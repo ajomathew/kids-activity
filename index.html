@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Learning Hub</title>
+    <meta name="description" content="A fun and interactive learning hub for kids. Explore flashcards for English, Malayalam, Maths, and learning to tell Time.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f9ff;
+            --text-color: #2b2b2b;
+            --card-bg: #ffffff;
+            --primary-color: #ff6b6b;    /* Red for English */
+            --secondary-color: #4ecdc4;  /* Teal for Malayalam */
+            --tertiary-color: #feca57;   /* Yellow for Maths */
+            --quaternary-color: #5f27cd; /* Purple for Time */
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 1rem 3rem;
+            width: 100%;
+            background: linear-gradient(135deg, var(--secondary-color), #2ab7a8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 3rem;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.15);
+            letter-spacing: 1.5px;
+        }
+
+        p.subtitle {
+            font-size: 1.4rem;
+            margin-top: 1rem;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2.5rem;
+            padding: 1rem 2rem;
+            max-width: 1100px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-bottom: 8px solid;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.8), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .card-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            z-index: 1;
+        }
+
+        /* Specific card colors */
+        .card.english { border-color: var(--primary-color); }
+        .card.english:hover { background-color: rgba(255, 107, 107, 0.04); }
+        .card.english .card-title { color: var(--primary-color); }
+
+        .card.malayalam { border-color: var(--secondary-color); }
+        .card.malayalam:hover { background-color: rgba(78, 205, 196, 0.04); }
+        .card.malayalam .card-title { color: #209f92; }
+
+        .card.maths { border-color: var(--tertiary-color); }
+        .card.maths:hover { background-color: rgba(254, 202, 87, 0.04); }
+        .card.maths .card-title { color: #d69e12; }
+
+        .card.time { border-color: var(--quaternary-color); }
+        .card.time:hover { background-color: rgba(95, 39, 205, 0.04); }
+        .card.time .card-title { color: var(--quaternary-color); }
+
+        footer {
+            margin-top: auto;
+            padding: 3rem 1rem 2rem;
+            text-align: center;
+            color: #888;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; }
+            .container { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+            .card { padding: 2rem 1.5rem; }
+            .card-icon { font-size: 4rem; }
+            .card-title { font-size: 1.6rem; }
+        }
+        
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            p.subtitle { font-size: 1.1rem; }
+            header { padding: 3rem 1rem 2rem; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Kids Learning Hub</h1>
+        <p class="subtitle">Choose an app to start learning!</p>
+    </header>
+
+    <main class="container">
+        <a href="english-flashcard.html" class="card english" aria-label="English Flashcards">
+            <div class="card-icon" aria-hidden="true">🔤</div>
+            <h2 class="card-title">English</h2>
+        </a>
+
+        <a href="malayalam-flashcards.html" class="card malayalam" aria-label="Malayalam Flashcards">
+            <div class="card-icon" aria-hidden="true">അ</div>
+            <h2 class="card-title">Malayalam</h2>
+        </a>
+
+        <a href="maths-flashcards.html" class="card maths" aria-label="Maths Flashcards">
+            <div class="card-icon" aria-hidden="true">🔢</div>
+            <h2 class="card-title">Maths</h2>
+        </a>
+
+        <a href="tell-the-time.html" class="card time" aria-label="Tell the Time">
+            <div class="card-icon" aria-hidden="true">⌚</div>
+            <h2 class="card-title">Time</h2>
+        </a>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Kids Learning Hub</p>
+    </footer>
+
+</body>
+</html>
