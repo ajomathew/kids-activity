@@ -778,7 +778,8 @@
             <div class="lcard">
                 <div class="lcard-h">The two hands</div>
                 <div><span class="dot" style="background:#FF6B6B"></span>Short (red) hand &#8594; shows the
-                    <strong>hour</strong></div>
+                    <strong>hour</strong>
+                </div>
                 <div style="margin-top:4px"><span class="dot" style="background:#4ECDC4"></span>Long (teal) hand &#8594;
                     shows the <strong>minutes</strong></div>
             </div>
@@ -987,10 +988,12 @@
         /* ─── arrow controls ─── */
         function changeH(d) {
             setClock(curH + d, curM);
+            if (mode === 'quiz') buildChoicesForTime(curH, curM);
         }
         function changeM(d) {
             /* Using normalizeTime ensures hour adjusts automatically when minutes wrap */
             setClock(curH, curM + d);
+            if (mode === 'quiz') buildChoicesForTime(curH, curM);
         }
 
         /* ─── modes ─── */
@@ -1014,16 +1017,13 @@
         ];
         function rndTime() { return QUIZ_TIMES[Math.floor(Math.random() * QUIZ_TIMES.length)]; }
 
-        function genQuestion() {
+        function buildChoicesForTime(h, m) {
             answered = false;
             document.getElementById('feedback').textContent = '';
             document.getElementById('feedback').className = 'feedback';
             document.getElementById('nextBtn').classList.remove('show');
 
-            const [qH, qM] = rndTime();
-            setClock(qH, qM);
-
-            const correct = toWords(qH, qM);
+            const correct = toWords(h, m);
             const wrongs = new Set();
             while (wrongs.size < 3) {
                 const [wh, wm] = rndTime();
@@ -1042,6 +1042,12 @@
                 btn.onclick = () => check(ch, correct);
                 box.appendChild(btn);
             });
+        }
+
+        function genQuestion() {
+            const [qH, qM] = rndTime();
+            setClock(qH, qM);
+            buildChoicesForTime(qH, qM);
         }
 
         function check(chosen, correct) {
