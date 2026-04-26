@@ -871,6 +871,57 @@
             ctx.fillStyle = p.face; ctx.fill();
             ctx.strokeStyle = p.rim; ctx.lineWidth = 6; ctx.stroke();
 
+            /* alternating quadrant shading */
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(CX, CY, R - 4, 0, 2 * Math.PI);
+            ctx.clip();
+
+            const quadA = dark ? 'rgba(255,107,157,0.11)' : 'rgba(255,107,107,0.10)';
+            const quadB = dark ? 'rgba(78,205,196,0.11)' : 'rgba(78,205,196,0.10)';
+
+            ctx.fillStyle = quadA;
+            ctx.beginPath();
+            ctx.moveTo(CX, CY);
+            ctx.arc(CX, CY, R - 6, -Math.PI / 2, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(CX, CY);
+            ctx.arc(CX, CY, R - 6, Math.PI / 2, Math.PI);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = quadB;
+            ctx.beginPath();
+            ctx.moveTo(CX, CY);
+            ctx.arc(CX, CY, R - 6, 0, Math.PI / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(CX, CY);
+            ctx.arc(CX, CY, R - 6, Math.PI, (3 * Math.PI) / 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            /* quadrant guides */
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(CX, CY, R - 3, 0, 2 * Math.PI);
+            ctx.clip();
+            ctx.strokeStyle = dark ? 'rgba(201,209,217,0.22)' : 'rgba(44,62,80,0.16)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(CX - (R - 8), CY);
+            ctx.lineTo(CX + (R - 8), CY);
+            ctx.moveTo(CX, CY - (R - 8));
+            ctx.lineTo(CX, CY + (R - 8));
+            ctx.stroke();
+            ctx.restore();
+
             /* tick marks */
             for (let i = 0; i < 60; i++) {
                 const a = i / 60 * 2 * Math.PI - Math.PI / 2;
