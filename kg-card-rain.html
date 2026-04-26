@@ -10,6 +10,7 @@
             --bg0: #f4fbff;
             --bg1: #ddf3ff;
             --card: #ffffff;
+            --card-2: #f7fcff;
             --ink: #163447;
             --muted: #5e7f93;
             --line: #c5dfef;
@@ -17,6 +18,32 @@
             --accent-2: #ff6ea9;
             --good: #1ea567;
             --bad: #d74f4f;
+            --pill-bg: rgba(255, 255, 255, 0.88);
+            --panel-bg: #fcfeff;
+            --game0: #eaf8ff;
+            --game1: #d8f1ff;
+            --game2: #c4e8ff;
+            --shadow: rgba(22, 52, 71, 0.12);
+        }
+
+        :root[data-theme="dark"] {
+            --bg0: #121f31;
+            --bg1: #0c1422;
+            --card: #17263a;
+            --card-2: #142133;
+            --ink: #e8f2ff;
+            --muted: #a3bfd8;
+            --line: #2d425c;
+            --accent: #4ab3ff;
+            --accent-2: #ff8bbc;
+            --good: #56db94;
+            --bad: #ff8787;
+            --pill-bg: rgba(17, 28, 44, 0.88);
+            --panel-bg: #1a2b41;
+            --game0: #23384f;
+            --game1: #1b2f45;
+            --game2: #18283b;
+            --shadow: rgba(0, 0, 0, 0.45);
         }
 
         * {
@@ -40,15 +67,31 @@
             overflow: hidden;
             background: var(--card);
             border: 1px solid var(--line);
-            box-shadow: 0 12px 34px rgba(22, 52, 71, 0.12);
+            box-shadow: 0 12px 34px var(--shadow);
         }
 
         .head {
             padding: 16px;
             border-bottom: 1px solid var(--line);
-            background: linear-gradient(180deg, #ffffff, #f7fcff);
+            background: linear-gradient(180deg, var(--card), var(--card-2));
             display: grid;
             gap: 12px;
+        }
+
+        .top-tools {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .theme-btn {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--card);
+            color: var(--ink);
+            padding: 8px 12px;
+            font-size: 0.86rem;
+            font-weight: 800;
+            cursor: pointer;
         }
 
         .title {
@@ -110,7 +153,7 @@
         .panel {
             border: 1px solid var(--line);
             border-radius: 14px;
-            background: #fcfeff;
+            background: var(--panel-bg);
             padding: 12px;
         }
 
@@ -139,7 +182,7 @@
             min-height: 50px;
             border: 1px solid var(--line);
             border-radius: 10px;
-            background: #fff;
+            background: var(--card);
             color: var(--ink);
             font-size: 1.1rem;
             font-weight: 800;
@@ -148,7 +191,7 @@
         }
 
         .key-btn:hover {
-            background: #eef8ff;
+            background: color-mix(in srgb, var(--accent) 12%, var(--card));
             transform: translateY(-1px);
         }
 
@@ -168,7 +211,7 @@
             border: 1px solid var(--line);
             border-radius: 14px;
             overflow: hidden;
-            background: linear-gradient(180deg, #eaf8ff 0%, #d8f1ff 56%, #c4e8ff 100%);
+            background: linear-gradient(180deg, var(--game0) 0%, var(--game1) 56%, var(--game2) 100%);
         }
 
         .game.active {
@@ -190,7 +233,7 @@
         .pill {
             border: 1px solid var(--line);
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.88);
+            background: var(--pill-bg);
             padding: 6px 12px;
             font-size: 0.88rem;
             font-weight: 800;
@@ -200,8 +243,8 @@
             margin-left: auto;
             border: 1px solid var(--line);
             border-radius: 10px;
-            background: #fff;
-            color: var(--muted);
+            background: var(--card);
+            color: var(--ink);
             padding: 7px 10px;
             font-size: 0.82rem;
             font-weight: 800;
@@ -243,6 +286,8 @@
             animation: fall linear forwards;
             transform-origin: center bottom;
             z-index: 1;
+            --spin-start: 0deg;
+            --spin-end: 0deg;
         }
 
         .fruit::before {
@@ -261,6 +306,26 @@
             background: radial-gradient(circle at 35% 25%, #ffc5c5 0%, #ff7a7a 46%, #dc3f3f 100%);
         }
 
+        .fruit.fruit-apple {
+            background: radial-gradient(circle at 36% 25%, #ffd3d3 0%, #ff7d7d 45%, #cf3636 100%);
+        }
+
+        .fruit.fruit-lemon {
+            background: radial-gradient(circle at 36% 25%, #fff8ba 0%, #ffd35d 45%, #ffae33 100%);
+        }
+
+        .fruit.fruit-grape {
+            background: radial-gradient(circle at 36% 25%, #e4ccff 0%, #b987ff 45%, #7a4acb 100%);
+        }
+
+        .fruit.fruit-lime {
+            background: radial-gradient(circle at 36% 25%, #d9ffc5 0%, #8ce86b 45%, #3ca343 100%);
+        }
+
+        .fruit.fruit-blueberry {
+            background: radial-gradient(circle at 36% 25%, #b8d8ff 0%, #5f97ff 45%, #2a57c7 100%);
+        }
+
         .symbol {
             font-size: 1.5rem;
             font-weight: 900;
@@ -274,33 +339,57 @@
             transition: transform 420ms ease-in, opacity 420ms ease-in;
         }
 
-        .fruit.squash {
-            animation: squash 320ms ease-out forwards;
+        .fruit.blast {
+            pointer-events: none;
+            animation: blast-away 380ms ease-out forwards;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 14px;
+            border-radius: 3px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 4;
+            animation: confetti-pop 900ms ease-out forwards;
         }
 
         @keyframes fall {
             from {
-                transform: translateY(-5vh) rotate(0deg);
+                transform: translateY(-5vh) rotate(var(--spin-start));
             }
 
             to {
-                transform: translateY(90vh) rotate(340deg);
+                transform: translateY(90vh) rotate(var(--spin-end));
             }
         }
 
-        @keyframes squash {
+        @keyframes blast-away {
             0% {
-                transform: scale(1, 1);
+                transform: translate(0, 0) scale(1);
                 opacity: 1;
             }
 
-            55% {
-                transform: scale(1.25, 0.56);
+            38% {
+                transform: translate(0, 0) scale(1.42);
                 opacity: 1;
             }
 
             100% {
-                transform: scale(0.14, 0.05);
+                transform: translate(var(--blast-x), var(--blast-y)) rotate(var(--blast-rot)) scale(0.07);
+                opacity: 0;
+            }
+        }
+
+        @keyframes confetti-pop {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.65);
                 opacity: 0;
             }
         }
@@ -324,12 +413,83 @@
                 font-size: 1.7rem;
             }
         }
+
+        .global-apps-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 99999;
+            display: flex;
+            gap: 8px;
+            background: rgba(30, 30, 35, 0.85);
+            padding: 8px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            align-items: center;
+        }
+
+        .global-apps-nav .nav-lbl {
+            color: #a0a0b0;
+            font-family: sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .global-apps-nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-family: sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .global-apps-nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .global-apps-nav {
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 10px;
+                padding: 6px 8px;
+                width: 90%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .global-apps-nav .nav-lbl {
+                display: none;
+            }
+
+            .global-apps-nav a {
+                padding: 6px 8px;
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 
 <body>
     <main class="app">
         <section class="head">
+            <div class="top-tools">
+                <button class="theme-btn" id="themeBtn" type="button">Dark Mode</button>
+            </div>
             <div class="title">KG Card Rain</div>
             <div class="subtitle">Choose capital letters, small letters, or numbers. After selection, keyboard hides and
                 fruits start raining.</div>
@@ -382,8 +542,19 @@
             target: null,
             raining: false,
             timer: null,
-            caught: 0
+            caught: 0,
+            theme: "light",
+            roundComplete: false,
+            nextRoundTimer: null
         };
+
+        const FRUIT_VARIANTS = [
+            "fruit-apple",
+            "fruit-lemon",
+            "fruit-grape",
+            "fruit-lime",
+            "fruit-blueberry"
+        ];
 
         const keyboardTable = document.getElementById("keyboardTable");
         const selectorPanel = document.getElementById("selectorPanel");
@@ -392,6 +563,25 @@
         const caughtPill = document.getElementById("caughtPill");
         const basket = document.getElementById("basket");
         const status = document.getElementById("status");
+        const themeBtn = document.getElementById("themeBtn");
+        let audioContext = null;
+
+        function setTheme(theme) {
+            state.theme = theme;
+            document.documentElement.setAttribute("data-theme", theme);
+            themeBtn.textContent = theme === "dark" ? "Light Mode" : "Dark Mode";
+            window.localStorage.setItem("kg-card-rain-theme", theme);
+        }
+
+        function initTheme() {
+            const saved = window.localStorage.getItem("kg-card-rain-theme");
+            if (saved === "dark" || saved === "light") {
+                setTheme(saved);
+                return;
+            }
+
+            setTheme("light");
+        }
 
         function setStatus(text, tone) {
             status.textContent = text;
@@ -414,14 +604,23 @@
             }
         }
 
+        function stopNextRoundTimer() {
+            if (state.nextRoundTimer) {
+                window.clearTimeout(state.nextRoundTimer);
+                state.nextRoundTimer = null;
+            }
+        }
+
         function clearFruits() {
             gameArea.querySelectorAll(".fruit").forEach((fruit) => fruit.remove());
         }
 
         function backToSelection() {
             stopRain();
+            stopNextRoundTimer();
             clearFruits();
             state.target = null;
+            state.roundComplete = false;
             selectorPanel.style.display = "block";
             gameArea.classList.remove("active");
             targetPill.textContent = "Target: -";
@@ -430,8 +629,10 @@
         }
 
         function startRainForTarget(target) {
+            stopNextRoundTimer();
             state.target = target;
             state.caught = 0;
+            state.roundComplete = false;
             targetPill.textContent = "Target: " + target;
             caughtPill.textContent = "Caught: 0";
             selectorPanel.style.display = "none";
@@ -444,11 +645,12 @@
         }
 
         function spawnFruit() {
-            if (!state.target) return;
+            if (!state.target || state.roundComplete) return;
 
             const fruit = document.createElement("button");
             fruit.type = "button";
             fruit.className = "fruit";
+            fruit.classList.add(FRUIT_VARIANTS[Math.floor(Math.random() * FRUIT_VARIANTS.length)]);
 
             const rows = KEY_LAYOUTS[state.mode].flat().filter(Boolean);
             const symbol = Math.random() < 0.23
@@ -465,6 +667,10 @@
             const maxX = Math.max(pad, gameArea.clientWidth - pad);
             fruit.style.left = Math.floor(Math.random() * maxX) + "px";
             fruit.style.animationDuration = (4 + Math.random() * 2.4).toFixed(2) + "s";
+            const spinStart = -24 + Math.random() * 48;
+            const spinEnd = -90 + Math.random() * 180;
+            fruit.style.setProperty("--spin-start", spinStart.toFixed(1) + "deg");
+            fruit.style.setProperty("--spin-end", spinEnd.toFixed(1) + "deg");
 
             fruit.addEventListener("click", () => onFruitSelected(fruit));
             fruit.addEventListener("animationend", () => fruit.remove());
@@ -497,17 +703,144 @@
             fruit.addEventListener("transitionend", () => fruit.remove(), { once: true });
         }
 
+        function speakCaughtSymbol(symbol) {
+            if (!("speechSynthesis" in window)) return;
+
+            const utterance = new SpeechSynthesisUtterance(symbol);
+            utterance.rate = 0.95;
+            utterance.pitch = 1.02;
+            utterance.volume = 1;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function playBuzzer() {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+
+            if (!audioContext) {
+                audioContext = new Ctx();
+            }
+
+            if (audioContext.state === "suspended") {
+                audioContext.resume();
+            }
+
+            const now = audioContext.currentTime;
+            const osc = audioContext.createOscillator();
+            const osc2 = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(1400, now);
+            osc.type = "sawtooth";
+            osc2.type = "square";
+            osc.frequency.setValueAtTime(230, now);
+            osc.frequency.exponentialRampToValueAtTime(120, now + 0.42);
+            osc2.frequency.setValueAtTime(180, now);
+            osc2.frequency.exponentialRampToValueAtTime(95, now + 0.42);
+
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.11, now + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.08, now + 0.26);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+
+            osc.connect(filter);
+            osc2.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.start(now);
+            osc2.start(now + 0.01);
+            osc.stop(now + 0.52);
+            osc2.stop(now + 0.5);
+        }
+
+        function animateWrongBlast(fruit) {
+            const fruitRect = fruit.getBoundingClientRect();
+            const hostRect = gameArea.getBoundingClientRect();
+            const centerX = hostRect.left + hostRect.width / 2;
+
+            fruit.style.animation = "none";
+            fruit.style.left = (fruitRect.left - hostRect.left) + "px";
+            fruit.style.top = (fruitRect.top - hostRect.top) + "px";
+
+            const direction = fruitRect.left < centerX ? -1 : 1;
+            const blastX = direction * (85 + Math.random() * 150);
+            const blastY = -(70 + Math.random() * 140);
+            const blastRot = (-180 + Math.random() * 360).toFixed(1) + "deg";
+
+            fruit.style.setProperty("--blast-x", blastX.toFixed(1) + "px");
+            fruit.style.setProperty("--blast-y", blastY.toFixed(1) + "px");
+            fruit.style.setProperty("--blast-rot", blastRot);
+
+            fruit.classList.remove("collecting");
+            fruit.style.animation = "";
+            requestAnimationFrame(() => {
+                fruit.classList.add("wrong", "blast");
+            });
+        }
+
+        function fireConfettiBurst(side) {
+            const colors = ["#ff6a6a", "#ffd54a", "#5cd67a", "#6bb6ff", "#d690ff", "#ff8fbd"];
+            const xBase = side === "left" ? 24 : gameArea.clientWidth - 24;
+            const spread = side === "left" ? 1 : -1;
+
+            for (let i = 0; i < 34; i += 1) {
+                const bit = document.createElement("span");
+                bit.className = "confetti";
+                bit.style.background = colors[Math.floor(Math.random() * colors.length)];
+                bit.style.left = xBase + "px";
+                bit.style.bottom = "18px";
+                bit.style.width = (6 + Math.random() * 8).toFixed(1) + "px";
+                bit.style.height = (8 + Math.random() * 10).toFixed(1) + "px";
+                const dx = spread * (28 + Math.random() * 150);
+                const dy = -(90 + Math.random() * 220);
+                const rot = (-360 + Math.random() * 720).toFixed(1) + "deg";
+                bit.style.setProperty("--dx", dx.toFixed(1) + "px");
+                bit.style.setProperty("--dy", dy.toFixed(1) + "px");
+                bit.style.setProperty("--rot", rot);
+                bit.style.animationDuration = (760 + Math.random() * 420).toFixed(0) + "ms";
+                bit.style.animationDelay = (Math.random() * 140).toFixed(0) + "ms";
+                bit.addEventListener("animationend", () => bit.remove(), { once: true });
+                gameArea.appendChild(bit);
+            }
+        }
+
+        function celebrateRoundComplete() {
+            state.roundComplete = true;
+            stopRain();
+            clearFruits();
+            setStatus("Awesome! 10 fruits caught. Pick next key.", "good");
+            fireConfettiBurst("left");
+            fireConfettiBurst("right");
+            state.nextRoundTimer = window.setTimeout(() => {
+                backToSelection();
+            }, 1600);
+        }
+
         function onFruitSelected(fruit) {
+            if (state.roundComplete) return;
+
             const chosen = fruit.dataset.symbol;
             if (chosen === state.target) {
                 animateCollectToBasket(fruit);
                 state.caught += 1;
                 caughtPill.textContent = "Caught: " + state.caught;
+                speakCaughtSymbol(chosen);
                 setStatus("Great! " + chosen + " collected.", "good");
+
+                if (state.caught >= 10) {
+                    celebrateRoundComplete();
+                }
                 return;
             }
 
-            fruit.classList.add("wrong", "squash");
+            fruit.disabled = true;
+            speakCaughtSymbol(chosen);
+            playBuzzer();
+            animateWrongBlast(fruit);
             setStatus("Oops, you need " + state.target + ".", "bad");
         }
 
@@ -547,9 +880,22 @@
         });
 
         document.getElementById("changeBtn").addEventListener("click", backToSelection);
+        themeBtn.addEventListener("click", () => {
+            setTheme(state.theme === "dark" ? "light" : "dark");
+        });
 
+        initTheme();
         renderKeyboard();
     </script>
+
+    <nav class="global-apps-nav">
+        <span class="nav-lbl">Apps</span>
+        <a href="tell-the-time.html" title="Clock">🕒 Time</a>
+        <a href="maths-flashcards.html" title="Maths">➕ Maths</a>
+        <a href="english-flashcard.html" title="Spelling">🔤 Spelling</a>
+        <a href="malayalam-flashcards.html" title="Malayalam">അ Malayalam</a>
+        <a href="kg-card-rain.html" title="KG Card Rain">🍎 KG Rain</a>
+    </nav>
 </body>
 
 </html>
