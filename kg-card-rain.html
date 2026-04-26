@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KG Card Rain</title>
+    <style>
+        :root {
+            --bg0: #f4fbff;
+            --bg1: #ddf3ff;
+            --card: #ffffff;
+            --ink: #163447;
+            --muted: #5e7f93;
+            --line: #c5dfef;
+            --accent: #1f9ef8;
+            --accent-2: #ff6ea9;
+            --good: #1ea567;
+            --bad: #d74f4f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            color: var(--ink);
+            background: radial-gradient(circle at top, var(--bg0) 0%, var(--bg1) 100%);
+            display: grid;
+            place-items: center;
+            padding: 14px;
+        }
+
+        .app {
+            width: min(980px, 100%);
+            border-radius: 18px;
+            overflow: hidden;
+            background: var(--card);
+            border: 1px solid var(--line);
+            box-shadow: 0 12px 34px rgba(22, 52, 71, 0.12);
+        }
+
+        .head {
+            padding: 16px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, #ffffff, #f7fcff);
+            display: grid;
+            gap: 12px;
+        }
+
+        .title {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 800;
+            letter-spacing: 0.01em;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .modes {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--muted);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            color: #fff;
+            border-color: transparent;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        }
+
+        .status {
+            color: var(--muted);
+            font-size: 0.92rem;
+            font-weight: 700;
+            min-height: 1.3em;
+        }
+
+        .status.good {
+            color: var(--good);
+        }
+
+        .status.bad {
+            color: var(--bad);
+        }
+
+        .content {
+            padding: 16px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fcfeff;
+            padding: 12px;
+        }
+
+        .panel-title {
+            margin: 0 0 10px;
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 6px;
+            table-layout: fixed;
+        }
+
+        td {
+            width: 10%;
+        }
+
+        .key-btn {
+            width: 100%;
+            min-height: 50px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--ink);
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.12s ease, background 0.12s ease;
+        }
+
+        .key-btn:hover {
+            background: #eef8ff;
+            transform: translateY(-1px);
+        }
+
+        .key-btn:active {
+            transform: scale(0.97);
+        }
+
+        .key-btn.blank {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .game {
+            display: none;
+            position: relative;
+            height: min(70vh, 560px);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #eaf8ff 0%, #d8f1ff 56%, #c4e8ff 100%);
+        }
+
+        .game.active {
+            display: block;
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            z-index: 3;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            padding: 6px 12px;
+            font-size: 0.88rem;
+            font-weight: 800;
+        }
+
+        .change-btn {
+            margin-left: auto;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--muted);
+            padding: 7px 10px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .basket {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 20px;
+            width: 110px;
+            height: 70px;
+            border-radius: 18px 18px 28px 28px;
+            border: 3px solid rgba(112, 71, 33, 0.75);
+            background: linear-gradient(180deg, #dfa45e 0%, #b77939 100%);
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.25), 0 6px 13px rgba(0, 0, 0, 0.16);
+            display: grid;
+            place-items: center;
+            color: #fff7ea;
+            font-size: 0.9rem;
+            font-weight: 900;
+            z-index: 2;
+        }
+
+        .fruit {
+            position: absolute;
+            top: -72px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            background: radial-gradient(circle at 36% 25%, #ffe48c 0%, #ffbe48 38%, #ff7e33 100%);
+            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.12);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            user-select: none;
+            animation: fall linear forwards;
+            transform-origin: center bottom;
+            z-index: 1;
+        }
+
+        .fruit::before {
+            content: "";
+            position: absolute;
+            top: -8px;
+            left: 21px;
+            width: 18px;
+            height: 10px;
+            border-radius: 80% 20% 80% 20%;
+            background: #3bb56b;
+            transform: rotate(-20deg);
+        }
+
+        .fruit.wrong {
+            background: radial-gradient(circle at 35% 25%, #ffc5c5 0%, #ff7a7a 46%, #dc3f3f 100%);
+        }
+
+        .symbol {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.03em;
+            line-height: 1;
+        }
+
+        .fruit.collecting {
+            transition: transform 420ms ease-in, opacity 420ms ease-in;
+        }
+
+        .fruit.squash {
+            animation: squash 320ms ease-out forwards;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-5vh) rotate(0deg);
+            }
+
+            to {
+                transform: translateY(90vh) rotate(340deg);
+            }
+        }
+
+        @keyframes squash {
+            0% {
+                transform: scale(1, 1);
+                opacity: 1;
+            }
+
+            55% {
+                transform: scale(1.25, 0.56);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.14, 0.05);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .key-btn {
+                min-height: 44px;
+                font-size: 1rem;
+            }
+
+            table {
+                border-spacing: 4px;
+            }
+
+            .fruit {
+                width: 64px;
+                height: 64px;
+            }
+
+            .symbol {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="app">
+        <section class="head">
+            <div class="title">KG Card Rain</div>
+            <div class="subtitle">Choose capital letters, small letters, or numbers. After selection, keyboard hides and
+                fruits start raining.</div>
+            <div class="modes" id="modeButtons">
+                <button class="mode-btn active" data-mode="caps">Capital Letters</button>
+                <button class="mode-btn" data-mode="small">Small Letters</button>
+                <button class="mode-btn" data-mode="nums">Numbers</button>
+            </div>
+            <div class="status" id="status">Select a key to start raining fruits.</div>
+        </section>
+
+        <section class="content">
+            <section class="panel" id="selectorPanel">
+                <h2 class="panel-title">QWERTY Keyboard Table</h2>
+                <table id="keyboardTable" aria-label="QWERTY keyboard"></table>
+            </section>
+
+            <section class="game" id="gameArea">
+                <div class="hud">
+                    <div class="pill" id="targetPill">Target: -</div>
+                    <div class="pill" id="caughtPill">Caught: 0</div>
+                    <button class="change-btn" id="changeBtn">Pick Another Key</button>
+                </div>
+                <div class="basket" id="basket">Basket</div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        const KEY_LAYOUTS = {
+            caps: [
+                ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+                ["", "A", "S", "D", "F", "G", "H", "J", "K", "L"],
+                ["", "", "Z", "X", "C", "V", "B", "N", "M", ""]
+            ],
+            small: [
+                ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+                ["", "a", "s", "d", "f", "g", "h", "j", "k", "l"],
+                ["", "", "z", "x", "c", "v", "b", "n", "m", ""]
+            ],
+            nums: [
+                ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+                ["", "", "", "", "", "", "", "", "", ""],
+                ["", "", "", "", "", "", "", "", "", ""]
+            ]
+        };
+
+        const state = {
+            mode: "caps",
+            target: null,
+            raining: false,
+            timer: null,
+            caught: 0
+        };
+
+        const keyboardTable = document.getElementById("keyboardTable");
+        const selectorPanel = document.getElementById("selectorPanel");
+        const gameArea = document.getElementById("gameArea");
+        const targetPill = document.getElementById("targetPill");
+        const caughtPill = document.getElementById("caughtPill");
+        const basket = document.getElementById("basket");
+        const status = document.getElementById("status");
+
+        function setStatus(text, tone) {
+            status.textContent = text;
+            status.className = "status" + (tone ? " " + tone : "");
+        }
+
+        function setMode(nextMode) {
+            state.mode = nextMode;
+            document.querySelectorAll(".mode-btn").forEach((btn) => {
+                btn.classList.toggle("active", btn.dataset.mode === nextMode);
+            });
+            renderKeyboard();
+        }
+
+        function stopRain() {
+            state.raining = false;
+            if (state.timer) {
+                window.clearInterval(state.timer);
+                state.timer = null;
+            }
+        }
+
+        function clearFruits() {
+            gameArea.querySelectorAll(".fruit").forEach((fruit) => fruit.remove());
+        }
+
+        function backToSelection() {
+            stopRain();
+            clearFruits();
+            state.target = null;
+            selectorPanel.style.display = "block";
+            gameArea.classList.remove("active");
+            targetPill.textContent = "Target: -";
+            caughtPill.textContent = "Caught: 0";
+            setStatus("Select a key to start raining fruits.");
+        }
+
+        function startRainForTarget(target) {
+            state.target = target;
+            state.caught = 0;
+            targetPill.textContent = "Target: " + target;
+            caughtPill.textContent = "Caught: 0";
+            selectorPanel.style.display = "none";
+            gameArea.classList.add("active");
+            setStatus("Tap fruits with " + target + " to collect in basket.");
+
+            stopRain();
+            state.raining = true;
+            state.timer = window.setInterval(spawnFruit, 520);
+        }
+
+        function spawnFruit() {
+            if (!state.target) return;
+
+            const fruit = document.createElement("button");
+            fruit.type = "button";
+            fruit.className = "fruit";
+
+            const rows = KEY_LAYOUTS[state.mode].flat().filter(Boolean);
+            const symbol = Math.random() < 0.23
+                ? state.target
+                : rows[Math.floor(Math.random() * rows.length)];
+            fruit.dataset.symbol = symbol;
+
+            const mark = document.createElement("span");
+            mark.className = "symbol";
+            mark.textContent = symbol;
+            fruit.appendChild(mark);
+
+            const pad = 72;
+            const maxX = Math.max(pad, gameArea.clientWidth - pad);
+            fruit.style.left = Math.floor(Math.random() * maxX) + "px";
+            fruit.style.animationDuration = (4 + Math.random() * 2.4).toFixed(2) + "s";
+
+            fruit.addEventListener("click", () => onFruitSelected(fruit));
+            fruit.addEventListener("animationend", () => fruit.remove());
+
+            gameArea.appendChild(fruit);
+        }
+
+        function animateCollectToBasket(fruit) {
+            const fruitRect = fruit.getBoundingClientRect();
+            const hostRect = gameArea.getBoundingClientRect();
+            const basketRect = basket.getBoundingClientRect();
+
+            fruit.style.animation = "none";
+            fruit.style.left = (fruitRect.left - hostRect.left) + "px";
+            fruit.style.top = (fruitRect.top - hostRect.top) + "px";
+            fruit.classList.add("collecting");
+
+            const fromX = fruitRect.left + fruitRect.width / 2;
+            const fromY = fruitRect.top + fruitRect.height / 2;
+            const toX = basketRect.left + basketRect.width / 2;
+            const toY = basketRect.top + basketRect.height / 2;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+
+            requestAnimationFrame(() => {
+                fruit.style.transform = "translate(" + dx + "px, " + dy + "px) scale(0.16)";
+                fruit.style.opacity = "0";
+            });
+
+            fruit.addEventListener("transitionend", () => fruit.remove(), { once: true });
+        }
+
+        function onFruitSelected(fruit) {
+            const chosen = fruit.dataset.symbol;
+            if (chosen === state.target) {
+                animateCollectToBasket(fruit);
+                state.caught += 1;
+                caughtPill.textContent = "Caught: " + state.caught;
+                setStatus("Great! " + chosen + " collected.", "good");
+                return;
+            }
+
+            fruit.classList.add("wrong", "squash");
+            setStatus("Oops, you need " + state.target + ".", "bad");
+        }
+
+        function renderKeyboard() {
+            keyboardTable.innerHTML = "";
+            const rows = KEY_LAYOUTS[state.mode];
+
+            rows.forEach((row) => {
+                const tr = document.createElement("tr");
+                row.forEach((cell) => {
+                    const td = document.createElement("td");
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "key-btn";
+
+                    if (!cell) {
+                        btn.classList.add("blank");
+                        btn.setAttribute("aria-hidden", "true");
+                        btn.tabIndex = -1;
+                        btn.textContent = "";
+                    } else {
+                        btn.textContent = cell;
+                        btn.addEventListener("click", () => startRainForTarget(cell));
+                    }
+
+                    td.appendChild(btn);
+                    tr.appendChild(td);
+                });
+                keyboardTable.appendChild(tr);
+            });
+        }
+
+        document.getElementById("modeButtons").addEventListener("click", (event) => {
+            const modeBtn = event.target.closest(".mode-btn");
+            if (!modeBtn) return;
+            setMode(modeBtn.dataset.mode);
+        });
+
+        document.getElementById("changeBtn").addEventListener("click", backToSelection);
+
+        renderKeyboard();
+    </script>
+</body>
+
+</html>
