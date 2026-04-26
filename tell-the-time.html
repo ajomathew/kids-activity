@@ -301,7 +301,10 @@
         canvas {
             border-radius: 50%;
             display: block;
-            flex-shrink: 0
+            flex-shrink: 0;
+            width: 360px;
+            height: 360px;
+            max-width: 100%
         }
 
         /* answer */
@@ -690,6 +693,114 @@
             border-radius: 50%;
         }
 
+        @media (max-width: 900px) {
+            canvas {
+                width: 320px;
+                height: 320px;
+            }
+
+            .arr {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+
+            .arr-col {
+                min-width: 52px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .app {
+                max-width: 100%;
+            }
+
+            .title {
+                font-size: 26px;
+            }
+
+            .clock-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                justify-items: center;
+                align-items: start;
+                gap: 10px 14px;
+                margin: 10px 0 12px;
+            }
+
+            .clock-row canvas {
+                grid-column: 1 / -1;
+                order: -1;
+                width: min(92vw, 360px);
+                height: auto;
+            }
+
+            .arr-col {
+                min-width: 0;
+                width: 100%;
+                max-width: 140px;
+            }
+
+            .answer-box {
+                max-width: min(94vw, 360px);
+                padding: 10px 14px;
+            }
+
+            .t-dig {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+
+            .tabs {
+                gap: 8px;
+                padding: 12px 10px 0;
+            }
+
+            .tab {
+                min-width: 96px;
+                font-size: 12px;
+                padding: 9px 6px;
+            }
+
+            .panel {
+                margin: 10px 10px 0;
+                padding: 14px;
+            }
+
+            .choices {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .topbar {
+                padding: 10px 10px 0;
+            }
+
+            .title {
+                font-size: 23px;
+            }
+
+            .clock-row canvas {
+                width: min(94vw, 330px);
+            }
+
+            .arr {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .t-dig {
+                font-size: 32px;
+            }
+
+            .score-row {
+                gap: 10px;
+                align-items: flex-end;
+            }
+        }
+
         \n
     </style>
 </head>
@@ -734,7 +845,7 @@
                     <button class="arr h" onclick="changeH(-1)">&#9660;</button>
                 </div>
 
-                <canvas id="clock" width="210" height="210"></canvas>
+                <canvas id="clock" width="420" height="420"></canvas>
 
                 <!-- RIGHT: Minute arrows -->
                 <div class="arr-col">
@@ -807,11 +918,13 @@
         const canvas = document.getElementById('clock');
         const ctx = canvas.getContext('2d');
         const CX = 105, CY = 105, R = 98;
+        const CLOCK_SCALE = 2;
 
         /* ─── state ─── */
         let curH = 12, curM = 0;   /* canonical time — single source of truth */
         let dark = false;
         let isTimeRevealed = false;
+        let showMinuteLabels = false;
 
         /* ─── validation ─── */
         function normalizeTime(h, m) {
@@ -864,7 +977,9 @@
             const p = pal();
             const { hAngle, mAngle } = handAngles(curH, curM);
 
-            ctx.clearRect(0, 0, 210, 210);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.setTransform(CLOCK_SCALE, 0, 0, CLOCK_SCALE, 0, 0);
 
             /* face */
             ctx.beginPath(); ctx.arc(CX, CY, R, 0, 2 * Math.PI);
@@ -937,12 +1052,25 @@
             }
 
             /* hour numbers */
-            ctx.font = 'bold 15px Nunito,sans-serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            for (let i = 1; i <= 12; i++) {
-                const a = i / 12 * 2 * Math.PI - Math.PI / 2;
-                ctx.fillStyle = p.num;
-                ctx.fillText(i, CX + Math.cos(a) * 74, CY + Math.sin(a) * 74);
+            if (!showMinuteLabels) {
+                ctx.font = 'bold 15px Nunito,sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                for (let i = 1; i <= 12; i++) {
+                    const a = i / 12 * 2 * Math.PI - Math.PI / 2;
+                    ctx.fillStyle = p.num;
+                    ctx.fillText(i, CX + Math.cos(a) * 74, CY + Math.sin(a) * 74);
+                }
+            }
+
+            /* optional minute labels mapped to each hour mark */
+            if (showMinuteLabels) {
+                ctx.font = 'bold 11px Nunito,sans-serif';
+                ctx.fillStyle = dark ? '#7dd3fc' : '#0f766e';
+                for (let i = 0; i < 12; i++) {
+                    const a = i / 12 * 2 * Math.PI - Math.PI / 2;
+                    const minuteValue = (i * 5).toString().padStart(2, '0');
+                    ctx.fillText(minuteValue, CX + Math.cos(a) * 89, CY + Math.sin(a) * 89);
+                }
             }
 
             /* draw a hand — angle from 12 o'clock, len = length toward tip, tail = stub behind center */
@@ -1034,6 +1162,11 @@
 
         function toggleTimeReveal() {
             setTimeRevealState(!isTimeRevealed);
+        }
+
+        function toggleMinuteLabels() {
+            showMinuteLabels = !showMinuteLabels;
+            drawClock();
         }
 
         /* ─── arrow controls ─── */
@@ -1131,6 +1264,7 @@
                 toggleTimeReveal();
             }
         });
+        canvas.addEventListener('click', toggleMinuteLabels);
 
         setClock(12, 0);
     </script>
