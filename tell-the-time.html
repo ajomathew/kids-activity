@@ -3221,6 +3221,40 @@
             const theme = getThemeByValue(saved);
             applyTheme(theme);
 
+            const globalNavShell = document.getElementById('globalNavShell');
+            const globalNavToggle = document.getElementById('globalNavToggle');
+            const mobileQuery = window.matchMedia('(max-width: 600px)');
+
+            function setGlobalNavOpen(open) {
+                if (!globalNavShell || !globalNavToggle) return;
+                globalNavShell.classList.toggle('open', open);
+                globalNavToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+
+            if (globalNavShell && globalNavToggle) {
+                globalNavToggle.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (!mobileQuery.matches) return;
+                    setGlobalNavOpen(!globalNavShell.classList.contains('open'));
+                });
+
+                globalNavShell.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                });
+
+                document.addEventListener('click', () => {
+                    setGlobalNavOpen(false);
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') setGlobalNavOpen(false);
+                });
+
+                mobileQuery.addEventListener('change', () => {
+                    setGlobalNavOpen(false);
+                });
+            }
+
             const themeSearch = document.getElementById('themeSearch');
             themeSearch.addEventListener('keydown', (event) => {
                 const menu = document.getElementById('themeMenu');
@@ -3257,11 +3291,43 @@
 
     \n
     <style>
+        .global-nav-shell {
+            position: fixed;
+            z-index: 99999;
+        }
+
+        .nav-star-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(30, 30, 35, 0.85);
+            color: #ffd45e;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            animation: nav-star-spin 6s linear infinite;
+        }
+
+        @keyframes nav-star-spin {
+            from {
+                rotate: 0deg;
+            }
+
+            to {
+                rotate: 360deg;
+            }
+        }
+
         .global-apps-nav {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            z-index: 99999;
             display: flex;
             gap: 8px;
             background: rgba(30, 30, 35, 0.85);
@@ -3305,14 +3371,36 @@
         }
 
         @media (max-width: 600px) {
+            .global-nav-shell {
+                top: 10px;
+                right: 10px;
+            }
+
+            .nav-star-btn {
+                display: flex;
+            }
+
             .global-apps-nav {
-                left: 50%;
-                transform: translateX(-50%);
-                bottom: 10px;
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                left: auto;
+                bottom: auto;
                 padding: 6px 8px;
-                width: 90%;
+                width: min(92vw, 340px);
                 justify-content: center;
                 flex-wrap: wrap;
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(-8px) scale(0.98);
+                transform-origin: top right;
+                transition: opacity 0.25s ease, transform 0.25s ease;
+            }
+
+            .global-nav-shell.open .global-apps-nav {
+                opacity: 1;
+                pointer-events: auto;
+                transform: translateY(0) scale(1);
             }
 
             .global-apps-nav .nav-lbl {
@@ -3325,13 +3413,17 @@
             }
         }
     </style>
-    <nav class="global-apps-nav">
-        <span class="nav-lbl">Apps</span>
-        <a href="tell-the-time.html" title="Clock">🕒 Time</a>
-        <a href="maths-flashcards.html" title="Maths">➕ Maths</a>
-        <a href="english-flashcard.html" title="Spelling">🔤 Spelling</a>
-        <a href="malayalam-flashcards.html" title="Malayalam">അ Malayalam</a>
-    </nav>
+    <div class="global-nav-shell" id="globalNavShell">
+        <button class="nav-star-btn" id="globalNavToggle" aria-label="Toggle app navigation"
+            aria-expanded="false">✦</button>
+        <nav class="global-apps-nav">
+            <span class="nav-lbl">Apps</span>
+            <a href="tell-the-time.html" title="Clock">🕒 Time</a>
+            <a href="maths-flashcards.html" title="Maths">➕ Maths</a>
+            <a href="english-flashcard.html" title="Spelling">🔤 Spelling</a>
+            <a href="malayalam-flashcards.html" title="Malayalam">അ Malayalam</a>
+        </nav>
+    </div>
     \n
 </body>
 
