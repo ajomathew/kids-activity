@@ -1050,6 +1050,7 @@
                 <div class="mode-toggle">
                     <button class="mode-opt active" data-mode="all">All numbers</button>
                     <button class="mode-opt" data-mode="specific">Specific number</button>
+                    <button class="mode-opt" data-mode="upto">Numbers up to</button>
                 </div>
             </div>
 
@@ -1205,7 +1206,16 @@
                 modeOpts.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 state.mode = btn.dataset.mode;
-                specificField.classList.toggle('visible', state.mode === 'specific');
+                
+                const isUptoOrSpecific = state.mode === 'specific' || state.mode === 'upto';
+                specificField.classList.toggle('visible', isUptoOrSpecific);
+                
+                if (state.mode === 'upto') {
+                    document.querySelector('.specific-field label').textContent = 'Maximum number (1–10)';
+                } else if (state.mode === 'specific') {
+                    document.querySelector('.specific-field label').textContent = 'Focus number (1–10)';
+                }
+                
                 $('generate-table-btn').style.display = state.mode === 'specific' ? 'block' : 'none';
                 updatePreview();
             }));
@@ -1225,12 +1235,22 @@
             function updatePreview() {
                 const n = parseInt(specificNum.value) || 7;
                 state.specificNum = n;
-                const map = {
-                    add: `e.g. ${n} + ? for all values 1–10`,
-                    sub: `e.g. ? − ${n} for all a ≥ ${n}`,
-                    mul: `e.g. ${n} × ? for all values 1–10`,
-                    div: `e.g. ? ÷ ${n} for multiples of ${n}`
-                };
+                let map;
+                if (state.mode === 'upto') {
+                    map = {
+                        add: `e.g. all additions up to ${n} + ${n}`,
+                        sub: `e.g. all subtractions up to ${n} − ${n}`,
+                        mul: `e.g. all multiplications up to ${n} × ${n}`,
+                        div: `e.g. all divisions up to ${n * n} ÷ ${n}`
+                    };
+                } else {
+                    map = {
+                        add: `e.g. ${n} + ? for all values 1–10`,
+                        sub: `e.g. ? − ${n} for all a ≥ ${n}`,
+                        mul: `e.g. ${n} × ? for all values 1–10`,
+                        div: `e.g. ? ÷ ${n} for multiples of ${n}`
+                    };
+                }
                 specificPrev.textContent = map[state.op];
             }
 
@@ -1295,33 +1315,34 @@
             function buildCards(op, mode, sn) {
                 const cfg = OPS[op];
                 const [lo, hi] = cfg.range;
+                const limit = mode === 'upto' ? sn : hi;
                 const cards = [];
 
                 if (op === 'add') {
-                    if (mode === 'all') {
-                        for (let a = lo; a <= hi; a++)
-                            for (let b = lo; b <= hi; b++) cards.push(mk(cfg, a, b));
+                    if (mode === 'all' || mode === 'upto') {
+                        for (let a = lo; a <= limit; a++)
+                            for (let b = lo; b <= limit; b++) cards.push(mk(cfg, a, b));
                     } else {
                         for (let b = lo; b <= hi; b++) cards.push(mk(cfg, sn, b));
                     }
                 } else if (op === 'sub') {
-                    if (mode === 'all') {
-                        for (let a = lo; a <= hi; a++)
+                    if (mode === 'all' || mode === 'upto') {
+                        for (let a = lo; a <= limit; a++)
                             for (let b = lo; b <= a; b++) cards.push(mk(cfg, a, b));
                     } else {
                         for (let a = sn; a <= hi; a++) cards.push(mk(cfg, a, sn));
                     }
                 } else if (op === 'mul') {
-                    if (mode === 'all') {
-                        for (let a = lo; a <= hi; a++)
-                            for (let b = lo; b <= hi; b++) cards.push(mk(cfg, a, b));
+                    if (mode === 'all' || mode === 'upto') {
+                        for (let a = lo; a <= limit; a++)
+                            for (let b = lo; b <= limit; b++) cards.push(mk(cfg, a, b));
                     } else {
                         for (let b = lo; b <= hi; b++) cards.push(mk(cfg, sn, b));
                     }
                 } else if (op === 'div') {
-                    if (mode === 'all') {
-                        for (let b = lo; b <= hi; b++)
-                            for (let a = lo; a <= hi; a++) {
+                    if (mode === 'all' || mode === 'upto') {
+                        for (let b = lo; b <= limit; b++)
+                            for (let a = lo; a <= limit; a++) {
                                 const d = a * b;
                                 cards.push({ q: `${d} ${cfg.sym} ${b} = ?`, a: a, eq: `${d} ${cfg.sym} ${b} = ${a}` });
                             }
@@ -1395,6 +1416,7 @@
                 if (!window.speechSynthesis) return;
                 window.speechSynthesis.cancel();
                 const utt = new SpeechSynthesisUtterance(text);
+                utt.lang = 'en-US';
                 utt.rate = 0.92;
                 utt.pitch = 1;
                 window.speechSynthesis.speak(utt);
@@ -1463,7 +1485,10 @@
             // ─── Card interaction ────────────────────────────────────────────
             cardInner.addEventListener('click', flipCard);
 
+            let isTransitioning = false;
+
             function flipCard() {
+                if (isTransitioning) return;
                 if (!state.flipped) {
                     state.flipped = true;
                     cardInner.classList.add('flipped');
@@ -1476,16 +1501,40 @@
             }
 
             function nextCard() {
+                if (isTransitioning) return;
                 if (state.idx < state.cards.length - 1) {
-                    state.idx++;
-                    renderCard();
+                    if (state.flipped) {
+                        isTransitioning = true;
+                        cardInner.classList.remove('flipped');
+                        state.flipped = false;
+                        setTimeout(() => {
+                            state.idx++;
+                            renderCard();
+                            isTransitioning = false;
+                        }, 500);
+                    } else {
+                        state.idx++;
+                        renderCard();
+                    }
                 }
             }
 
             function prevCard() {
+                if (isTransitioning) return;
                 if (state.idx > 0) {
-                    state.idx--;
-                    renderCard();
+                    if (state.flipped) {
+                        isTransitioning = true;
+                        cardInner.classList.remove('flipped');
+                        state.flipped = false;
+                        setTimeout(() => {
+                            state.idx--;
+                            renderCard();
+                            isTransitioning = false;
+                        }, 500);
+                    } else {
+                        state.idx--;
+                        renderCard();
+                    }
                 }
             }
 

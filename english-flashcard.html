@@ -2222,7 +2222,7 @@
         let isSpoken = false;
 
 
-        
+
 
         function populateThemes() {
             const itemsContainer = document.getElementById('selectItems');
@@ -2305,7 +2305,7 @@
         function displayCard() {
             const word = words[currentIndex];
             document.getElementById('cardWord').textContent = isFlipped ? word : '🔊';
-            
+
             const hint = document.getElementById('cardHint');
             if (!isFlipped && !isSpoken) {
                 hint.textContent = "Click to speak the word";
@@ -2316,7 +2316,7 @@
             } else {
                 hint.textContent = "All done! Click Start Over.";
             }
-            
+
             document.getElementById('currentCard').textContent = currentIndex + 1;
             updateNavigation();
         }
@@ -2343,17 +2343,10 @@
         function speakWord() {
             const word = words[currentIndex];
             const utterance = new SpeechSynthesisUtterance(word);
-            utterance.rate = 0.9;
+            utterance.lang = 'en-US';
+            utterance.rate = 0.82;
             utterance.pitch = 1.0;
             utterance.volume = 1.0;
-            const voices = window.speechSynthesis.getVoices();
-
-            // Prioritize high-quality English voices (e.g., Edge Natural, Premium, Google)
-            const voice = voices.find(v =>
-                v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Premium') || v.name.includes('Google'))
-            ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
-
-            if (voice) utterance.voice = voice;
             window.speechSynthesis.cancel();
             window.speechSynthesis.speak(utterance);
         }
