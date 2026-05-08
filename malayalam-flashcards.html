@@ -505,6 +505,13 @@
             transform: translateY(8px) scale(0.8);
             animation: letterPop 0.25s ease forwards;
             white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .spell-letter:hover {
+            background: rgba(201, 168, 76, 0.2);
+            transform: translateY(0) scale(1.02);
         }
 
         @keyframes letterPop {
@@ -1038,7 +1045,7 @@
             if (letters.length <= 1) return '';
             return letters.map((l, idx) => {
                 const d = 320 + idx * 110, dd = d + 70, last = idx === letters.length - 1;
-                return `<span class="spell-letter" style="animation-delay:${d}ms">${l}</span>${!last ? `<span class="spell-dot" style="animation-delay:${dd}ms">·</span>` : ''}`;
+                return `<span class="spell-letter" style="animation-delay:${d}ms" onclick="speakLetter(event)">${l}</span>${!last ? `<span class="spell-dot" style="animation-delay:${dd}ms">·</span>` : ''}`;
             }).join('');
         }
 
@@ -1130,6 +1137,13 @@
         function speakCurrent(event) {
             event.stopPropagation();
             speak(cards[current], event.currentTarget);
+        }
+
+        function speakLetter(event) {
+            event.stopPropagation();
+            const letter = event.currentTarget.textContent.trim();
+            if (!letter) return;
+            speak(letter, null);
         }
 
         function shuffleCards() {
