@@ -878,7 +878,10 @@
 
         /* Theme Dropdown Styles */
         .theme-dropdown-container {
-            position: relative;
+            position: fixed;
+            bottom: 14px;
+            right: 14px;
+            z-index: 99999;
             font-family: monospace;
         }
 
@@ -902,9 +905,9 @@
 
         .theme-dropdown-menu {
             position: absolute;
-            top: 100%;
+            bottom: 100%;
             right: 0;
-            margin-top: 8px;
+            margin-bottom: 8px;
             background: #1e1e2e;
             border: 1px solid #313244;
             border-radius: 8px;
@@ -1665,16 +1668,18 @@
     </script>
 
     <style>
-        .global-nav-shell {
+        .global-nav-shell { 
             position: fixed;
-            top: 14px;
-            right: 14px;
+            bottom: 14px;
+            left: 14px;
             z-index: 99999;
         }
 
         .nav-star-btn {
             width: 44px;
             height: 44px;
+            padding: 0;
+            margin: 0;
             border-radius: 50%;
             border: 1px solid rgba(255, 255, 255, 0.18);
             background: rgba(30, 30, 35, 0.85);
@@ -1687,28 +1692,20 @@
             justify-content: center;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            animation: star-spin 6s linear infinite;
             transition: transform 0.2s ease, opacity 0.2s ease;
         }
 
         .nav-star-btn:hover {
             transform: scale(1.06);
+
         }
 
-        @keyframes star-spin {
-            from {
-                rotate: 0deg;
-            }
 
-            to {
-                rotate: 360deg;
-            }
-        }
 
         .global-apps-nav {
             position: absolute;
-            top: calc(100% + 10px);
-            right: 0;
+            bottom: calc(100% + 10px);
+            left: 0;
             display: flex;
             gap: 8px;
             background: rgba(30, 30, 35, 0.85);
@@ -1721,7 +1718,7 @@
             opacity: 0;
             pointer-events: none;
             transform: translateY(-8px) scale(0.98);
-            transform-origin: top right;
+            transform-origin: bottom left;
             transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
@@ -1764,8 +1761,8 @@
 
         @media (max-width: 600px) {
             .global-nav-shell {
-                top: 10px;
-                right: 10px;
+                bottom: 10px;
+                left: 10px;
             }
 
             .nav-star-btn {
@@ -1775,8 +1772,8 @@
             }
 
             .global-apps-nav {
-                top: calc(100% + 8px);
-                right: 0;
+                bottom: calc(100% + 8px);
+                left: 0;
                 padding: 6px 8px;
                 width: min(92vw, 340px);
                 justify-content: center;
@@ -1799,7 +1796,7 @@
     </style>
     <div class="global-nav-shell" id="globalNavShell">
         <button class="nav-star-btn" id="globalNavToggle" aria-label="Toggle app navigation"
-            aria-expanded="false">✦</button>
+            aria-expanded="false">></button>
         <nav class="global-apps-nav" id="globalAppsNav">
             <span class="nav-lbl">Apps</span>
             <a href="tell-the-time.html" title="Clock">🕒 Time</a>
