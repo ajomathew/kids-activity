@@ -781,7 +781,10 @@
 
         /* Theme Dropdown Styles */
         .theme-dropdown-container {
-            position: relative;
+            position: fixed;
+            bottom: 14px;
+            right: 14px;
+            z-index: 99999;
             font-family: monospace;
         }
 
@@ -805,9 +808,9 @@
 
         .theme-dropdown-menu {
             position: absolute;
-            top: 100%;
+            bottom: 100%;
             right: 0;
-            margin-top: 8px;
+            margin-bottom: 8px;
             background: #1e1e2e;
             border: 1px solid #313244;
             border-radius: 8px;
@@ -876,8 +879,7 @@
             border-radius: 50%;
         }
 
-        \n
-    </style>
+        </style>
     <script src="themes.js"></script>
     <script src="analytics.js"></script>
 </head>
@@ -920,21 +922,7 @@
             </button>
         </div>
 
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-            <div class="theme-dropdown-container" id="themeDropdownContainer">
-                <button class="theme-dropdown-btn" onclick="toggleThemeMenu(event)">
-                    <span id="currentThemeName">Theme</span>
-                    <div class="theme-circles" id="currentThemeCircles" style="background:transparent;padding:0"></div>
-                </button>
-                <div class="theme-dropdown-menu" id="themeMenu" onclick="event.stopPropagation()">
-                    <div class="theme-search-wrapper">
-                        <span>🔍</span>
-                        <input type="text" id="themeSearch" placeholder="Theme..." oninput="filterThemes()">
-                    </div>
-                    <div class="theme-list" id="themeList"></div>
-                </div>
-            </div>
-        </div>
+
 
         <div id="cardArea"></div>
     </main>
@@ -1373,11 +1361,43 @@
 
     \n
     <style>
-        .global-apps-nav {
+        .global-nav-shell {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
+            bottom: 14px;
+            left: 14px;
             z-index: 99999;
+        }
+
+        .nav-star-btn {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            margin: 0;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(30, 30, 35, 0.85);
+            color: #9e1891;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-star-btn:hover {
+            transform: scale(1.06);
+        }
+
+
+
+        .global-apps-nav {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 0;
             display: flex;
             gap: 8px;
             background: rgba(30, 30, 35, 0.85);
@@ -1387,6 +1407,17 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-8px) scale(0.98);
+            transform-origin: bottom left;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .global-nav-shell.open .global-apps-nav {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
         }
 
         .global-apps-nav .nav-lbl {
@@ -1421,14 +1452,28 @@
         }
 
         @media (max-width: 600px) {
-            .global-apps-nav {
-                left: 50%;
-                transform: translateX(-50%);
+            .global-nav-shell {
                 bottom: 10px;
+                left: 10px;
+            }
+
+            .nav-star-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .global-apps-nav {
+                bottom: calc(100% + 8px);
+                left: 0;
                 padding: 6px 8px;
-                width: 90%;
+                width: min(92vw, 340px);
                 justify-content: center;
                 flex-wrap: wrap;
+            }
+
+            .global-nav-shell.open .global-apps-nav {
+                transform: translateY(0) scale(1);
             }
 
             .global-apps-nav .nav-lbl {
@@ -1441,14 +1486,61 @@
             }
         }
     </style>
-    <nav class="global-apps-nav">
-        <span class="nav-lbl">Apps</span>
-        <a href="tell-the-time.html" title="Clock">🕒 Time</a>
-        <a href="maths-flashcards.html" title="Maths">➕ Maths</a>
-        <a href="english-flashcard.html" title="Spelling">🔤 Spelling</a>
-        <a href="malayalam-flashcards.html" title="Malayalam">അ Malayalam</a>
-        <a href="kg-card-rain.html" title="KG Card Rain">🍎 KG Rain</a>
-    </nav>
+    <div class="theme-dropdown-container" id="themeDropdownContainer">
+        <button class="theme-dropdown-btn" onclick="toggleThemeMenu(event)">
+            <span id="currentThemeName">Theme</span>
+            <div class="theme-circles" id="currentThemeCircles" style="background:transparent;padding:0"></div>
+        </button>
+        <div class="theme-dropdown-menu" id="themeMenu" onclick="event.stopPropagation()">
+            <div class="theme-search-wrapper">
+                <span>🔍</span>
+                <input type="text" id="themeSearch" placeholder="Theme..." oninput="filterThemes()">
+            </div>
+            <div class="theme-list" id="themeList"></div>
+        </div>
+    </div>
+
+    <div class="global-nav-shell" id="globalNavShell">
+        <button class="nav-star-btn" id="globalNavToggle" aria-label="Toggle app navigation" aria-expanded="true">></button>
+        <nav class="global-apps-nav" id="globalAppsNav">
+            <span class="nav-lbl">Apps</span>
+            <a href="tell-the-time.html" title="Clock">🕒 Time</a>
+            <a href="maths-flashcards.html" title="Maths">➕ Maths</a>
+            <a href="english-flashcard.html" title="Spelling">🔤 Spelling</a>
+            <a href="malayalam-flashcards.html" title="Malayalam">അ Malayalam</a>
+            <a href="kg-card-rain.html" title="KG Card Rain">🍎 KG Rain</a>
+        </nav>
+    </div>
+
+    <script>
+        (function () {
+            const shell = document.getElementById('globalNavShell');
+            const toggle = document.getElementById('globalNavToggle');
+            if (!shell || !toggle) return;
+
+            function setNavOpen(open) {
+                shell.classList.toggle('open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+
+            toggle.addEventListener('click', function (event) {
+                event.stopPropagation();
+                setNavOpen(!shell.classList.contains('open'));
+            });
+
+            shell.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+
+            document.addEventListener('click', function () {
+                setNavOpen(false);
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') setNavOpen(false);
+            });
+        })();
+    </script>
     \n
 </body>
 
