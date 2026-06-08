@@ -982,11 +982,13 @@
 
         function loadVoices() {
             const v = synth ? synth.getVoices() : [];
+            // Prefer explicit Malayalam voices, then any voice that starts with 'ml',
+            // then Hindi or Indian English as fallback, then any available voice.
             mlVoice = v.find(x => x.lang === 'ml-IN' || x.lang === 'ml')
-                || v.find(x => x.lang.startsWith('ml'))
+                || v.find(x => x.lang && x.lang.startsWith && x.lang.startsWith('ml'))
                 || v.find(x => x.lang === 'hi-IN')
-                || v.find(x => x.lang.startsWith('en-IN'))
-                || null;
+                || v.find(x => x.lang && x.lang.startsWith && x.lang.startsWith('en-IN'))
+                || v[0] || null;
         }
         if (synth) { loadVoices(); if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices; }
 
@@ -994,8 +996,15 @@
             if (!synth) return;
             synth.cancel();
             const utt = new SpeechSynthesisUtterance(text);
-            utt.lang = 'ml-IN'; utt.rate = 0.82; utt.pitch = 1;
-            if (mlVoice) utt.voice = mlVoice;
+            // Use selected voice's language if available (helps iOS pick correct voice),
+            // otherwise prefer Malayalam locale.
+            if (mlVoice) {
+                utt.voice = mlVoice;
+                if (mlVoice.lang) utt.lang = mlVoice.lang;
+            } else {
+                utt.lang = 'ml-IN';
+            }
+            utt.rate = 0.82; utt.pitch = 1;
             if (btnEl) {
                 btnEl.classList.add('speaking');
                 btnEl.innerHTML = `<span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>`;
