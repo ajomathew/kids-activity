@@ -1162,6 +1162,19 @@
         loadVoices();
 
         function speak(text) {
+            const v = synth ? synth.getVoices() : [];
+            const hasMalayalam = v.some(x => x.lang.startsWith('ml'));
+
+            // If the device (like iOS) doesn't have a native Malayalam voice, 
+            // fallback to an online text-to-speech service (Google Translate).
+            if (!hasMalayalam && navigator.onLine) {
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ml&client=tw-ob&q=${encodeURIComponent(text)}`;
+                const audio = new Audio(url);
+                audio.playbackRate = 0.85; // Slow it down slightly to match flashcard pacing
+                audio.play().catch(e => console.warn("Audio fallback failed:", e));
+                return;
+            }
+
             if (!synth) return;
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
