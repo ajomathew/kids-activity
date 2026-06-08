@@ -905,7 +905,8 @@
             <div class="input-body">
                 <label class="input-label" for="mlInput">Enter text below</label>
                 <textarea id="mlInput"
-                    placeholder="ഇവിടെ മലയാളം ഖണ്ഡിക ടൈപ്പ് ചെയ്യുക...&#10;&#10;Example: കേരളം ദൈവത്തിന്റെ സ്വന്തം നാട് ആണ്. &#10;ഇവിടെ പ്രകൃതി ഭംഗി ഒരുപാട് ഉണ്ട്."></textarea>
+                    placeholder="ഇവിടെ മലയാളം ഖണ്ഡിക ടൈപ്പ് ചെയ്യുക...&#10;&#10;Example: കേരളം ദൈവത്തിന്റെ ...">
+                </textarea>
                 <button class="btn-generate" onclick="generate()">
                     &#9654; Generate Flash Cards
                 </button>
@@ -979,9 +980,21 @@
         // ── TTS ───────────────────────────────────────────────────
         const synth = window.speechSynthesis;
         let mlVoice = null;
+        let voiceLoadAttempts = 0;
 
         function loadVoices() {
             const v = synth ? synth.getVoices() : [];
+            
+            // iOS fix: voices may be empty initially, retry a few times
+            if (v.length === 0 && voiceLoadAttempts < 5) {
+                voiceLoadAttempts++;
+                setTimeout(loadVoices, 100);
+                return;
+            }
+            
+            // Reset counter after successful load
+            voiceLoadAttempts = 0;
+            
             // Prefer explicit Malayalam voices, then any voice that starts with 'ml',
             // then Hindi or Indian English as fallback, then any available voice.
             mlVoice = v.find(x => x.lang === 'ml-IN' || x.lang === 'ml')
@@ -996,72 +1009,31 @@
             if (!synth) return;
             synth.cancel();
             const utt = new SpeechSynthesisUtterance(text);
-            // Use selected voice's language if available (helps iOS pick correct voice),
-            // otherwise prefer Malayalam locale.
+            
+            // iOS fix: Set voice if available
             if (mlVoice) {
                 utt.voice = mlVoice;
-                if (mlVoice.lang) utt.lang = mlVoice.lang;
-            } else {
-                utt.lang = 'ml-IN';
             }
-            utt.rate = 0.82; utt.pitch = 1;
+            
+            // Set language as fallback (helps iOS pick correct voice)
+            utt.lang = 'ml-IN';
+            utt.rate = 0.9;
+            utt.pitch = 1;
+            
+            // Speak immediately (must be in user interaction context)
+            synth.speak(utt);
+            
+            // Handle button UI updates
             if (btnEl) {
                 btnEl.classList.add('speaking');
-                btnEl.innerHTML = `<span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>`;
-                utt.onend = utt.onerror = () => { btnEl.classList.remove('speaking'); btnEl.innerHTML = speakerIcon() + ' hear it'; };
-            }
-            synth.speak(utt);
-        }
-
-        function speakerIcon() {
-            return `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>`;
-        }
-
-        // ── Helpers ───────────────────────────────────────────────
-        function getGraphemes(text) {
-            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-                const seg = new Intl.Segmenter('ml', { granularity: 'grapheme' });
-                return [...seg.segment(text)].map(s => s.segment);
-            }
-            return [...text];
-        }
-
-        function tokenize(text, m) {
-            if (m === 'words') {
-                return text.split(/[\s\u200c\u200d،،؛؟।॥,.!?;:\-–—"'"'()\[\]{}]+/)
-                    .filter(w => w.length > 0 && /[\u0D00-\u0D7F]/.test(w));
-            }
-            const chars = getGraphemes(text).filter(c => /[\u0D00-\u0D7F]/.test(c));
-            const seenSet = new Set(), unique = [];
-            for (const c of chars) { if (!seenSet.has(c)) { seenSet.add(c); unique.push(c); } }
-            return unique;
-        }
-
-        function buildSpellRow(word) {
-            const letters = getGraphemes(word).filter(c => /[\u0D00-\u0D7F]/.test(c));
-            if (letters.length <= 1) return '';
-            return letters.map((l, idx) => {
-                const d = 320 + idx * 110, dd = d + 70, last = idx === letters.length - 1;
-                return `<span class="spell-letter" style="animation-delay:${d}ms" onclick="speakLetter(event)">${l}</span>${!last ? `<span class="spell-dot" style="animation-delay:${dd}ms">·</span>` : ''}`;
-            }).join('');
-        }
-
-        // ── Auto font-size ─────────────────────────────────────────
-        function fitText(el) {
-            if (!el) return;
-            const container = el.closest('.card-front, .card-back');
-            if (!container) return;
-            const maxW = container.clientWidth - 56;
-            const maxH = container.clientHeight * 0.45;
-            let size = 64;
-            el.style.fontSize = size + 'px';
-            while ((el.scrollWidth > maxW || el.scrollHeight > maxH) && size > 18) {
-                size -= 2;
-                el.style.fontSize = size + 'px';
+                utt.onend = () => btnEl.classList.remove('speaking');
+                utt.onerror = () => {
+                    btnEl.classList.remove('speaking');
+                    console.error('Speech synthesis failed:', utt.error);
+                };
             }
         }
 
-        // ── UI actions ─────────────────────────────────────────────
         function setMode(m) {
             mode = m;
             document.getElementById('btn-words').classList.toggle('active', m === 'words');
@@ -1155,395 +1127,121 @@
 
         // ── Render ─────────────────────────────────────────────────
         function renderStage() {
-            const label = mode === 'words' ? 'WORDS' : 'UNIQUE LETTERS';
-            const hasTTS = !!synth;
-            const noTTS = hasTTS ? '' : '<span style="color:var(--red)">⚠ No TTS</span>';
-
-            const html = `
-      <div class="progress-header">
-        <span class="counter-label" id="counterLabel"><span>1</span> / ${cards.length}</span>
-        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-        ${noTTS}
-      </div>
-      <div class="card-stage" id="cardStage"></div>
-      <div class="nav-row" id="navRow">
-        <button class="nav-btn" id="prevBtn" onclick="goPrev()" ${current === 0 ? 'disabled' : ''}>&#8592;</button>
-        <div class="nav-dots" id="navDots"></div>
-        <button class="nav-btn" id="nextBtn" onclick="goNext()" ${current === cards.length - 1 ? 'disabled' : ''}>&#8594;</button>
-      </div>
-      <div class="shuffle-row">
-        <button class="ctrl-btn" onclick="shuffleCards()">⇄ Shuffle</button>
-      </div>
-    `;
-            document.getElementById('cardArea').innerHTML = html;
-            renderCard('enter-right');
-        }
-
-        function renderCard(animClass) {
-            const stage = document.getElementById('cardStage');
-            if (!stage) return;
-
-            const item = cards[current];
-            const tag = mode === 'words' ? 'word' : 'letter';
-            const hasTTS = !!synth;
-            const spellHTML = mode === 'words' ? `<div class="spell-row"></div>` : '';
-            const speakHTML = hasTTS ? `<button class="speak-btn" onclick="speakCurrent(event)">${speakerIcon()} hear it</button>` : '';
-
-            stage.innerHTML = `
-      <div class="flash-card ${animClass || ''}" onclick="flipCurrent()">
-        <div class="card-inner ${isFlipped ? 'flipped-init' : ''}">
-          <div class="card-front">
-            <div class="card-num">#${current + 1}</div>
-            <div class="card-tag">${tag}</div>
-            <div class="card-char">${item}</div>
-            <div class="card-hint">tap to reveal</div>
-          </div>
-          <div class="card-back">
-            <div class="card-num">#${current + 1}</div>
-            <div class="card-char">${item}</div>
-            ${spellHTML}
-            ${speakHTML}
-            <div class="card-hint">${current < cards.length - 1 ? '→ tap to continue' : '✓ done'}</div>
-          </div>
+            const area = document.getElementById('cardArea');
+            if (cards.length === 0) { area.innerHTML = ''; return; }
+            area.innerHTML = `<div class="card-stage">
+        <div class="progress-header">
+            <div class="counter-label">Card <span>${current + 1}</span>/${cards.length}</div>
+            <div class="progress-wrap">
+                <div class="progress-fill" style="width: ${(seen.size / cards.length) * 100}%"></div>
+            </div>
         </div>
-      </div>
-    `;
-
-            // Fit text on front after paint
-            requestAnimationFrame(() => {
-                fitText(stage.querySelector('.card-front .card-char'));
-                fitText(stage.querySelector('.card-back .card-char'));
-            });
-
-            // Update nav buttons & dots
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            if (prevBtn) prevBtn.disabled = current === 0;
-            if (nextBtn) nextBtn.disabled = current === cards.length - 1;
-            renderDots();
+        <div id="cardContainer"></div>
+        <div class="nav-row">
+            <button class="nav-btn" onclick="goPrev()" ${current === 0 ? 'disabled' : ''}>←</button>
+            <div class="nav-dots">${Array.from({length: cards.length}, (_, i) => `
+                <div class="nav-dot ${i === current ? 'active' : ''} ${seen.has(i) ? 'seen' : ''}" onclick="gotoCard(${i})"></div>
+            `).join('')}</div>
+            <button class="nav-btn" onclick="goNext()" ${current >= cards.length - 1 ? 'disabled' : ''}>→</button>
+        </div>
+        <div class="shuffle-row">
+            <button class="ctrl-btn" onclick="shuffleCards()">⇄ Shuffle</button>
+        </div>
+    </div>`;
+            renderCard();
         }
 
-        function renderDots() {
-            const dotsEl = document.getElementById('navDots');
-            if (!dotsEl) return;
-            const total = cards.length;
-            const maxDots = 9;
-            if (total > maxDots) {
-                dotsEl.innerHTML = `<span style="font-size:10px;color:var(--muted);letter-spacing:0.1em">${current + 1} / ${total}</span>`;
-                return;
-            }
-            dotsEl.innerHTML = Array.from({ length: total }, (_, i) => {
-                const cls = i === current ? 'active' : seen.has(i) ? 'seen' : '';
-                return `<div class="nav-dot ${cls}" onclick="jumpTo(${i})"></div>`;
-            }).join('');
+        function renderCard(anim = '') {
+            const cc = document.getElementById('cardContainer');
+            if (!cc) return;
+            const card = cards[current];
+            cc.innerHTML = `<div class="flash-card ${anim}" onclick="flipCurrent()">
+        <div class="card-inner">
+            <div class="card-front">
+                <div class="card-num">${current + 1}</div>
+                <div class="card-tag">${mode === 'words' ? 'word' : 'letter'}</div>
+                <div class="card-char">${escapeHtml(card)}</div>
+                <div class="card-hint">tap to flip</div>
+            </div>
+            <div class="card-back">
+                <div class="card-char">${escapeHtml(card)}</div>
+                <div class="card-hint">tap to flip</div>
+                <button class="speak-btn" onclick="speakCurrent(event)">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v9.28c-3.47.6-6 3.53-6 7.02 0 3.9 3.13 7 7 7s7-3.1 7-7h1.1c0 4.41-3.59 8-8 8s-8-3.59-8-8c0-4.03 3.06-7.43 7-7.93V3m7-1v5h5v-5h-5z"/></svg>
+                    <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+                </button>
+                <div class="spell-row"></div>
+            </div>
+        </div>
+    </div>`;
+            fitText(cc.querySelector('.card-char'));
         }
 
-        function jumpTo(i) {
-            if (i === current) return;
-            lastDir = i > current ? 1 : -1;
-            seen.add(current);
-            current = i; isFlipped = false;
-            renderCard(lastDir > 0 ? 'enter-right' : 'enter-left');
+        function gotoCard(i) {
+            current = i;
+            isFlipped = false;
+            renderCard('enter-right');
             updateProgress();
         }
 
         function updateProgress() {
-            seen.add(current); // count current as seen
-            const pct = cards.length ? (seen.size / cards.length * 100) : 0;
-            const fill = document.getElementById('progressFill');
-            if (fill) fill.style.width = pct + '%';
-            const label = document.getElementById('counterLabel');
-            if (label) label.innerHTML = `<span>${current + 1}</span> / ${cards.length}`;
-            renderDots();
+            const label = document.querySelector('.counter-label span');
+            if (label) label.textContent = current + 1;
+            const fill = document.querySelector('.progress-fill');
+            if (fill) fill.style.width = (seen.size / cards.length) * 100 + '%';
+            const dots = document.querySelectorAll('.nav-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === current);
+                dot.classList.toggle('seen', seen.has(i));
+            });
+            const prevBtn = document.querySelectorAll('.nav-btn')[0];
+            const nextBtn = document.querySelectorAll('.nav-btn')[1];
+            if (prevBtn) prevBtn.disabled = current === 0;
+            if (nextBtn) nextBtn.disabled = current >= cards.length - 1;
         }
 
-        // ── Keyboard nav ──────────────────────────────────────────
-        document.addEventListener('keydown', e => {
-            if (cards.length === 0) return;
-            if (e.key === 'ArrowRight') goNext();
-            else if (e.key === 'ArrowLeft') goPrev();
-            else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCurrent(); }
-        });
+        function fitText(el) {
+            if (!el) return;
+            el.style.fontSize = getComputedStyle(el).fontSize;
+            const maxWidth = el.parentElement.offsetWidth - 20;
+            while (el.offsetWidth > maxWidth && parseInt(el.style.fontSize) > 12) {
+                el.style.fontSize = (parseInt(el.style.fontSize) - 2) + 'px';
+            }
+        }
+
+        function buildSpellRow(word) {
+            const letters = [...word];
+            return letters.map(l => `<span class="spell-letter" onclick="speakLetter(event)">${escapeHtml(l)}</span>`).join('') +
+                (letters.length > 1 ? Array(letters.length - 1).fill(0).map(() => '<span class="spell-dot">·</span>').join('') : '');
+        }
 
         function showEmpty(msg) {
-            document.getElementById('cardArea').innerHTML = `
-      <div class="empty-state"><div class="empty-icon">𑀵</div><p>${msg}</p></div>
-    `;
+            document.getElementById('cardArea').innerHTML = `<div class="empty-state"><div class="empty-icon">∅</div><p>${msg}</p></div>`;
         }
 
-        showEmpty('Expand the paragraph field above,<br>enter Malayalam text, then hit Generate.');
+        function escapeHtml(text) {
+            const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // ── Tokenizer ──────────────────────────────────────────────
+        function tokenize(text, m) {
+            if (m === 'words') {
+                return text.split(/\s+/).filter(w => /[\u0D00-\u0D7F]/.test(w)).map(w => w.replace(/[^\u0D00-\u0D7F]/g, ''));
+            } else {
+                // Letters
+                const all = text.replace(/\s+/g, '').split('');
+                const seen = new Set();
+                return all.filter(ch => {
+                    if (/[\u0D00-\u0D7F]/.test(ch)) {
+                        if (!seen.has(ch)) { seen.add(ch); return true; }
+                    }
+                    return false;
+                });
+            }
+        }
     </script>
 
-
-
-
-    <script>
-
-
-        module.exports = themesData;
-    </script>
-    <script>
-
-        function applyThemeVariables(theme) {
-            const r = document.documentElement;
-            r.style.setProperty('--bg', theme.colors.bg);
-            r.style.setProperty('--surface', theme.colors.bg);
-            r.style.setProperty('--surface2', 'rgba(128,128,128,0.1)');
-            r.style.setProperty('--gold', theme.colors.main);
-            r.style.setProperty('--gold-light', theme.colors.main);
-            r.style.setProperty('--text', theme.colors.sub);
-            r.style.setProperty('--cream', theme.colors.sub);
-            r.style.setProperty('--teal', theme.colors.sub);
-            r.style.setProperty('--border', 'rgba(128,128,128,0.2)');
-        }
-
-
-        function toggleThemeMenu(e) {
-            e.stopPropagation();
-            document.getElementById('themeMenu').classList.toggle('show');
-            document.getElementById('themeSearch').focus();
-        }
-
-        function closeThemeMenu() {
-            const menu = document.getElementById('themeMenu');
-            if (menu) menu.classList.remove('show');
-        }
-
-        document.addEventListener('click', closeThemeMenu);
-
-        function renderThemes(filter = '') {
-            const list = document.getElementById('themeList');
-            if (!list) return;
-            list.innerHTML = '';
-            const lowerFilter = filter.toLowerCase();
-            themesData.forEach(theme => {
-                if (!theme.name.toLowerCase().includes(lowerFilter)) return;
-                const div = document.createElement('div');
-                div.className = 'theme-item';
-                div.innerHTML = `
-                    <span>${theme.name.toLowerCase()}</span>
-                    <div class="theme-circles">
-                        <div class="theme-circle" style="background:${theme.colors.bg}"></div>
-                        <div class="theme-circle" style="background:${theme.colors.main}"></div>
-                        <div class="theme-circle" style="background:${theme.colors.sub}"></div>
-                    </div>
-                `;
-                div.onclick = () => {
-                    applyTheme(theme);
-                    closeThemeMenu();
-                };
-                list.appendChild(div);
-            });
-        }
-
-        function filterThemes() {
-            renderThemes(document.getElementById('themeSearch').value);
-        }
-
-        function applyTheme(theme) {
-            localStorage.setItem(location.pathname + '-theme', theme.value);
-            document.getElementById('currentThemeName').textContent = theme.name.toLowerCase();
-            document.getElementById('currentThemeCircles').innerHTML = `
-                <div class="theme-circle" style="background:${theme.colors.bg}"></div>
-                <div class="theme-circle" style="background:${theme.colors.main}"></div>
-                <div class="theme-circle" style="background:${theme.colors.sub}"></div>
-            `;
-            applyThemeVariables(theme);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderThemes();
-            const saved = localStorage.getItem(location.pathname + '-theme');
-            const theme = themesData.find(t => t.value === saved) || themesData[0];
-            applyTheme(theme);
-        });
-    </script>
-
-    \n
-    <style>
-        .global-nav-shell {
-            position: fixed;
-            bottom: 14px;
-            left: 14px;
-            z-index: 99999;
-        }
-
-        .nav-star-btn {
-            width: 44px;
-            height: 44px;
-            padding: 0;
-            margin: 0;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(30, 30, 35, 0.85);
-            color: #9e1891;
-            font-size: 22px;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-
-        .nav-star-btn:hover {
-            transform: scale(1.06);
-        }
-
-
-
-        .global-apps-nav {
-            position: absolute;
-            bottom: calc(100% + 10px);
-            left: 0;
-            display: flex;
-            gap: 8px;
-            background: rgba(30, 30, 35, 0.85);
-            padding: 8px 12px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(-8px) scale(0.98);
-            transform-origin: bottom left;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-
-        .global-nav-shell.open .global-apps-nav {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0) scale(1);
-        }
-
-        .global-apps-nav .nav-lbl {
-            color: #a0a0b0;
-            font-family: sans-serif;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-right: 4px;
-            letter-spacing: 0.5px;
-        }
-
-        .global-apps-nav a {
-            color: #e0e0e0;
-            text-decoration: none;
-            font-family: sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .global-apps-nav a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 600px) {
-            .global-nav-shell {
-                bottom: 10px;
-                left: 10px;
-            }
-
-            .nav-star-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-
-            .global-apps-nav {
-                bottom: calc(100% + 8px);
-                left: 0;
-                padding: 6px 8px;
-                width: min(92vw, 340px);
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .global-nav-shell.open .global-apps-nav {
-                transform: translateY(0) scale(1);
-            }
-
-            .global-apps-nav .nav-lbl {
-                display: none;
-            }
-
-            .global-apps-nav a {
-                padding: 6px 8px;
-                font-size: 11px;
-            }
-        }
-    </style>
-    <div class="theme-dropdown-container" id="themeDropdownContainer">
-        <button class="theme-dropdown-btn" onclick="toggleThemeMenu(event)">
-            <span id="currentThemeName">Theme</span>
-            <div class="theme-circles" id="currentThemeCircles" style="background:transparent;padding:0"></div>
-        </button>
-        <div class="theme-dropdown-menu" id="themeMenu" onclick="event.stopPropagation()">
-            <div class="theme-search-wrapper">
-                <span>🔍</span>
-                <input type="text" id="themeSearch" placeholder="Theme..." oninput="filterThemes()">
-            </div>
-            <div class="theme-list" id="themeList"></div>
-        </div>
-    </div>
-
-    <div class="global-nav-shell" id="globalNavShell">
-        <button class="nav-star-btn" id="globalNavToggle" aria-label="Toggle app navigation" aria-expanded="true">></button>
-        <nav class="global-apps-nav" id="globalAppsNav">
-            <span class="nav-lbl">Apps</span>
-            <a href="tell-the-time.html" title="Clock">🕒 Time</a>
-            <a href="maths-flashcards.html" title="Maths">➕ Maths</a>
-            <a href="english-flashcard.html" title="Spelling">🔤 Spelling</a>
-            <a href="malayalam-flashcards.html" title="Malayalam">അ Malayalam</a>
-            <a href="kg-card-rain.html" title="KG Card Rain">🍎 KG Rain</a>
-        </nav>
-    </div>
-
-    <script>
-        (function () {
-            const shell = document.getElementById('globalNavShell');
-            const toggle = document.getElementById('globalNavToggle');
-            if (!shell || !toggle) return;
-
-            function setNavOpen(open) {
-                shell.classList.toggle('open', open);
-                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-            }
-
-            toggle.addEventListener('click', function (event) {
-                event.stopPropagation();
-                setNavOpen(!shell.classList.contains('open'));
-            });
-
-            shell.addEventListener('click', function (event) {
-                event.stopPropagation();
-            });
-
-            document.addEventListener('click', function () {
-                setNavOpen(false);
-            });
-
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') setNavOpen(false);
-            });
-        })();
-    </script>
-    \n
 </body>
-
-
 
 </html>
