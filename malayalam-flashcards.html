@@ -418,16 +418,15 @@
         }
 
         .card-back {
-            background: linear-gradient(145deg, #1c1608, #0f0d07);
+            background: var(--surface2);
             border: 1.5px solid var(--gold);
             transform: rotateY(180deg);
             overflow: hidden;
-            box-shadow: 0 0 60px rgba(201, 168, 76, 0.12);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
         }
 
         :root.light .card-back {
-            background: linear-gradient(145deg, #fdf6e3, #f5ecd0);
-            box-shadow: 0 0 40px rgba(160, 120, 40, 0.1);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
         }
 
         /* The main word/letter — auto-sizing */
@@ -458,7 +457,7 @@
         }
 
         .card-back .card-hint {
-            color: rgba(201, 168, 76, 0.5);
+            color: var(--muted);
         }
 
         .card-tag {
@@ -497,8 +496,8 @@
             font-family: 'Noto Sans Malayalam', sans-serif;
             font-size: 1rem;
             color: var(--gold);
-            background: rgba(201, 168, 76, 0.1);
-            border: 1px solid rgba(201, 168, 76, 0.25);
+            background: transparent;
+            border: 1px solid var(--gold);
             border-radius: 6px;
             padding: 3px 8px;
             opacity: 0;
@@ -510,7 +509,8 @@
         }
 
         .spell-letter:hover {
-            background: rgba(201, 168, 76, 0.2);
+            background: var(--gold);
+            color: var(--bg);
             transform: translateY(0) scale(1.02);
         }
 
@@ -536,8 +536,8 @@
             gap: 6px;
             margin-top: 14px;
             padding: 8px 20px;
-            background: rgba(201, 168, 76, 0.1);
-            border: 1px solid rgba(201, 168, 76, 0.3);
+            background: transparent;
+            border: 1px solid var(--gold);
             border-radius: 999px;
             color: var(--gold);
             font-family: 'DM Mono', monospace;
@@ -550,7 +550,8 @@
         }
 
         .speak-btn:hover {
-            background: rgba(201, 168, 76, 0.22);
+            background: var(--gold);
+            color: var(--bg);
             border-color: var(--gold);
             transform: scale(1.05);
         }
@@ -1018,6 +1019,10 @@
             root.style.setProperty('--text', textColor);
             root.style.setProperty('--muted', luminance > 0.5 ? '#666' : '#999');
 
+            root.style.setProperty('--surface', colors.bg);
+            root.style.setProperty('--surface2', colors.bg);
+            root.style.setProperty('--border', colors.sub);
+
             currentTheme = themeName;
             localStorage.setItem('ml-current-theme', themeName);
             updateThemeMenuActiveState();
@@ -1075,34 +1080,38 @@
         document.addEventListener('DOMContentLoaded', initThemeDropdown);
 
         // ── Malayalam Grapheme Splitting ──────────────────────────────────────────
-        // Properly split Malayalam text respecting ligatures and combining characters
         function splitMalayalamGraphemes(text) {
-            const graphemes = [];
-            let i = 0;
-            while (i < text.length) {
-                let grapheme = text[i];
-                i++;
+            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+                const segmenter = new Intl.Segmenter('ml-IN', { granularity: 'grapheme' });
+                return Array.from(segmenter.segment(text)).map(s => s.segment);
+            }
 
-                // Malayalam combining characters (matras, virama, etc.)
-                // Check if next char is a combining mark
-                while (i < text.length) {
-                    const code = text.charCodeAt(i);
-                    // Malayalam combining marks: U+0900–U+094F
-                    // Matras: U+093E–U+094C
-                    // Virama: U+094D
-                    // Anusvara: U+0902, Visarga: U+0903
-                    if ((code >= 0x093E && code <= 0x094C) ||  // Matras
-                        code === 0x094D ||                      // Virama
-                        code === 0x0902 ||                      // Anusvara
-                        code === 0x0903 ||                      // Visarga
-                        code === 0x093C) {                      // Nukta
-                        grapheme += text[i];
-                        i++;
-                    } else {
-                        break;
+            const graphemes = [];
+            let current = '';
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const code = text.charCodeAt(i);
+                
+                // Combining marks for Malayalam
+                const isCombining = (code >= 0x0D00 && code <= 0x0D03) ||
+                                    (code >= 0x0D3B && code <= 0x0D4D) ||
+                                    (code === 0x0D57 || code === 0x0D62 || code === 0x0D63) ||
+                                    (code === 0x200D || code === 0x200C);
+                
+                if (!isCombining) {
+                    if (current.length > 0) {
+                        const lastCode = current.charCodeAt(current.length - 1);
+                        // If previous character was Virama or ZWJ, do not split (forms a conjunct)
+                        if (lastCode !== 0x0D4D && lastCode !== 0x200D) {
+                            graphemes.push(current);
+                            current = '';
+                        }
                     }
                 }
-                graphemes.push(grapheme);
+                current += char;
+            }
+            if (current.length > 0) {
+                graphemes.push(current);
             }
             return graphemes;
         }
@@ -1269,13 +1278,23 @@
         }
 
         function flipCard() {
-            isFlipped = !isFlipped;
-            const card = document.getElementById('mainCard');
-            card.classList.toggle('flipped', isFlipped);
-            seen.add(current);
             if (isFlipped) {
-                render(); // Re-render to show spell-out
+                nextCard();
+                return;
             }
+            
+            isFlipped = true;
+            const card = document.getElementById('mainCard');
+            card.classList.add('flipped');
+            seen.add(current);
+            const spellRow = document.getElementById('spellRow');
+            const graphemes = splitMalayalamGraphemes(cards[current]);
+            spellRow.innerHTML = graphemes.map((g, i) => 
+                `<span class="spell-letter" style="animation-delay: ${i * 0.15}s">${g}</span>`
+            ).join('');
+            
+            // Automatically speak the word when flipped
+            speak(cards[current]);
         }
 
         function nextCard() {
