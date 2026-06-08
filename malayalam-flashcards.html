@@ -1290,7 +1290,7 @@
             const spellRow = document.getElementById('spellRow');
             const graphemes = splitMalayalamGraphemes(cards[current]);
             spellRow.innerHTML = graphemes.map((g, i) => 
-                `<span class="spell-letter" style="animation-delay: ${i * 0.15}s">${g}</span>`
+                `<span class="spell-letter" style="animation-delay: ${i * 0.15}s" onclick="speak('${g.replace(/'/g, "\\'")}'); event.stopPropagation();">${g}</span>`
             ).join('');
             
             // Automatically speak the word when flipped
