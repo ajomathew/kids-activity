@@ -86,18 +86,25 @@
             text-align: center;
         }
 
-        /* Theme toggle */
-        .theme-toggle {
+        /* Header controls */
+        .header-controls {
             position: absolute;
             top: 18px;
             right: 24px;
             display: flex;
             align-items: center;
             gap: 8px;
+            z-index: 10;
+        }
+
+        .top-bar-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             background: var(--surface);
             border: 1.5px solid var(--border);
             border-radius: 999px;
-            padding: 6px 14px 6px 10px;
+            padding: 6px 14px;
             cursor: pointer;
             transition: all 0.2s;
             font-family: 'DM Mono', monospace;
@@ -106,19 +113,37 @@
             color: var(--muted);
         }
 
-        .theme-toggle:hover {
+        .top-bar-btn:hover {
             border-color: var(--gold);
             color: var(--gold);
         }
 
-        .theme-icon {
+        .control-icon {
             font-size: 15px;
             line-height: 1;
             transition: transform 0.4s ease;
         }
 
-        .theme-toggle:hover .theme-icon {
+        .top-bar-btn:hover .control-icon {
+            transform: scale(1.15);
+        }
+
+        #themeToggleBtn:hover .control-icon {
             transform: rotate(20deg);
+        }
+
+        @media (max-width: 520px) {
+            .btn-label-text {
+                display: none;
+            }
+            .top-bar-btn {
+                padding: 6px 10px;
+                gap: 0;
+            }
+            .header-controls {
+                right: 12px;
+                top: 12px;
+            }
         }
 
         .logo-label {
@@ -891,10 +916,16 @@
         <div class="logo-label">Learn Malayalam</div>
         <h1>മലയാളം Flash Cards</h1>
         <p class="subtitle">Paste a paragraph · tap to flip · hear it spoken</p>
-        <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle light/dark mode">
-            <span class="theme-icon" id="themeIcon">🌙</span>
-            <span id="themeLabel">Light</span>
-        </button>
+        <div class="header-controls">
+            <button class="top-bar-btn" id="muteToggleBtn" onclick="toggleMute()" title="Mute/Unmute audio">
+                <span class="control-icon" id="muteIcon">🔊</span>
+                <span class="btn-label-text" id="muteLabel">Sound On</span>
+            </button>
+            <button class="top-bar-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle light/dark mode">
+                <span class="control-icon" id="themeIcon">🌙</span>
+                <span class="btn-label-text" id="themeLabel">Light</span>
+            </button>
+        </div>
     </header>
 
     <main>
@@ -978,6 +1009,43 @@
                     const label = document.getElementById('themeLabel');
                     if (icon) icon.textContent = '☀️';
                     if (label) label.textContent = 'Dark';
+                });
+            }
+        })();
+
+        // ── Mute toggle ──────────────────────────────────────────
+        let isMuted = false;
+        let activeAudio = null;
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            localStorage.setItem('ml-muted', isMuted ? 'true' : 'false');
+            updateMuteButton();
+            if (isMuted) {
+                if (synth) synth.cancel();
+                if (activeAudio) {
+                    activeAudio.pause();
+                    activeAudio = null;
+                }
+            }
+        }
+
+        function updateMuteButton() {
+            const icon = document.getElementById('muteIcon');
+            const label = document.getElementById('muteLabel');
+            if (icon && label) {
+                icon.textContent = isMuted ? '🔇' : '🔊';
+                label.textContent = isMuted ? 'Muted' : 'Sound On';
+            }
+        }
+
+        // Restore saved mute preference
+        (function () {
+            const saved = localStorage.getItem('ml-muted');
+            if (saved === 'true') {
+                isMuted = true;
+                document.addEventListener('DOMContentLoaded', () => {
+                    updateMuteButton();
                 });
             }
         })();
@@ -1161,7 +1229,15 @@
         synth?.addEventListener?.('voiceschanged', loadVoices);
         loadVoices();
 
-        function speak(text) {
+        function speak(text, force = false) {
+            if (isMuted && !force) return;
+
+            // Stop any playing fallback audio
+            if (activeAudio) {
+                activeAudio.pause();
+                activeAudio = null;
+            }
+
             const v = synth ? synth.getVoices() : [];
             const hasMalayalam = v.some(x => x.lang.startsWith('ml'));
 
@@ -1170,8 +1246,18 @@
             if (!hasMalayalam && navigator.onLine) {
                 const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ml&client=tw-ob&q=${encodeURIComponent(text)}`;
                 const audio = new Audio(url);
+                activeAudio = audio;
                 audio.playbackRate = 0.85; // Slow it down slightly to match flashcard pacing
-                audio.play().catch(e => console.warn("Audio fallback failed:", e));
+                audio.play()
+                    .then(() => {
+                        audio.onended = () => {
+                            if (activeAudio === audio) activeAudio = null;
+                        };
+                    })
+                    .catch(e => {
+                        console.warn("Audio fallback failed:", e);
+                        if (activeAudio === audio) activeAudio = null;
+                    });
                 return;
             }
 
@@ -1257,7 +1343,7 @@
                                 <span class="card-num">${current + 1}</span>
                                 <div class="card-char">${card}</div>
                                 <div class="spell-row" id="spellRow"></div>
-                                <button class="speak-btn" onclick="speak('${card.replace(/'/g, "\\'")}'); event.stopPropagation();">
+                                <button class="speak-btn" onclick="speak('${card.replace(/'/g, "\\'")}', true); event.stopPropagation();">
                                     <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.26 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                                     Speak
                                 </button>
@@ -1303,7 +1389,7 @@
             const spellRow = document.getElementById('spellRow');
             const graphemes = splitMalayalamGraphemes(cards[current]);
             spellRow.innerHTML = graphemes.map((g, i) => 
-                `<span class="spell-letter" style="animation-delay: ${i * 0.15}s" onclick="speak('${g.replace(/'/g, "\\'")}'); event.stopPropagation();">${g}</span>`
+                `<span class="spell-letter" style="animation-delay: ${i * 0.15}s" onclick="speak('${g.replace(/'/g, "\\'")}', true); event.stopPropagation();">${g}</span>`
             ).join('');
             
             // Automatically speak the word when flipped
