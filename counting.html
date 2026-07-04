@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Count & Learn - Kids Counting Game</title>
+    <meta name="description"
+        content="A fun, colorful, and interactive counting game for kids. Learn to count stars, apples, trees, balls, and more with voice feedback.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f4fbff;
+            --main: #ff7a90;
+            --sub: #4a768d;
+            --text: #2c3e50;
+            --muted: #64748b;
+            --surface: #ffffff;
+            --surface2: #f8fafc;
+            --border: #dde8f0;
+            --shadow: rgba(0, 0, 0, 0.06);
+            --good: #10b981;
+            --bad: #ef4444;
+            --glow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        html,
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Fredoka', 'Nunito', sans-serif;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        header {
+            width: min(980px, 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--surface);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px var(--shadow);
+            border: 2px solid var(--border);
+            margin-bottom: 20px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--sub);
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-4px);
+            color: var(--main);
+            border-color: var(--main);
+        }
+
+        h1 {
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            font-weight: 700;
+            color: var(--main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-round {
+            border: 2px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-round:hover {
+            transform: scale(1.05);
+            border-color: var(--main);
+            color: var(--main);
+        }
+
+        .app-container {
+            width: min(980px, 100%);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 24px;
+            border: 2px solid var(--border);
+            box-shadow: 0 10px 30px var(--shadow);
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* Setup Card Styles */
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .setup-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--sub);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Quick numbers badges */
+        .quick-numbers {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .num-badge {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .num-badge:hover,
+        .num-badge.active {
+            transform: scale(1.1);
+            background: var(--main);
+            color: white;
+            border-color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-number-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .custom-number-wrapper input {
+            width: 80px;
+            padding: 10px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .custom-number-wrapper input:focus {
+            outline: none;
+            border-color: var(--main);
+        }
+
+        /* Object Selector */
+        .object-picker {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .object-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            background: var(--surface2);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .object-item:hover,
+        .object-item.active {
+            transform: translateY(-4px);
+            border-color: var(--main);
+            background: var(--surface);
+            box-shadow: 0 6px 12px var(--shadow);
+        }
+
+        .object-item .emoji {
+            font-size: 2.2rem;
+            margin-bottom: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .object-item:hover .emoji {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .object-item .label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .object-item.active .label {
+            color: var(--main);
+        }
+
+        /* Mode Selector */
+        .mode-toggle-container {
+            display: flex;
+            gap: 12px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+        }
+
+        .mode-btn:hover,
+        .mode-btn.active {
+            transform: translateY(-2px);
+            border-color: var(--main);
+            background: var(--surface);
+            box-shadow: 0 6px 12px var(--shadow);
+        }
+
+        .mode-btn.active {
+            border-color: var(--main);
+            color: var(--main);
+        }
+
+        .mode-btn span.mode-desc {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .mode-btn.active span.mode-desc {
+            color: var(--main);
+            opacity: 0.8;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 18px;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(135deg, var(--main), #ff9eb0);
+            color: white;
+            font-family: inherit;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 122, 144, 0.35);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 28px rgba(255, 122, 144, 0.5);
+        }
+
+        .btn-start:active {
+            transform: translateY(-1px);
+        }
+
+        /* Game Board Styles */
+        .game-header {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .game-status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .game-instructions {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .game-instructions span.highlight {
+            color: var(--main);
+            background: var(--surface2);
+            padding: 2px 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            max-width: 400px;
+            height: 24px;
+            background: var(--surface2);
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            position: relative;
+            overflow: visible;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #38bdf8, var(--main));
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        /* Interactive Bunny on progress bar */
+        .progress-bunny {
+            position: absolute;
+            left: 0%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.7rem;
+            line-height: 1;
+            transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .progress-carrot {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.4rem;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .play-board {
+            width: 100%;
+            height: 480px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--border);
+            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.05);
+            background-color: #f8fafc;
+            transition: background 0.5s ease;
+        }
+
+        /* Play Board Themed Backgrounds */
+        .play-board.theme-space {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            border-color: #312e81;
+        }
+
+        .play-board.theme-space::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 30px);
+            background-size: 550px 550px, 350px 350px;
+            background-position: 0 0, 40px 60px;
+            opacity: 0.4;
+        }
+
+        .play-board.theme-grass {
+            background: linear-gradient(180deg, #bae6fd 0%, #dcfce7 40%, #86efac 100%);
+            border-color: #4ade80;
+        }
+
+        .play-board.theme-forest {
+            background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 60%, #bbf7d0 100%);
+            border-color: #22c55e;
+        }
+
+        .play-board.theme-sky {
+            background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 60%, #7dd3fc 100%);
+            border-color: #38bdf8;
+        }
+
+        .play-board.theme-sky::before {
+            content: '☁️';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            font-size: 3rem;
+            opacity: 0.15;
+        }
+
+        .play-board.theme-sky::after {
+            content: '☁️';
+            position: absolute;
+            top: 25%;
+            right: 15%;
+            font-size: 4rem;
+            opacity: 0.15;
+        }
+
+        .play-board.theme-garden {
+            background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 50%, #fbcfe8 100%);
+            border-color: #f472b6;
+        }
+
+        .play-board.theme-cozy {
+            background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 60%, #fed7aa 100%);
+            border-color: #fb923c;
+        }
+
+        .play-board.theme-hearts {
+            background: linear-gradient(180deg, #ffe4e6 0%, #fecdd3 50%, #fda4af 100%);
+            border-color: #f43f5e;
+        }
+
+        .play-board.theme-hearts::before {
+            content: '💖';
+            position: absolute;
+            top: 15%;
+            right: 20%;
+            font-size: 3.5rem;
+            opacity: 0.15;
+        }
+
+        .play-board.theme-candy {
+            background: linear-gradient(180deg, #fae8ff 0%, #f5d0fe 50%, #e879f9 100%);
+            border-color: #d946ef;
+        }
+
+        .play-board.theme-candy::before {
+            content: '🍬';
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            font-size: 3rem;
+            opacity: 0.15;
+        }
+
+        .play-board.theme-road {
+            background: linear-gradient(180deg, #f1f5f9 0%, #cbd5e1 60%, #94a3b8 100%);
+            border-color: #64748b;
+        }
+
+        .play-board.theme-road::before {
+            content: '🚧';
+            position: absolute;
+            bottom: 10%;
+            right: 10%;
+            font-size: 3rem;
+            opacity: 0.15;
+        }
+
+        .play-board.theme-pond {
+            background: linear-gradient(180deg, #ecfeff 0%, #cffafe 60%, #a5f3fc 100%);
+            border-color: #06b6d4;
+        }
+
+        .play-board.theme-pond::before {
+            content: '🌊';
+            position: absolute;
+            top: 15%;
+            left: 25%;
+            font-size: 3rem;
+            opacity: 0.15;
+        }
+
+        .play-board.theme-ocean {
+            background: linear-gradient(180deg, #e0f2fe 0%, #7dd3fc 50%, #0284c7 100%);
+            border-color: #0284c7;
+        }
+
+        .play-board.theme-ocean::before {
+            content: '🐠';
+            position: absolute;
+            top: 15%;
+            right: 15%;
+            font-size: 3rem;
+            opacity: 0.12;
+            transform: scaleX(-1);
+        }
+
+        /* Bubble Element Style */
+        .object-bubble {
+            position: absolute;
+            width: clamp(75px, 14vw, 100px);
+            height: clamp(75px, 14vw, 100px);
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08),
+                inset 0 -5px 10px rgba(0, 0, 0, 0.12),
+                inset 0 5px 10px rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(2.2rem, 5vw, 3.4rem);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: float 4s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        /* Floating animation custom values are applied in JS */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) translateY(-15px) rotate(3deg);
+            }
+        }
+
+        .object-bubble:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15),
+                inset 0 -5px 10px rgba(0, 0, 0, 0.12),
+                inset 0 5px 10px rgba(255, 255, 255, 0.8);
+            z-index: 8;
+        }
+
+        /* Number Hint inside bubbles (For Numbered Mode) */
+        .bubble-hint {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--sub);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            pointer-events: none;
+        }
+
+        /* Highlighted State (Correctly counted) */
+        .object-bubble.counted {
+            background: radial-gradient(circle at 30% 30%, #fffbeb 0%, #fef3c7 60%, #fde68a 100%);
+            border: 5px solid #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4),
+                inset 0 -5px 10px rgba(0, 0, 0, 0.05),
+                inset 0 5px 10px rgba(255, 255, 255, 0.9);
+            transform: translate(-50%, -50%) scale(0.95);
+            animation: none !important;
+            cursor: default;
+        }
+
+        .object-bubble.counted .bubble-hint {
+            background: #f59e0b;
+        }
+
+        /* Displayed order count inside counted bubble */
+        .object-bubble .counted-index {
+            position: absolute;
+            bottom: -5px;
+            background: #f59e0b;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 10px;
+            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            pointer-events: none;
+        }
+
+        /* Error vibration */
+        .object-bubble.shake {
+            animation: shake 0.4s ease-in-out !important;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translate(-50%, -50%) translateX(-8px) rotate(-3deg);
+            }
+
+            40%,
+            80% {
+                transform: translate(-50%, -50%) translateX(8px) rotate(3deg);
+            }
+        }
+
+        /* Particle explosion */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: particle-fly 0.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            z-index: 1000;
+        }
+
+        @keyframes particle-fly {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Footer buttons inside board */
+        .game-footer-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 16px;
+        }
+
+        /* Theme Selector Dropdown */
+        .theme-dropdown-container {
+            position: relative;
+        }
+
+        .theme-dropdown-btn {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface2);
+            color: var(--text);
+            padding: 8px 16px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .theme-dropdown-btn:hover {
+            border-color: var(--main);
+            color: var(--main);
+        }
+
+        .theme-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 250px;
+            max-height: 350px;
+            overflow-y: auto;
+            z-index: 200;
+        }
+
+        .theme-dropdown-menu.show {
+            display: block;
+            animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes dropdownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .theme-search-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 2;
+        }
+
+        .theme-search-wrapper input {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            width: 100%;
+        }
+
+        .theme-search-wrapper input:focus {
+            outline: none;
+        }
+
+        .theme-list {
+            padding: 6px;
+        }
+
+        .theme-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .theme-item:hover,
+        .theme-item.active {
+            background: var(--surface2);
+        }
+
+        .theme-item.active {
+            font-weight: 700;
+            border-left: 4px solid var(--main);
+        }
+
+        .theme-circles {
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 3px;
+            border-radius: 8px;
+        }
+
+        .theme-circle {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Success Overlay */
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .celebration-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .celebration-card {
+            background: var(--surface);
+            border: 4px solid var(--main);
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            width: min(480px, 90%);
+            padding: 40px 32px;
+            text-align: center;
+            transform: scale(0.7);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .celebration-overlay.show .celebration-card {
+            transform: scale(1);
+        }
+
+        .celebration-emoji {
+            font-size: 5rem;
+            animation: bounce 1.5s ease infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px) scale(1.05);
+            }
+        }
+
+        .celebration-title {
+            font-size: 2.2rem;
+            color: var(--main);
+            font-weight: 700;
+        }
+
+        .celebration-desc {
+            font-size: 1.3rem;
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 499;
+        }
+
+        /* Sound Indicator Animating */
+        .sound-speaking-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--main);
+            display: inline-block;
+            opacity: 0;
+            margin-left: 6px;
+        }
+
+        .speaking .sound-speaking-indicator {
+            animation: speakPulse 0.5s ease infinite alternate;
+            opacity: 1;
+        }
+
+        @keyframes speakPulse {
+            from {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            to {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+
+        /* Welcome Overlay to initiate Audio Context / Speech Synthesis */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .welcome-card {
+            background: var(--surface);
+            border: 3px solid var(--border);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 28px;
+            padding: 36px;
+            text-align: center;
+            max-width: 440px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            animation: wobble 2s ease infinite;
+        }
+
+        @keyframes wobble {
+
+            0%,
+            100% {
+                transform: rotate(0);
+            }
+
+            25% {
+                transform: rotate(-5deg);
+            }
+
+            75% {
+                transform: rotate(5deg);
+            }
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        @media(max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            header {
+                padding: 12px 16px;
+                margin-bottom: 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .play-board {
+                height: 380px;
+            }
+
+            .object-picker {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    <script src="analytics.js"></script>
+</head>
+
+<body>
+
+    <!-- Welcome Overlay to unlock audio -->
+    <div id="welcomeOverlay" class="welcome-overlay">
+        <div class="welcome-card">
+            <div class="welcome-icon">🎮</div>
+            <h2 style="font-size: 1.8rem; color: var(--main);">Ready to Count?</h2>
+            <p style="font-size: 1.1rem; color: var(--muted); font-weight: 600;">Let's turn on sound and start our
+                counting adventure!</p>
+            <button class="btn-start" onclick="unlockAudio()">✨ Start Playing!</button>
+        </div>
+    </div>
+
+    <header>
+        <a href="index.html" class="back-btn" aria-label="Go back to Learning Hub">
+            <span>←</span> Hub
+        </a>
+        <h1>🔢 Count & Learn!</h1>
+        <div class="header-controls">
+            <button class="btn-round" id="muteToggleBtn" onclick="toggleMute()" title="Mute/Unmute sound">
+                <span id="muteIcon">🔊</span>
+                <span id="muteLabel">Sound On</span>
+            </button>
+            <div class="theme-dropdown-container">
+                <button class="theme-dropdown-btn" id="themeDropdownBtn" onclick="toggleThemeDropdown()">
+                    🎨 Themes
+                </button>
+                <div class="theme-dropdown-menu" id="themeDropdownMenu">
+                    <div class="theme-search-wrapper">
+                        <span>🔍</span>
+                        <input type="text" id="themeSearch" placeholder="Search themes..." onkeyup="filterThemes()">
+                    </div>
+                    <div class="theme-list" id="themeList"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- SETUP CARD -->
+        <div class="card" id="setupCard">
+            <div class="setup-grid">
+                <!-- Section: Max Number -->
+                <div class="setup-section">
+                    <h2 class="section-title"><span>🔢</span> How high to count?</h2>
+                    <div class="quick-numbers">
+                        <button class="num-badge" onclick="selectQuickNumber(5)">5</button>
+                        <button class="num-badge active" onclick="selectQuickNumber(10)">10</button>
+                        <button class="num-badge" onclick="selectQuickNumber(15)">15</button>
+                        <button class="num-badge" onclick="selectQuickNumber(20)">20</button>
+                    </div>
+                    <div class="custom-number-wrapper">
+                        <span style="font-weight: 700; color: var(--muted);">Or choose any:</span>
+                        <input type="number" id="maxNumberInput" min="1" max="40" value="10"
+                            oninput="onCustomNumberInput()">
+                    </div>
+                </div>
+
+                <!-- Section: Object Type -->
+                <div class="setup-section">
+                    <h2 class="section-title"><span>🍎</span> What to count?</h2>
+                    <div class="object-picker" id="objectPicker">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Section: Mode Selector -->
+                <div class="setup-section">
+                    <h2 class="section-title"><span>🖐️</span> How to play?</h2>
+                    <div class="mode-toggle-container">
+                        <button class="mode-btn active" id="btnModeFree" onclick="setPlayMode('free')">
+                            <span>Explore 🖐️</span>
+                            <span class="mode-desc">Tap any object to count it</span>
+                        </button>
+                        <button class="mode-btn" id="btnModeOrdered" onclick="setPlayMode('ordered')">
+                            <span>In Order 🔢</span>
+                            <span class="mode-desc">Tap numbers 1, 2, 3... in order</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-start" onclick="startGame()">
+                🚀 Let's Count!
+            </button>
+        </div>
+
+        <!-- GAMEPLAY CARD -->
+        <div class="card hidden" id="gameCard">
+            <div class="game-header">
+                <div class="game-status-row">
+                    <div class="game-instructions" id="gameInstructions">
+                        Tap the objects to count them!
+                    </div>
+                    <!-- Rabbit and Carrot Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                        <div class="progress-bunny" id="progressBunny">🐰</div>
+                        <div class="progress-carrot">🥕</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drawing Board -->
+            <div class="play-board" id="playBoard">
+                <!-- Objects are drawn here in JS -->
+            </div>
+
+            <!-- Control Footer -->
+            <div class="game-footer-row">
+                <button class="btn-round" onclick="resetGame()" style="background: var(--surface2)">
+                    🔄 Draw Again
+                </button>
+                <button class="btn-round" onclick="showSettings()"
+                    style="background: var(--surface2); color: var(--sub);">
+                    ⚙️ Change Settings
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal Overlay -->
+    <div class="celebration-overlay" id="celebrationOverlay">
+        <div class="celebration-card">
+            <div class="celebration-emoji">🏆</div>
+            <h2 class="celebration-title">Fantastic!</h2>
+            <div class="celebration-desc" id="celebrationDesc">
+                You successfully counted 10 items!
+            </div>
+            <button class="btn-start" onclick="replayAfterCelebration()" style="width: auto; padding: 14px 28px;">
+                🎉 Play Again!
+            </button>
+        </div>
+    </div>
+
+    <!-- Canvas for Confetti -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- Theme script -->
+    <script src="themes.js"></script>
+
+    <!-- Core Game Logic -->
+    <script>
+        // Types of objects available
+        const COUNTING_OBJECTS = [
+            { id: 'star', emoji: '⭐', label: 'Stars', theme: 'theme-space', speakName: 'stars' },
+            { id: 'apple', emoji: '🍎', label: 'Apples', theme: 'theme-grass', speakName: 'apples' },
+            { id: 'tree', emoji: '🌲', label: 'Trees', theme: 'theme-forest', speakName: 'trees' },
+            { id: 'ball', emoji: '⚽', label: 'Balls', theme: 'theme-sky', speakName: 'balls' },
+            { id: 'balloon', emoji: '🎈', label: 'Balloons', theme: 'theme-sky', speakName: 'balloons' },
+            { id: 'flower', emoji: '🌸', label: 'Flowers', theme: 'theme-garden', speakName: 'flowers' },
+            { id: 'cat', emoji: '🐱', label: 'Cats', theme: 'theme-cozy', speakName: 'cats' },
+            { id: 'heart', emoji: '❤️', label: 'Hearts', theme: 'theme-hearts', speakName: 'hearts' },
+            { id: 'candy', emoji: '🍬', label: 'Candies', theme: 'theme-candy', speakName: 'candies' },
+            { id: 'car', emoji: '🚗', label: 'Cars', theme: 'theme-road', speakName: 'cars' },
+            { id: 'duck', emoji: '🦆', label: 'Ducks', theme: 'theme-pond', speakName: 'ducks' },
+            { id: 'fish', emoji: '🐠', label: 'Fish', theme: 'theme-ocean', speakName: 'fish' }
+        ];
+
+        // App state
+        let maxNumber = 10;
+        let selectedObject = COUNTING_OBJECTS[0]; // Default Star
+        let playMode = 'free'; // 'free' or 'ordered'
+        let actualCount = 0; // Number of objects drawn
+        let currentProgress = 0; // Tapped objects count
+        let objectPositions = []; // To verify overlaps
+        let audioUnlocked = false;
+        let isMuted = false;
+        let speakVoice = null;
+
+        // Render selectors on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderObjectPicker();
+            initThemeDropdown();
+
+            // Try to load speak voices
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    speakVoice = voices.find(v => v.lang.startsWith('en')) || null;
+                };
+            }
+        });
+
+        // Initialize object picker buttons
+        function renderObjectPicker() {
+            const picker = document.getElementById('objectPicker');
+            picker.innerHTML = '';
+
+            COUNTING_OBJECTS.forEach(obj => {
+                const div = document.createElement('div');
+                div.className = `object-item ${obj.id === selectedObject.id ? 'active' : ''}`;
+                div.id = `obj-picker-${obj.id}`;
+                div.innerHTML = `
+                    <span class="emoji">${obj.emoji}</span>
+                    <span class="label">${obj.label}</span>
+                `;
+                div.onclick = () => selectObjectType(obj);
+                picker.appendChild(div);
+            });
+        }
+
+        // Selection Handlers
+        function selectQuickNumber(num) {
+            maxNumber = num;
+            document.getElementById('maxNumberInput').value = num;
+
+            // Highlight active badge
+            const badges = document.querySelectorAll('.num-badge');
+            badges.forEach(b => {
+                b.classList.remove('active');
+                if (parseInt(b.textContent) === num) {
+                    b.classList.add('active');
+                }
+            });
+        }
+
+        function onCustomNumberInput() {
+            const input = document.getElementById('maxNumberInput');
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 1) val = 1;
+            if (val > 40) val = 40; // cap at 40 to avoid overcrowding
+            maxNumber = val;
+
+            // Remove active highlights from quick buttons unless it matches
+            const badges = document.querySelectorAll('.num-badge');
+            badges.forEach(b => {
+                if (parseInt(b.textContent) === maxNumber) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+        }
+
+        function selectObjectType(obj) {
+            selectedObject = obj;
+            const items = document.querySelectorAll('.object-item');
+            items.forEach(item => item.classList.remove('active'));
+            document.getElementById(`obj-picker-${obj.id}`).classList.add('active');
+        }
+
+        function setPlayMode(mode) {
+            playMode = mode;
+            document.getElementById('btnModeFree').classList.toggle('active', mode === 'free');
+            document.getElementById('btnModeOrdered').classList.toggle('active', mode === 'ordered');
+        }
+
+        // Start Game Canvas
+        function startGame() {
+            // Pick a random number between 1 and the selected max
+            actualCount = Math.floor(Math.random() * maxNumber) + 1;
+            currentProgress = 0;
+
+            document.getElementById('setupCard').classList.add('hidden');
+            document.getElementById('gameCard').classList.remove('hidden');
+
+            setupGameBoard();
+        }
+
+        function setupGameBoard() {
+            const playBoard = document.getElementById('playBoard');
+            playBoard.className = 'play-board'; // Reset class
+            playBoard.classList.add(selectedObject.theme); // Add theme class
+            playBoard.innerHTML = '';
+
+            updateProgressBar();
+            updateInstructions();
+
+            // Setup elements placement using jittered grid to avoid collisions
+            // Grid size determined by count
+            let cols, rows;
+            if (actualCount <= 6) { cols = 3; rows = 2; }
+            else if (actualCount <= 12) { cols = 4; rows = 3; }
+            else if (actualCount <= 20) { cols = 5; rows = 4; }
+            else if (actualCount <= 30) { cols = 6; rows = 5; }
+            else { cols = 8; rows = 5; }
+
+            const cellsCount = cols * rows;
+            const cellIndices = Array.from({ length: cellsCount }, (_, i) => i);
+
+            // Shuffle cell indices
+            for (let i = cellIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cellIndices[i], cellIndices[j]] = [cellIndices[j], cellIndices[i]];
+            }
+
+            // Create objects mapping numbers
+            const items = [];
+            for (let i = 1; i <= actualCount; i++) {
+                items.push({
+                    numberValue: i,
+                    cellIndex: cellIndices[i - 1]
+                });
+            }
+
+            // If ordered mode, we shuffle the rendering elements position, but they keep their index
+            // If we render them in sorted position it would be too easy, so shuffle them on board
+            let displayItems = [...items];
+            if (playMode === 'ordered') {
+                // Shuffle items drawing coordinates
+                for (let i = displayItems.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    const tempIndex = displayItems[i].cellIndex;
+                    displayItems[i].cellIndex = displayItems[j].cellIndex;
+                    displayItems[j].cellIndex = tempIndex;
+                }
+            }
+
+            // Draw bubbles
+            displayItems.forEach(item => {
+                const bubble = document.createElement('div');
+                bubble.className = 'object-bubble';
+                bubble.innerHTML = selectedObject.emoji;
+
+                // Position calculation based on grid cells
+                const col = item.cellIndex % cols;
+                const row = Math.floor(item.cellIndex / cols);
+
+                const cellW = 100 / cols;
+                const cellH = 100 / rows;
+
+                // Cell center percentage
+                const cX = col * cellW + cellW / 2;
+                const cY = row * cellH + cellH / 2;
+
+                // Add jitter (max +/- 25% of cell width/height)
+                const jitterX = (Math.random() - 0.5) * (cellW * 0.5);
+                const jitterY = (Math.random() - 0.5) * (cellH * 0.5);
+
+                const finalX = cX + jitterX;
+                const finalY = cY + jitterY;
+
+                // Keep bubbles away from boundaries slightly
+                const paddingPercent = 8;
+                const boundedX = Math.max(paddingPercent, Math.min(100 - paddingPercent, finalX));
+                const boundedY = Math.max(paddingPercent, Math.min(100 - paddingPercent, finalY));
+
+                bubble.style.left = `${boundedX}%`;
+                bubble.style.top = `${boundedY}%`;
+
+                // Set offset animations to make it look organic
+                bubble.style.animationDuration = (3.5 + Math.random() * 2) + 's';
+                bubble.style.animationDelay = (Math.random() * -5) + 's';
+
+                // Rotation
+                const angle = Math.floor(Math.random() * 20) - 10;
+                bubble.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+                // Store metadata in dataset
+                bubble.dataset.number = item.numberValue;
+                bubble.dataset.tapped = "false";
+
+                // Number label for Ordered Mode
+                if (playMode === 'ordered') {
+                    const hint = document.createElement('div');
+                    hint.className = 'bubble-hint';
+                    hint.textContent = item.numberValue;
+                    bubble.appendChild(hint);
+                }
+
+                bubble.onclick = (e) => onBubbleClick(bubble, e);
+                playBoard.appendChild(bubble);
+            });
+        }
+
+        // Bubble Tap Handling
+        function onBubbleClick(bubble, event) {
+            if (bubble.dataset.tapped === "true") return;
+
+            const bubbleNum = parseInt(bubble.dataset.number);
+
+            if (playMode === 'ordered') {
+                // Must click the exact next number in order
+                const nextExpectedNum = currentProgress + 1;
+                if (bubbleNum !== nextExpectedNum) {
+                    // Wrong choice
+                    shakeBubble(bubble);
+                    playErrorSound();
+                    speak(`Look for number ${nextExpectedNum}`);
+                    return;
+                }
+            }
+
+            // Valid choice (Free mode or correct number in ordered mode)
+            currentProgress++;
+            bubble.dataset.tapped = "true";
+            bubble.classList.add('counted');
+
+            // Render index inside
+            const indexIndicator = document.createElement('div');
+            indexIndicator.className = 'counted-index';
+            indexIndicator.textContent = currentProgress;
+            bubble.appendChild(indexIndicator);
+
+            // Pop sound
+            playPopSound();
+
+            // Create particle explosion
+            createExplosion(event.clientX, event.clientY);
+
+            // Speak count
+            speak(currentProgress.toString());
+
+            // Update stats
+            updateProgressBar();
+            updateInstructions();
+
+            // Check win condition
+            if (currentProgress === actualCount) {
+                setTimeout(showCelebration, 900);
+            }
+        }
+
+        function shakeBubble(bubble) {
+            bubble.classList.add('shake');
+            setTimeout(() => bubble.classList.remove('shake'), 400);
+        }
+
+        // Particle Burst Effect
+        function createExplosion(x, y) {
+            const board = document.getElementById('playBoard');
+            const rect = board.getBoundingClientRect();
+
+            // Position relative to playboard
+            const boardX = x - rect.left;
+            const boardY = y - rect.top;
+
+            const particleColors = ['#ff7a90', '#f59e0b', '#3b82f6', '#10b981', '#a855f7', '#ec4899'];
+
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = boardX + 'px';
+                p.style.top = boardY + 'px';
+                p.style.backgroundColor = particleColors[Math.floor(Math.random() * particleColors.length)];
+
+                // Set destination using CSS variables
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 70 + 40;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                p.style.setProperty('--dx', dx + 'px');
+                p.style.setProperty('--dy', dy + 'px');
+
+                board.appendChild(p);
+
+                // Clean up particle
+                setTimeout(() => p.remove(), 700);
+            }
+        }
+
+        // Progress Update
+        function updateProgressBar() {
+            const pct = (currentProgress / actualCount) * 100;
+            document.getElementById('progressBar').style.width = pct + '%';
+
+            // Move Bunny rabbit
+            const bunny = document.getElementById('progressBunny');
+            bunny.style.left = `calc(${pct}% - 2px)`;
+
+            // Tiny bunny hop animation when moving
+            bunny.style.transform = 'translate(-50%, -65%) scale(1.15)';
+            setTimeout(() => {
+                bunny.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 250);
+        }
+
+        function updateInstructions() {
+            const instructions = document.getElementById('gameInstructions');
+            const label = selectedObject.label.toLowerCase();
+            const singularLabel = selectedObject.label.slice(0, -1).toLowerCase();
+
+            const countText = actualCount === 1 ? `1 ${singularLabel}` : `${actualCount} ${label}`;
+
+            if (currentProgress === 0) {
+                instructions.innerHTML = `Let's count: <span class="highlight">${countText}</span>`;
+            } else {
+                instructions.innerHTML = `Counted: <span class="highlight">${currentProgress} of ${actualCount}</span>`;
+            }
+        }
+
+        // Show Settings / Draw Again
+        function showSettings() {
+            document.getElementById('gameCard').classList.add('hidden');
+            document.getElementById('setupCard').classList.remove('hidden');
+        }
+
+        function resetGame() {
+            startGame();
+        }
+
+        // Game Won / Celebration
+        function showCelebration() {
+            playSuccessSound();
+
+            const overlay = document.getElementById('celebrationOverlay');
+            const desc = document.getElementById('celebrationDesc');
+
+            const labelStr = actualCount === 1
+                ? selectedObject.label.slice(0, -1).toLowerCase()
+                : selectedObject.label.toLowerCase();
+
+            desc.innerHTML = `You correctly counted all <span style="color: var(--main); font-weight: 700;">${actualCount}</span> ${labelStr}!`;
+
+            overlay.classList.add('show');
+
+            // Start confetti canvas
+            confetti.start();
+
+            // Vocal summary
+            const vocalPhrase = `Awesome! The number of ${selectedObject.speakName} is ${actualCount}!`;
+            setTimeout(() => speak(vocalPhrase), 300);
+        }
+
+        function replayAfterCelebration() {
+            document.getElementById('celebrationOverlay').classList.remove('show');
+            confetti.stop();
+            startGame();
+        }
+
+        // Sound Engine (Web Audio & Speech)
+        function unlockAudio() {
+            audioUnlocked = true;
+            document.getElementById('welcomeOverlay').remove();
+
+            // Initialize Web Audio context if necessary
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const tempCtx = new AudioContext();
+                tempCtx.resume();
+            } catch (e) { }
+
+            // Initial voice greeting
+            speak("Welcome to counting adventure! Aiden");
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('muteIcon').textContent = isMuted ? '🔇' : '🔊';
+            document.getElementById('muteLabel').textContent = isMuted ? 'Muted' : 'Sound On';
+
+            if (isMuted && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function speak(text) {
+            if (isMuted || !audioUnlocked) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // responsiveness
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.95;
+                utterance.pitch = 1.15; // friendly tone
+
+                if (speakVoice) {
+                    utterance.voice = speakVoice;
+                }
+
+                // Add header class to show voice activity pulse
+                document.body.classList.add('speaking');
+                utterance.onend = () => {
+                    document.body.classList.remove('speaking');
+                };
+                utterance.onerror = () => {
+                    document.body.classList.remove('speaking');
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playPopSound() {
+            if (isMuted || !audioUnlocked) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(350, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.08);
+
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.08);
+            } catch (e) { }
+        }
+
+        function playErrorSound() {
+            if (isMuted || !audioUnlocked) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(90, ctx.currentTime + 0.22);
+
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.22);
+            } catch (e) { }
+        }
+
+        function playSuccessSound() {
+            if (isMuted || !audioUnlocked) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime;
+                // Arpeggio chord notes
+                const notes = [293.66, 349.23, 440.00, 587.33, 880.00]; // D4, F4, A4, D5, A5
+
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.45);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 0.45);
+                });
+
+                // Final synthesized chime
+                setTimeout(() => {
+                    const chimeNotes = [587.33, 739.99, 880.00, 1174.66]; // D5, F#5, A5, D6
+                    const chimeTime = ctx.currentTime;
+                    chimeNotes.forEach(freq => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, chimeTime);
+                        gain.gain.setValueAtTime(0.08, chimeTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, chimeTime + 0.95);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(chimeTime);
+                        osc.stop(chimeTime + 0.95);
+                    });
+                }, 550);
+            } catch (e) { }
+        }
+
+        // Custom HTML5 Canvas Confetti System
+        class ConfettiManager {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.pieces = [];
+                this.active = false;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            start() {
+                this.active = true;
+                this.pieces = [];
+                const colors = ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#0ea5e9', '#06b6d4', '#14b8a6', '#10b981', '#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444'];
+
+                for (let i = 0; i < 120; i++) {
+                    this.pieces.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height - this.canvas.height,
+                        r: Math.random() * 5 + 3,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        tilt: Math.random() * 8 - 4,
+                        tiltAngleIncremental: Math.random() * 0.05 + 0.02,
+                        tiltAngle: 0,
+                        w: Math.random() * 8 + 4,
+                        h: Math.random() * 12 + 6,
+                        vy: Math.random() * 3 + 2,
+                        vx: Math.random() * 2 - 1
+                    });
+                }
+                this.animate();
+            }
+
+            stop() {
+                this.active = false;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            animate() {
+                if (!this.active) return;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                let remaining = false;
+                this.pieces.forEach(p => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += p.vy;
+                    p.x += p.vx + Math.sin(p.tiltAngle) * 0.5;
+                    p.tilt = Math.sin(p.tiltAngle) * 12;
+
+                    if (p.y < this.canvas.height + 20) {
+                        remaining = true;
+                    }
+
+                    this.ctx.beginPath();
+                    this.ctx.lineWidth = p.r;
+                    this.ctx.strokeStyle = p.color;
+                    this.ctx.moveTo(p.x + p.tilt + p.w / 2, p.y);
+                    this.ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.h / 2);
+                    this.ctx.stroke();
+                });
+
+                if (remaining && this.active) {
+                    requestAnimationFrame(() => this.animate());
+                }
+            }
+        }
+        const confetti = new ConfettiManager('confettiCanvas');
+
+        // Theme integration logic loading from themes.js
+        let filteredThemes = [];
+        let committedThemeValue = null;
+        let currentTheme = '';
+
+        function getThemeByValue(value) {
+            return (typeof themesData !== 'undefined' ? themesData.find(theme => theme.value === value) : null) || null;
+        }
+
+        function applyTheme(themeName, colors) {
+            const root = document.documentElement;
+            root.style.setProperty('--bg', colors.bg);
+            root.style.setProperty('--main', colors.main);
+            root.style.setProperty('--sub', colors.sub);
+
+            // Luminance calculations to adjust UI variables
+            const r = parseInt(colors.bg.slice(1, 3), 16);
+            const g = parseInt(colors.bg.slice(3, 5), 16);
+            const b = parseInt(colors.bg.slice(5, 7), 16);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+            const textColor = luminance > 0.5 ? '#2c3e50' : '#f8fafc';
+            const mutedColor = luminance > 0.5 ? '#64748b' : '#94a3b8';
+            const surfaceColor = luminance > 0.5 ? '#ffffff' : `rgb(${Math.min(r + 14, 255)}, ${Math.min(g + 18, 255)}, ${Math.min(b + 28, 255)})`;
+            const surface2Color = luminance > 0.5 ? '#f8fafc' : `rgb(${Math.min(r + 6, 255)}, ${Math.min(g + 8, 255)}, ${Math.min(b + 14, 255)})`;
+            const borderColor = luminance > 0.5 ? '#dde8f0' : `rgb(${Math.min(r + 24, 255)}, ${Math.min(g + 30, 255)}, ${Math.min(b + 42, 255)})`;
+            const shadowStyle = luminance > 0.5 ? 'rgba(0, 0, 0, 0.05)' : 'rgba(0, 0, 0, 0.35)';
+
+            root.style.setProperty('--text', textColor);
+            root.style.setProperty('--muted', mutedColor);
+            root.style.setProperty('--surface', surfaceColor);
+            root.style.setProperty('--surface2', surface2Color);
+            root.style.setProperty('--border', borderColor);
+            root.style.setProperty('--shadow', shadowStyle);
+            root.style.setProperty('--glow', luminance > 0.5 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.5)');
+
+            currentTheme = themeName;
+            localStorage.setItem('counting-current-theme', themeName);
+            committedThemeValue = themeName;
+
+            // Highlight selected in dropdown
+            updateThemeMenuActiveState();
+        }
+
+        function toggleThemeDropdown() {
+            const menu = document.getElementById('themeDropdownMenu');
+            if (menu.classList.contains('show')) {
+                closeThemeDropdown();
+            } else {
+                menu.classList.add('show');
+                renderThemes(document.getElementById('themeSearch').value);
+                document.getElementById('themeSearch').focus();
+            }
+        }
+
+        function closeThemeDropdown() {
+            const menu = document.getElementById('themeDropdownMenu');
+            if (menu) menu.classList.remove('show');
+        }
+
+        // Close dropdown on click outside
+        document.addEventListener('click', (e) => {
+            const container = document.querySelector('.theme-dropdown-container');
+            if (container && !container.contains(e.target)) {
+                closeThemeDropdown();
+            }
+        });
+
+        function renderThemes(filter = '') {
+            const list = document.getElementById('themeList');
+            if (!list || typeof themesData === 'undefined') return;
+
+            list.innerHTML = '';
+            const lowerFilter = filter.toLowerCase();
+            filteredThemes = themesData.filter(theme => theme.name.toLowerCase().includes(lowerFilter));
+
+            filteredThemes.forEach(theme => {
+                const item = document.createElement('div');
+                item.className = 'theme-item';
+                item.dataset.theme = theme.value;
+                item.innerHTML = `
+                    <span>${theme.name.toLowerCase()}</span>
+                    <div class="theme-circles">
+                        <div class="theme-circle" style="background:${theme.colors.bg}"></div>
+                        <div class="theme-circle" style="background:${theme.colors.main}"></div>
+                        <div class="theme-circle" style="background:${theme.colors.sub}"></div>
+                    </div>
+                `;
+                item.onclick = () => {
+                    applyTheme(theme.value, theme.colors);
+                    closeThemeDropdown();
+                };
+                list.appendChild(item);
+            });
+            updateThemeMenuActiveState();
+        }
+
+        function filterThemes() {
+            renderThemes(document.getElementById('themeSearch').value);
+        }
+
+        function updateThemeMenuActiveState() {
+            const items = document.querySelectorAll('.theme-item');
+            items.forEach(item => {
+                item.classList.toggle('active', item.dataset.theme === currentTheme);
+            });
+        }
+
+        function initThemeDropdown() {
+            if (typeof themesData !== 'undefined') {
+                const saved = localStorage.getItem('counting-current-theme');
+                let initialTheme = themesData[0]; // Default fallback
+
+                if (saved) {
+                    const found = themesData.find(t => t.value === saved);
+                    if (found) initialTheme = found;
+                } else {
+                    // Try to find a nice light pastel theme if starting fresh
+                    const defaultFav = themesData.find(t => t.value === 'theme-bento' || t.value === 'theme-peach' || t.value === 'theme-beach');
+                    if (defaultFav) initialTheme = defaultFav;
+                }
+
+                applyTheme(initialTheme.value, initialTheme.colors);
+                renderThemes();
+            }
+        }
+    </script>
+</body>
+
+</html>
