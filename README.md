@@ -4,6 +4,10 @@ A suite of interactive, educational flashcard applications designed to help kids
 
 ## Release Notes
 
+### Version 2026.07.04
+
+**Counting Flash Cards**
+
 ### Version 2026.04.27
 
 **Maths Flashcards:**
