@@ -87,6 +87,24 @@
             border-bottom: 1px solid var(--ink-faint);
         }
 
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        #mute-btn {
+            background: var(--ink-faint);
+            border: 1px solid var(--ink-faint);
+            border-radius: 999px;
+            padding: 5px 12px;
+            font-size: 0.78rem;
+            color: var(--ink-mid);
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.15s;
+        }
+
         .logo {
             font-family: 'DM Serif Display', serif;
             font-size: 1.6rem;
@@ -400,9 +418,15 @@
 
         .progress-fill {
             height: 100%;
+            width: 0;
             background: var(--sky);
             border-radius: 2px;
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .generate-table-btn {
+            display: none;
+            margin-top: 10px;
         }
 
         /* Flashcard */
@@ -439,8 +463,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         .card-front {
@@ -970,6 +994,11 @@
             border-radius: 12px;
         }
 
+        #currentThemeCircles {
+            background: transparent;
+            padding: 0;
+        }
+
         .theme-circle {
             width: 12px;
             height: 12px;
@@ -984,18 +1013,16 @@
 
     <header>
         <div class="logo">Math<span>Flash</span></div>
-        <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div class="header-tools">
             <div class="tagline">Arithmetic Practice</div>
-            <button id="mute-btn" title="Toggle sound"
-                style="background:var(--ink-faint);border:1px solid var(--ink-faint);border-radius:999px;padding:5px 12px;font-size:0.78rem;color:var(--ink-mid);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;">🔊
-                Sound on</button>
+            <button id="mute-btn" title="Toggle sound">🔊 Sound on</button>
 
 
 
             <div class="theme-dropdown-container" id="themeDropdownContainer">
                 <button class="theme-dropdown-btn" onclick="toggleThemeMenu(event)">
                     <span id="currentThemeName">Theme</span>
-                    <div class="theme-circles" id="currentThemeCircles" style="background:transparent;padding:0"></div>
+                    <div class="theme-circles" id="currentThemeCircles"></div>
                 </button>
                 <div class="theme-dropdown-menu" id="themeMenu" onclick="event.stopPropagation()">
                     <div class="theme-search-wrapper">
@@ -1069,7 +1096,7 @@
                 <span>Generate flashcards</span>
             </button>
 
-            <button class="generate-btn" id="generate-table-btn" style="display: none; margin-top: 10px;">
+            <button class="generate-btn generate-table-btn" id="generate-table-btn">
                 <span>Generate table</span>
             </button>
         </aside>
@@ -1090,7 +1117,7 @@
                     <span class="progress-fraction" id="progress-fraction">0%</span>
                 </div>
                 <div class="progress-track">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    <div class="progress-fill" id="progress-fill"></div>
                 </div>
             </div>
 
@@ -1584,12 +1611,6 @@
 
 
     <script>
-
-
-        module.exports = themesData;
-    </script>
-    <script>
-
         function applyThemeVariables(theme) {
             const r = document.documentElement;
             r.style.setProperty('--cream', theme.colors.bg);
@@ -1690,6 +1711,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease, opacity 0.2s ease;
@@ -1711,6 +1733,7 @@
             background: rgba(30, 30, 35, 0.85);
             padding: 8px 12px;
             border-radius: 20px;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);

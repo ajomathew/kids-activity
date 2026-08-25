@@ -269,6 +269,7 @@
             align-items: center;
             justify-content: center;
             transition: all .15s;
+            -webkit-user-select: none;
             user-select: none;
             font-family: 'Nunito', sans-serif;
             line-height: 1
@@ -321,6 +322,7 @@
             border: 2px solid var(--cardB);
             transition: background .3s, border-color .3s;
             cursor: pointer;
+            -webkit-user-select: none;
             user-select: none
         }
 
@@ -687,6 +689,12 @@
             display: flex;
             gap: 4px;
             background: #11111b;
+
+        #currentThemeCircles { background: transparent; padding: 0; }
+        #quiz-panel, #learn-panel { display: none; }
+        .hour-dot { background: #FF6B6B; }
+        .minute-dot { background: #4ECDC4; }
+        .learn-offset { margin-top: 4px; }
             padding: 4px;
             border-radius: 12px;
         }
@@ -877,7 +885,7 @@
             <div class="theme-dropdown-container" id="themeDropdownContainer">
                 <button class="theme-dropdown-btn" onclick="toggleThemeMenu(event)">
                     <span id="currentThemeName">Theme</span>
-                    <div class="theme-circles" id="currentThemeCircles" style="background:transparent;padding:0"></div>
+                    <div class="theme-circles" id="currentThemeCircles"></div>
                 </button>
                 <div class="theme-dropdown-menu" id="themeMenu" onclick="event.stopPropagation()">
                     <div class="theme-search-wrapper">
@@ -929,7 +937,7 @@
                 Tips</button>
         </div>
 
-        <div id="quiz-panel" class="panel" style="display:none">
+        <div id="quiz-panel" class="panel">
             <div class="q-text" id="qText">What time does the clock show?</div>
             <div class="choices" id="choices"></div>
             <div class="feedback" id="feedback"></div>
@@ -942,13 +950,13 @@
             </div>
         </div>
 
-        <div id="learn-panel" class="learn-wrap" style="display:none">
+        <div id="learn-panel" class="learn-wrap">
             <div class="lcard">
                 <div class="lcard-h">The two hands</div>
-                <div><span class="dot" style="background:#FF6B6B"></span>Short (red) hand &#8594; shows the
+                <div><span class="dot hour-dot"></span>Short (red) hand &#8594; shows the
                     <strong>hour</strong>
                 </div>
-                <div style="margin-top:4px"><span class="dot" style="background:#4ECDC4"></span>Long (teal) hand &#8594;
+                <div class="learn-offset"><span class="dot minute-dot"></span>Long (teal) hand &#8594;
                     shows the <strong>minutes</strong></div>
             </div>
             <div class="lcard">
@@ -1398,10 +1406,6 @@
     <script>
         
 
-        module.exports = themesData;
-    </script>
-    <script>
-
         let filteredThemes = [];
         let highlightedThemeIndex = -1;
         let committedThemeValue = null;
@@ -1629,6 +1633,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease, opacity 0.2s ease;
@@ -1650,6 +1655,7 @@
             background: rgba(30, 30, 35, 0.85);
             padding: 8px 12px;
             border-radius: 20px;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);

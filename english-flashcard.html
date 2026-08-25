@@ -1905,9 +1905,10 @@
         }
 
         .theme-select {
-            appearance: none;
             -webkit-appearance: none;
+            appearance: none;
             background: var(--container, #ffffffcc);
+            -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
             border: 2px solid var(--card);
             color: var(--text-main, #111);
@@ -1931,6 +1932,7 @@
 
         .container {
             background: var(--container, #ffffffcc);
+            -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
@@ -2026,6 +2028,10 @@
             transform: scale(1.02);
         }
 
+        .reset-btn {
+            margin-top: 30px;
+        }
+
         .card-word {
             font-size: 48px;
             font-weight: bold;
@@ -2092,6 +2098,7 @@
 
         .select-selected {
             background: var(--container, #ffffffcc);
+            -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
             border: 2px solid var(--card);
             color: var(--text-main, #111);
@@ -2113,6 +2120,7 @@
         .select-items {
             position: absolute;
             background: var(--container, #ffffffcc);
+            -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -2197,7 +2205,7 @@
                 <span id="currentCard">1</span> / <span id="totalCards">0</span>
             </div>
 
-            <div class="flashcard" id="flashcard" onclick="handleCardClick()" style="cursor: pointer;">
+            <div class="flashcard" id="flashcard" onclick="handleCardClick()">
                 <div class="card-word" id="cardWord">Loading...</div>
                 <div class="card-hint" id="cardHint"></div>
             </div>
@@ -2207,7 +2215,7 @@
                 <button class="nav-btn" onclick="nextCard()" id="nextBtn">Next →</button>
             </div>
 
-            <button onclick="resetApp()" style="margin-top: 30px;">Start Over</button>
+            <button class="reset-btn" onclick="resetApp()">Start Over</button>
         </div>
 
         <div id="emptyMessage" class="empty-message">
@@ -2397,6 +2405,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease, opacity 0.2s ease;
@@ -2417,6 +2426,7 @@
             background: rgba(30, 30, 35, 0.85);
             padding: 8px 12px;
             border-radius: 20px;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -2546,9 +2556,6 @@
             });
         })();
     </script>
-</body>
-
-</html>    \n
 </body>
 
 </html>
