@@ -13,11 +13,11 @@ default:
 pages:
   stage: deploy
   script:
-    - dir 
-    - cp * public
+    - mkdir ../public
+    - cp * ../public
   artifacts:
     paths:
-      - public
+      - ../public
   only:
     variables:
       - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
