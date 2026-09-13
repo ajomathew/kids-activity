@@ -1,0 +1,13 @@
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - cp *.html public/
+    - cp *.js public/
+    # If you have other assets (css, js, images), copy them too:
+    # - cp -r css js images public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
