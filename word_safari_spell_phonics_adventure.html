@@ -153,6 +153,9 @@
         <button id="nav-phonics" onclick="switchMode('phonics')" class="px-3.5 sm:px-5 py-2 rounded-full font-bold text-sm sm:text-base transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
           <span>🔊</span> <span class="hidden xs:inline">3.</span> Phonics Lab
         </button>
+        <button id="nav-words" onclick="openWordManagerModal()" class="px-3 sm:px-4 py-2 rounded-full font-bold text-sm sm:text-base transition-all flex items-center gap-1.5 bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-400 shadow-sm" title="Add and manage words">
+          <span>➕</span> <span class="hidden sm:inline">Add</span> Words
+        </button>
       </nav>
 
       <!-- Score, Stars & Settings Bar -->
@@ -188,6 +191,9 @@
         <span id="active-category-name" class="font-bold text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-xl border border-indigo-200 flex items-center gap-1">
           🐾 3-Letter Starters
         </span>
+        <button onclick="openWordManagerModal()" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold px-2.5 py-1 rounded-lg border border-amber-300 transition-colors inline-flex items-center gap-1 ml-1" title="Manage words in this list or add new ones">
+          <span>✏️ Manage</span>
+        </button>
       </div>
 
       <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -417,26 +423,112 @@
         <!-- Injected via JS -->
       </div>
 
-      <hr class="my-5 border-slate-200">
-
-      <!-- Add Custom Word Section -->
-      <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
-        <h4 class="font-bold text-amber-900 text-sm flex items-center gap-1.5 mb-2">
-          <span>✏️</span> Add Custom Word for Kids
-        </h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-          <input type="text" id="custom-word-input" placeholder="word (e.g. star)" maxlength="12" class="px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold lowercase focus:ring-2 focus:ring-amber-400 outline-none">
-          <input type="text" id="custom-emoji-input" placeholder="emoji (e.g. ⭐)" maxlength="4" class="px-3 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
-        </div>
-        <input type="text" id="custom-sentence-input" placeholder="Example sentence (e.g. The star shines bright in the sky.)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-body mb-3 focus:ring-2 focus:ring-amber-400 outline-none">
-        <button onclick="addCustomWord()" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm shadow-sm btn-3d">
-          ➕ Add to Custom Category
+      <div class="mt-5 text-center flex gap-2 justify-center">
+        <button onclick="openWordManagerModal()" class="px-4 py-2.5 bg-safari-teal hover:bg-teal-600 text-white rounded-2xl font-bold text-sm btn-3d flex items-center gap-1.5">
+          <span>➕</span> Add New Words
+        </button>
+        <button onclick="closeCategoryModal()" class="px-6 py-2.5 bg-slate-800 text-white rounded-2xl font-bold text-sm btn-3d">
+          Done & Play!
         </button>
       </div>
 
-      <div class="mt-5 text-center">
-        <button onclick="closeCategoryModal()" class="px-6 py-2.5 bg-slate-800 text-white rounded-2xl font-bold text-sm btn-3d">
-          Done & Play!
+    </div>
+  </div>
+
+  <!-- MODAL: DEDICATED WORD MANAGER & LOCALSTORAGE REPOSITORY -->
+  <div id="word-manager-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-7 border-4 border-amber-400 shadow-2xl relative max-h-[92vh] flex flex-col">
+      
+      <!-- Close button -->
+      <button onclick="closeWordManagerModal()" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full font-bold text-slate-600 flex items-center justify-center transition-colors">
+        ✕
+      </button>
+
+      <!-- Header -->
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center text-xl border border-amber-300">
+          📚
+        </div>
+        <div>
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-800">Word Manager</h3>
+          <p class="text-xs font-body text-slate-500 font-semibold">Words are automatically saved in your browser storage (localStorage)</p>
+        </div>
+      </div>
+
+      <!-- Scrollable content area -->
+      <div class="overflow-y-auto pr-1 flex-1 space-y-4 my-2">
+        
+        <!-- Add Word Form Box -->
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border-2 border-amber-200">
+          <h4 class="font-bold text-amber-900 text-sm flex items-center gap-1.5 mb-2.5">
+            <span>➕</span> Add a New Word for Kids
+          </h4>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-2.5">
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] font-bold text-slate-600 uppercase font-body mb-1">New Word (letters only):</label>
+              <input type="text" id="mgr-word-input" placeholder="e.g. frog, star, cake" maxlength="14" class="w-full px-3 py-2 rounded-xl border-2 border-amber-200 text-base font-bold lowercase focus:ring-2 focus:ring-amber-400 outline-none">
+            </div>
+            
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase font-body mb-1">Emoji Icon:</label>
+              <div class="flex items-center gap-1.5">
+                <input type="text" id="mgr-emoji-input" value="🌟" maxlength="4" class="w-14 text-center text-xl px-2 py-1.5 rounded-xl border-2 border-amber-200 focus:ring-2 focus:ring-amber-400 outline-none">
+                <!-- Quick emoji picker buttons -->
+                <div class="flex flex-wrap gap-1">
+                  <button type="button" onclick="setManagerEmoji('🐱')" class="text-base hover:scale-125 transition-transform">🐱</button>
+                  <button type="button" onclick="setManagerEmoji('🐶')" class="text-base hover:scale-125 transition-transform">🐶</button>
+                  <button type="button" onclick="setManagerEmoji('⭐')" class="text-base hover:scale-125 transition-transform">⭐</button>
+                  <button type="button" onclick="setManagerEmoji('🍎')" class="text-base hover:scale-125 transition-transform">🍎</button>
+                  <button type="button" onclick="setManagerEmoji('🚗')" class="text-base hover:scale-125 transition-transform">🚗</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-[11px] font-bold text-slate-600 uppercase font-body mb-1">Example Sentence (optional):</label>
+            <input type="text" id="mgr-sentence-input" placeholder="e.g. A little green frog leaps across the lily pads." class="w-full px-3 py-2 rounded-xl border-2 border-amber-200 text-sm font-body focus:ring-2 focus:ring-amber-400 outline-none">
+          </div>
+
+          <button onclick="handleSaveWordFromManager()" class="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm shadow-bouncy-sm btn-3d flex items-center justify-center gap-2">
+            <span>💾</span> Save Word to Browser Storage
+          </button>
+        </div>
+
+        <!-- Custom Saved Words List -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+              <span>⭐</span> My Saved Words in Browser (<span id="mgr-custom-count">0</span>)
+            </h4>
+            <span class="text-[11px] font-body text-slate-400">Stored in localStorage</span>
+          </div>
+
+          <div id="mgr-saved-words-list" class="space-y-2 max-h-48 overflow-y-auto">
+            <!-- Dynamic word cards -->
+          </div>
+        </div>
+
+        <!-- Default categories preview & switch -->
+        <div class="pt-2 border-t border-slate-200">
+          <h4 class="font-bold text-slate-600 text-xs uppercase tracking-wider font-body mb-2">
+            Quick Switch Active Category:
+          </h4>
+          <div id="mgr-category-buttons" class="flex flex-wrap gap-1.5">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+        <button onclick="resetCustomWordsToDefaults()" class="text-xs text-rose-600 hover:text-rose-800 font-bold underline font-body">
+          Reset all custom words
+        </button>
+        <button onclick="closeWordManagerModal()" class="px-6 py-2 bg-safari-teal hover:bg-teal-600 text-white font-bold rounded-xl text-sm btn-3d">
+          Done & Practice Now! 🚀
         </button>
       </div>
 
@@ -471,7 +563,7 @@
 
   <script>
     // Master Word Categories Database with Phonics breakdown, Emojis, and Sentences (Lowercase letters)
-    const WORD_CATEGORIES = {
+    const DEFAULT_WORD_CATEGORIES = {
       starter3: {
         id: 'starter3',
         name: '🐾 3-Letter Starters',
@@ -642,8 +734,8 @@
       },
       custom: {
         id: 'custom',
-        name: '⭐ My Custom Words',
-        description: 'Words added by parents or teachers',
+        name: '⭐ My Saved Words',
+        description: 'Custom words saved in browser storage by parents or teachers',
         words: [
           {
             word: 'star',
@@ -656,6 +748,13 @@
       }
     };
 
+    let WORD_CATEGORIES = JSON.parse(JSON.stringify(DEFAULT_WORD_CATEGORIES));
+
+    // LocalStorage Keys
+    const STORAGE_KEY_CUSTOM_WORDS = 'kids_spelling_custom_words';
+    const STORAGE_KEY_STARS = 'kids_spelling_stars_count';
+    const STORAGE_KEY_CATEGORY = 'kids_spelling_active_category';
+
     // State Variables
     let currentCategoryKey = 'starter3';
     let currentWordIndex = 0;
@@ -663,6 +762,53 @@
     let starsCount = 0;
     let streakCount = 0;
     let isSoundMuted = false;
+
+    // Load persisted state from localStorage
+    function loadStorageData() {
+      try {
+        // 1. Load saved words
+        const savedCustomWords = localStorage.getItem(STORAGE_KEY_CUSTOM_WORDS);
+        if (savedCustomWords) {
+          const parsed = JSON.parse(savedCustomWords);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            WORD_CATEGORIES.custom.words = parsed;
+          }
+        }
+
+        // 2. Load stars count
+        const savedStars = localStorage.getItem(STORAGE_KEY_STARS);
+        if (savedStars !== null) {
+          starsCount = parseInt(savedStars, 10) || 0;
+          document.getElementById('star-count').textContent = starsCount;
+        }
+
+        // 3. Load active category preference if valid
+        const savedCategory = localStorage.getItem(STORAGE_KEY_CATEGORY);
+        if (savedCategory && WORD_CATEGORIES[savedCategory]) {
+          currentCategoryKey = savedCategory;
+        }
+      } catch (e) {
+        console.warn('Could not read from localStorage:', e);
+      }
+    }
+
+    // Save custom words array to localStorage
+    function persistCustomWords() {
+      try {
+        localStorage.setItem(STORAGE_KEY_CUSTOM_WORDS, JSON.stringify(WORD_CATEGORIES.custom.words));
+      } catch (e) {
+        console.error('Failed to save words to localStorage:', e);
+      }
+    }
+
+    // Save stars count to localStorage
+    function persistStars() {
+      try {
+        localStorage.setItem(STORAGE_KEY_STARS, starsCount.toString());
+      } catch (e) {
+        console.error('Failed to save stars to localStorage:', e);
+      }
+    }
 
     // Web Audio API context for tactile audio feedback
     let audioCtx = null;
@@ -750,10 +896,7 @@
       }
     }
 
-    // Accurate Phonics Sound Engine:
-    // Speech synthesis inherently says letter names ("bee", "see", "dee") when given single characters.
-    // To pronounce pure phoneme sounds (/buh/, /kuh/, /ah/, etc.) we map IPA & lowercase letters
-    // to phonetic words that speech engines speak with the exact target phonics sound.
+    // Accurate Phonics Sound Engine
     function pronouncePhoneme(phoneme, letter) {
       if (isSoundMuted) return;
       playTapChime(520);
@@ -762,21 +905,20 @@
 
       // Mappings based on IPA phonemes & letters to phonetic speech tokens
       const phonicsAudioGuide = {
-        // IPA direct sound approximations:
         '/k/': 'kuh',
-        '/æ/': 'aah',       // short 'a' sound as in cat / apple
+        '/æ/': 'aah',
         '/t/': 'tuh',
         '/d/': 'duh',
-        '/ɒ/': 'aww',       // short 'o' sound as in dog / pot
+        '/ɒ/': 'aww',
         '/ɡ/': 'guh',
         '/s/': 'sss',
-        '/ʌ/': 'uhh',       // short 'u' sound as in sun / cup
+        '/ʌ/': 'uhh',
         '/n/': 'nnn',
         '/p/': 'puh',
-        '/ɪ/': 'ihh',       // short 'i' sound as in pig / fish
+        '/ɪ/': 'ihh',
         '/b/': 'buh',
         '/f/': 'fff',
-        '/ks/': 'box',      // for 'x' sound
+        '/ks/': 'box',
         '/r/': 'rrr',
         '/ɜːr/': 'err',
         '/ʃ/': 'shh',
@@ -789,11 +931,10 @@
         '/m/': 'mmm',
         '/eɪ/': 'ay',
         '/əl/': 'ull',
-        '/ɛ/': 'ehh',       // short 'e' sound as in bed / bread
+        '/ɛ/': 'ehh',
         '/ɑːr/': 'are'
       };
 
-      // Fallback single-letter pure phonetic sounds (not letter names!)
       const letterPhonicsMap = {
         'a': 'aah',
         'b': 'buh',
@@ -835,7 +976,6 @@
       speakText(soundPrompt, 0.72, 1.1);
     }
 
-    // Pronounce letter phonics for missing letter keypad clicks
     function pronounceLetterPhonicsOnly(letter) {
       pronouncePhoneme(null, letter);
     }
@@ -917,16 +1057,13 @@
 
     function renderLearnView(wordObj) {
       document.getElementById('learn-emoji').textContent = wordObj.emoji;
-      // Lowercase word presentation
       document.getElementById('learn-word').textContent = wordObj.letters.join(' · ').toLowerCase();
       document.getElementById('learn-phonics').textContent = wordObj.phonics.join(' · ');
       
-      // Highlight target word in sentence
       const regex = new RegExp(`(${wordObj.word})`, 'gi');
       const formattedSentence = wordObj.sentence.replace(regex, `<span class="text-safari-coral font-bold underline">$1</span>`);
       document.getElementById('learn-sentence').innerHTML = formattedSentence;
 
-      // Build syllable / lowercase letter buttons
       const container = document.getElementById('learn-letter-buttons');
       container.innerHTML = '';
 
@@ -960,7 +1097,6 @@
       const letters = wordObj.letters;
       userSpellingAnswers = {};
       
-      // Missing indices logic
       if (letters.length <= 3) {
         puzzleMissingIndices = [1];
       } else {
@@ -990,11 +1126,9 @@
         const slot = document.createElement('div');
 
         if (!isMissing) {
-          // Pre-filled visible lowercase letter
           slot.className = "w-14 h-16 sm:w-16 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold bg-slate-100 border-4 border-slate-300 text-slate-700 shadow-bouncy-sm lowercase";
           slot.textContent = lowerChar;
         } else {
-          // Missing letter interactive slot
           const filledChar = userSpellingAnswers[index];
           const isActive = (activeSlotIndex === index);
 
@@ -1020,7 +1154,6 @@
       const grid = document.getElementById('spelling-options-grid');
       grid.innerHTML = '';
 
-      // Generate colorful options in lowercase: include correct answers + random distractors
       const requiredLetters = puzzleMissingIndices.map(idx => wordObj.letters[idx].toLowerCase());
       const alphabet = "abcdefghijklmnopqrstuvwxyz".split('');
       
@@ -1030,7 +1163,6 @@
         optionSet.add(randomChar);
       }
 
-      // Shuffle options
       const options = Array.from(optionSet).sort(() => Math.random() - 0.5);
 
       const colorPalette = [
@@ -1056,7 +1188,6 @@
     function handleLetterSelection(letter) {
       const lower = letter.toLowerCase();
       if (activeSlotIndex === null) {
-        // Default to first empty slot
         const firstEmpty = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
         if (firstEmpty !== undefined) {
           activeSlotIndex = firstEmpty;
@@ -1066,11 +1197,8 @@
       }
 
       userSpellingAnswers[activeSlotIndex] = lower;
-      
-      // Pronounce true phonetics sound of the chosen letter instead of saying letter name
       pronounceLetterPhonicsOnly(lower);
 
-      // Auto advance to next unfilled slot if exists
       const nextUnfilled = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
       if (nextUnfilled !== undefined) {
         activeSlotIndex = nextUnfilled;
@@ -1078,7 +1206,6 @@
 
       renderSpellingSlots();
 
-      // Check if all slots are filled
       const allFilled = puzzleMissingIndices.every(idx => !!userSpellingAnswers[idx]);
       if (allFilled) {
         checkAnswer(false);
@@ -1111,7 +1238,6 @@
         setSpellFeedback("Oops! Try again or tap Hint! 🌟", "error");
         speakText("Almost! Try again or tap the lightbulb hint!", 0.9, 1.05);
 
-        // Shake visual effect
         const container = document.getElementById('letter-slots-container');
         container.classList.add('animate-wiggle');
         setTimeout(() => container.classList.remove('animate-wiggle'), 500);
@@ -1123,13 +1249,13 @@
       streakCount += 1;
       document.getElementById('star-count').textContent = starsCount;
       document.getElementById('streak-count').textContent = streakCount;
+      persistStars(); // Save progress in localStorage
 
       setSpellFeedback("🎉 HOORAY! You spelled it right!", "success");
       
       triggerConfetti();
       playAudioCheer();
 
-      // Open Success Modal
       setTimeout(() => {
         const wordObj = getCurrentWord();
         document.getElementById('success-title').textContent = "Super Speller!";
@@ -1144,7 +1270,6 @@
         const correctLetter = wordObj.letters[activeSlotIndex].toLowerCase();
         userSpellingAnswers[activeSlotIndex] = correctLetter;
         
-        // Pronounce phonics
         pronounceLetterPhonicsOnly(correctLetter);
         
         const nextUnfilled = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
@@ -1202,9 +1327,11 @@
       }
     }
 
-    // Physical Keyboard Listener Support
     window.addEventListener('keydown', (e) => {
+      // Don't capture keys if typing into modal input fields
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       if (currentMode !== 'spell') return;
+
       const key = e.key.toLowerCase();
       if (/^[a-z]$/.test(key)) {
         handleLetterSelection(key);
@@ -1220,7 +1347,6 @@
 
     function renderPhonicsView(wordObj) {
       document.getElementById('phonics-emoji').textContent = wordObj.emoji;
-      // Lowercase word in phonics header
       document.getElementById('phonics-word-display').textContent = wordObj.word.toLowerCase();
 
       const container = document.getElementById('phonics-blocks-container');
@@ -1250,7 +1376,6 @@
       });
     }
 
-    // Blend sounds sequentially with true phoneme sounds, then pronounce whole word
     async function blendAndPlaySounds() {
       const wordObj = getCurrentWord();
       if (isSoundMuted) {
@@ -1275,7 +1400,6 @@
         }
       }
 
-      // Short pause before smooth blend of the whole word
       await new Promise(r => setTimeout(r, 350));
       speakText(`${wordObj.word.toLowerCase()}!`, 0.85, 1.15);
       triggerConfetti();
@@ -1314,6 +1438,9 @@
         card.onclick = () => {
           currentCategoryKey = key;
           currentWordIndex = 0;
+          try {
+            localStorage.setItem(STORAGE_KEY_CATEGORY, key);
+          } catch(e) {}
           renderCategoryList();
           renderCurrentModeView();
         };
@@ -1322,54 +1449,194 @@
       });
     }
 
-    function addCustomWord() {
-      const wordInput = document.getElementById('custom-word-input');
-      const emojiInput = document.getElementById('custom-emoji-input');
-      const sentenceInput = document.getElementById('custom-sentence-input');
+    /* WORD MANAGER AND LOCALSTORAGE LOGIC */
 
-      const word = wordInput.value.trim().toLowerCase();
-      let emoji = emojiInput.value.trim() || '🌟';
-      let sentence = sentenceInput.value.trim() || `This is the word ${word}!`;
+    function openWordManagerModal() {
+      closeCategoryModal();
+      renderWordManagerView();
+      document.getElementById('word-manager-modal').classList.remove('hidden');
+    }
 
-      if (!word || word.length < 2) {
-        speakText("Please enter a word with at least 2 letters.", 0.9, 1.1);
+    function closeWordManagerModal() {
+      document.getElementById('word-manager-modal').classList.add('hidden');
+      renderCurrentModeView();
+    }
+
+    function setManagerEmoji(emojiChar) {
+      document.getElementById('mgr-emoji-input').value = emojiChar;
+    }
+
+    function renderWordManagerView() {
+      const customWords = WORD_CATEGORIES.custom.words || [];
+      document.getElementById('mgr-custom-count').textContent = customWords.length;
+
+      // Render custom words list
+      const container = document.getElementById('mgr-saved-words-list');
+      container.innerHTML = '';
+
+      if (customWords.length === 0) {
+        container.innerHTML = `
+          <div class="p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center text-slate-400 text-xs font-body">
+            No custom words added yet. Type a word above and click "Save Word"!
+          </div>
+        `;
+      } else {
+        customWords.forEach((item, index) => {
+          const row = document.createElement('div');
+          row.className = "p-2.5 bg-slate-50 hover:bg-amber-50/60 border border-slate-200 rounded-xl flex items-center justify-between transition-colors";
+          row.innerHTML = `
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="text-2xl">${item.emoji}</span>
+              <div class="truncate">
+                <span class="font-bold text-base text-slate-800 lowercase">${item.word}</span>
+                <span class="text-xs text-purple-600 font-body ml-1.5 font-semibold">${item.phonics.join(' · ')}</span>
+                <p class="text-[11px] text-slate-500 font-body truncate max-w-xs">${item.sentence}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <button onclick="previewWordAudio('${item.word}')" class="p-1.5 hover:bg-slate-200 rounded-lg text-slate-600 text-sm" title="Listen">
+                🔊
+              </button>
+              <button onclick="deleteCustomWord(${index})" class="p-1.5 hover:bg-rose-100 text-rose-600 rounded-lg text-sm font-bold" title="Delete word from browser storage">
+                🗑️
+              </button>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+      }
+
+      // Render category switch chips
+      const catChips = document.getElementById('mgr-category-buttons');
+      catChips.innerHTML = '';
+      Object.keys(WORD_CATEGORIES).forEach(key => {
+        const cat = WORD_CATEGORIES[key];
+        const isSelected = (currentCategoryKey === key);
+        const btn = document.createElement('button');
+        btn.className = `px-3 py-1.5 rounded-xl font-bold text-xs transition-all border ${
+          isSelected 
+            ? 'bg-amber-400 border-amber-500 text-amber-950 shadow-sm' 
+            : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
+        }`;
+        btn.textContent = `${cat.name} (${cat.words.length})`;
+        btn.onclick = () => {
+          currentCategoryKey = key;
+          currentWordIndex = 0;
+          try {
+            localStorage.setItem(STORAGE_KEY_CATEGORY, key);
+          } catch(e) {}
+          renderWordManagerView();
+          updateProgressIndicators();
+        };
+        catChips.appendChild(btn);
+      });
+    }
+
+    function previewWordAudio(wordStr) {
+      speakText(wordStr.toLowerCase(), 0.85, 1.1);
+    }
+
+    function handleSaveWordFromManager() {
+      const wordInput = document.getElementById('mgr-word-input');
+      const emojiInput = document.getElementById('mgr-emoji-input');
+      const sentenceInput = document.getElementById('mgr-sentence-input');
+
+      // Sanitize word: lowercase, alphabets only
+      const rawWord = wordInput.value.trim().toLowerCase();
+      const sanitizedWord = rawWord.replace(/[^a-z]/g, '');
+      const emoji = emojiInput.value.trim() || '🌟';
+      let sentence = sentenceInput.value.trim();
+
+      if (!sanitizedWord || sanitizedWord.length < 2) {
+        speakText("Please type a word with at least 2 letters.", 0.9, 1.1);
+        wordInput.focus();
         return;
       }
 
-      // Generate lowercase letters and phonics approximations
-      const letters = word.split('').map(l => l.toLowerCase());
+      if (!sentence) {
+        sentence = `This is the word ${sanitizedWord}!`;
+      }
+
+      // Deconstruct word into letters & phonetics
+      const letters = sanitizedWord.split('');
       const phonics = letters.map(l => `/${l}/`);
 
-      WORD_CATEGORIES.custom.words.push({
-        word,
+      // Check if word already exists in custom list
+      const existingIdx = WORD_CATEGORIES.custom.words.findIndex(w => w.word.toLowerCase() === sanitizedWord);
+      const newWordObj = {
+        word: sanitizedWord,
         emoji,
         phonics,
         letters,
         sentence
-      });
+      };
 
-      // Switch to custom category
+      if (existingIdx >= 0) {
+        WORD_CATEGORIES.custom.words[existingIdx] = newWordObj;
+      } else {
+        WORD_CATEGORIES.custom.words.push(newWordObj);
+      }
+
+      // Persist immediately in localStorage
+      persistCustomWords();
+
+      // Automatically switch to Custom category to immediately practice the new word
       currentCategoryKey = 'custom';
       currentWordIndex = WORD_CATEGORIES.custom.words.length - 1;
+      try {
+        localStorage.setItem(STORAGE_KEY_CATEGORY, 'custom');
+      } catch(e) {}
 
-      // Clear inputs
+      // Clear input form
       wordInput.value = '';
-      emojiInput.value = '';
       sentenceInput.value = '';
+      setManagerEmoji('🌟');
 
-      renderCategoryList();
+      renderWordManagerView();
       renderCurrentModeView();
-      speakText(`Added ${word} to your custom list!`, 0.9, 1.15);
-      closeCategoryModal();
+      speakText(`Saved ${sanitizedWord} to your browser!`, 0.9, 1.15);
+      playTapChime(600);
+    }
+
+    function deleteCustomWord(index) {
+      if (index >= 0 && index < WORD_CATEGORIES.custom.words.length) {
+        const removed = WORD_CATEGORIES.custom.words.splice(index, 1);
+        persistCustomWords();
+        
+        if (currentWordIndex >= WORD_CATEGORIES.custom.words.length) {
+          currentWordIndex = Math.max(0, WORD_CATEGORIES.custom.words.length - 1);
+        }
+
+        renderWordManagerView();
+        renderCurrentModeView();
+        
+        if (removed && removed[0]) {
+          speakText(`Removed ${removed[0].word}`, 0.95, 1.1);
+        }
+      }
+    }
+
+    function resetCustomWordsToDefaults() {
+      WORD_CATEGORIES.custom.words = JSON.parse(JSON.stringify(DEFAULT_WORD_CATEGORIES.custom.words));
+      persistCustomWords();
+      currentWordIndex = 0;
+      renderWordManagerView();
+      renderCurrentModeView();
+      speakText("Words reset to default!", 0.9, 1.1);
     }
 
     window.onload = () => {
+      // 1. Initialize voices for speechSynthesis
       if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = () => {
           window.speechSynthesis.getVoices();
         };
       }
+
+      // 2. Load localStorage persistent data
+      loadStorageData();
       
+      // 3. Render initial view
       renderCurrentModeView();
     };
   </script>
