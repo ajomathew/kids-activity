@@ -226,8 +226,8 @@
 
         <!-- Big Bold Word Display with Syllable Dots -->
         <div class="text-center my-2">
-          <h2 id="learn-word" class="text-5xl sm:text-6xl font-bold tracking-widest text-slate-800 uppercase">
-            C · A · T
+          <h2 id="learn-word" class="text-5xl sm:text-6xl font-bold tracking-widest text-slate-800 lowercase">
+            c · a · t
           </h2>
           <!-- Phonetic spelling -->
           <div class="mt-2 inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 px-4 py-1.5 rounded-2xl border border-purple-200 font-body text-base font-semibold">
@@ -354,8 +354,8 @@
         </div>
 
         <div class="text-center mt-1 mb-2">
-          <h2 id="phonics-word-display" class="text-4xl sm:text-5xl font-bold tracking-widest text-slate-800 uppercase">
-            CAT
+          <h2 id="phonics-word-display" class="text-4xl sm:text-5xl font-bold tracking-widest text-slate-800 lowercase">
+            cat
           </h2>
           <p class="text-sm font-body font-semibold text-purple-600 mt-1">
             Tap each phoneme block, then press <span class="font-bold">Blend Sounds</span>!
@@ -376,7 +376,7 @@
         <div class="w-full bg-purple-50 rounded-2xl p-4 mt-5 border border-purple-200 flex items-start gap-3">
           <span class="text-2xl">💡</span>
           <div class="text-xs font-body text-purple-900 leading-relaxed">
-            <span class="font-bold">Phonics Tip:</span> Notice how the letters work together like a team! Letters have names (like 'C'), but phonics is the special sound they make when reading (like "/k/").
+            <span class="font-bold">Phonics Tip:</span> Notice how the letters work together like a team! Letters have names (like 'c'), but phonics is the special sound they make when reading (like "/k/").
           </div>
         </div>
 
@@ -425,10 +425,10 @@
           <span>✏️</span> Add Custom Word for Kids
         </h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
-          <input type="text" id="custom-word-input" placeholder="Word (e.g. STAR)" maxlength="12" class="px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold uppercase focus:ring-2 focus:ring-amber-400 outline-none">
-          <input type="text" id="custom-emoji-input" placeholder="Emoji (e.g. ⭐)" maxlength="4" class="px-3 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+          <input type="text" id="custom-word-input" placeholder="word (e.g. star)" maxlength="12" class="px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold lowercase focus:ring-2 focus:ring-amber-400 outline-none">
+          <input type="text" id="custom-emoji-input" placeholder="emoji (e.g. ⭐)" maxlength="4" class="px-3 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
         </div>
-        <input type="text" id="custom-sentence-input" placeholder="Example Sentence (e.g. The star shines bright in the sky.)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-body mb-3 focus:ring-2 focus:ring-amber-400 outline-none">
+        <input type="text" id="custom-sentence-input" placeholder="Example sentence (e.g. The star shines bright in the sky.)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-body mb-3 focus:ring-2 focus:ring-amber-400 outline-none">
         <button onclick="addCustomWord()" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm shadow-sm btn-3d">
           ➕ Add to Custom Category
         </button>
@@ -470,7 +470,7 @@
   </footer>
 
   <script>
-    // Master Word Categories Database with Phonics breakdown, Emojis, and Sentences
+    // Master Word Categories Database with Phonics breakdown, Emojis, and Sentences (Lowercase letters)
     const WORD_CATEGORIES = {
       starter3: {
         id: 'starter3',
@@ -478,59 +478,59 @@
         description: 'Easy foundational words for beginning spellers',
         words: [
           {
-            word: 'CAT',
+            word: 'cat',
             emoji: '🐱',
             phonics: ['/k/', '/æ/', '/t/'],
-            letters: ['C', 'A', 'T'],
+            letters: ['c', 'a', 't'],
             sentence: 'The playful cat purrs happily in the warm sunshine.'
           },
           {
-            word: 'DOG',
+            word: 'dog',
             emoji: '🐶',
             phonics: ['/d/', '/ɒ/', '/ɡ/'],
-            letters: ['D', 'O', 'G'],
+            letters: ['d', 'o', 'g'],
             sentence: 'The loyal dog wags its tail when greeting a friend.'
           },
           {
-            word: 'SUN',
+            word: 'sun',
             emoji: '☀️',
             phonics: ['/s/', '/ʌ/', '/n/'],
-            letters: ['S', 'U', 'N'],
+            letters: ['s', 'u', 'n'],
             sentence: 'The golden sun warms the earth every morning.'
           },
           {
-            word: 'PIG',
+            word: 'pig',
             emoji: '🐷',
             phonics: ['/p/', '/ɪ/', '/ɡ/'],
-            letters: ['P', 'I', 'G'],
+            letters: ['p', 'i', 'g'],
             sentence: 'The cheerful pig loves to splash in cool mud.'
           },
           {
-            word: 'BAT',
+            word: 'bat',
             emoji: '🦇',
             phonics: ['/b/', '/æ/', '/t/'],
-            letters: ['B', 'A', 'T'],
+            letters: ['b', 'a', 't'],
             sentence: 'The little brown bat flies under the moonlight.'
           },
           {
-            word: 'BUG',
+            word: 'bug',
             emoji: '🐞',
             phonics: ['/b/', '/ʌ/', '/ɡ/'],
-            letters: ['B', 'U', 'G'],
+            letters: ['b', 'u', 'g'],
             sentence: 'A tiny ladybug crawls on a green garden leaf.'
           },
           {
-            word: 'CUP',
+            word: 'cup',
             emoji: '🥛',
             phonics: ['/k/', '/ʌ/', '/p/'],
-            letters: ['C', 'U', 'P'],
+            letters: ['c', 'u', 'p'],
             sentence: 'I drink a fresh cup of cold milk with breakfast.'
           },
           {
-            word: 'FOX',
+            word: 'fox',
             emoji: '🦊',
             phonics: ['/f/', '/ɒ/', '/ks/'],
-            letters: ['F', 'O', 'X'],
+            letters: ['f', 'o', 'x'],
             sentence: 'The clever orange fox trots through the forest.'
           }
         ]
@@ -541,59 +541,59 @@
         description: 'Wonderful 4-letter words from the animal and nature world',
         words: [
           {
-            word: 'FROG',
+            word: 'frog',
             emoji: '🐸',
             phonics: ['/f/', '/r/', '/ɒ/', '/ɡ/'],
-            letters: ['F', 'R', 'O', 'G'],
+            letters: ['f', 'r', 'o', 'g'],
             sentence: 'The green frog leaps from lily pad to lily pad!'
           },
           {
-            word: 'BIRD',
+            word: 'bird',
             emoji: '🐦',
             phonics: ['/b/', '/ɜːr/', '/d/'],
-            letters: ['B', 'I', 'R', 'D'],
+            letters: ['b', 'i', 'r', 'd'],
             sentence: 'The blue bird sings a sweet song up in the oak tree.'
           },
           {
-            word: 'FISH',
+            word: 'fish',
             emoji: '🐠',
             phonics: ['/f/', '/ɪ/', '/ʃ/'],
-            letters: ['F', 'I', 'S', 'H'],
+            letters: ['f', 'i', 's', 'h'],
             sentence: 'The tropical fish swims smoothly through the coral.'
           },
           {
-            word: 'DUCK',
+            word: 'duck',
             emoji: '🦆',
             phonics: ['/d/', '/ʌ/', '/k/'],
-            letters: ['D', 'U', 'C', 'K'],
+            letters: ['d', 'u', 'c', 'k'],
             sentence: 'The mama duck leads her ducklings across the pond.'
           },
           {
-            word: 'BEAR',
+            word: 'bear',
             emoji: '🐻',
             phonics: ['/b/', '/ɛər/'],
-            letters: ['B', 'E', 'A', 'R'],
+            letters: ['b', 'e', 'a', 'r'],
             sentence: 'The big fuzzy bear enjoys honey and fresh berries.'
           },
           {
-            word: 'LION',
+            word: 'lion',
             emoji: '🦁',
             phonics: ['/l/', '/aɪ/', '/ə/', '/n/'],
-            letters: ['L', 'I', 'O', 'N'],
+            letters: ['l', 'i', 'o', 'n'],
             sentence: 'The brave lion roars across the African plains.'
           },
           {
-            word: 'TREE',
+            word: 'tree',
             emoji: '🌳',
             phonics: ['/t/', '/r/', '/iː/'],
-            letters: ['T', 'R', 'E', 'E'],
+            letters: ['t', 'r', 'e', 'e'],
             sentence: 'The tall green tree gives shade on hot summer days.'
           },
           {
-            word: 'MOON',
+            word: 'moon',
             emoji: '🌙',
             phonics: ['/m/', '/uː/', '/n/'],
-            letters: ['M', 'O', 'O', 'N'],
+            letters: ['m', 'o', 'o', 'n'],
             sentence: 'The silver moon glows peacefully in the night sky.'
           }
         ]
@@ -604,38 +604,38 @@
         description: 'Delicious food words with tasty sounds',
         words: [
           {
-            word: 'CAKE',
+            word: 'cake',
             emoji: '🎂',
             phonics: ['/k/', '/eɪ/', '/k/'],
-            letters: ['C', 'A', 'K', 'E'],
+            letters: ['c', 'a', 'k', 'e'],
             sentence: 'We celebrate birthdays with yummy frosted cake!'
           },
           {
-            word: 'APPLE',
+            word: 'apple',
             emoji: '🍎',
             phonics: ['/æ/', '/p/', '/əl/'],
-            letters: ['A', 'P', 'P', 'L', 'E'],
+            letters: ['a', 'p', 'p', 'l', 'e'],
             sentence: 'Crunching into a sweet red apple is delicious.'
           },
           {
-            word: 'BREAD',
+            word: 'bread',
             emoji: '🍞',
             phonics: ['/b/', '/r/', '/ɛ/', '/d/'],
-            letters: ['B', 'R', 'E', 'A', 'D'],
+            letters: ['b', 'r', 'e', 'a', 'd'],
             sentence: 'Warm baked bread smells wonderful right out of the oven.'
           },
           {
-            word: 'MILK',
+            word: 'milk',
             emoji: '🥛',
             phonics: ['/m/', '/ɪ/', '/l/', '/k/'],
-            letters: ['M', 'I', 'L', 'K'],
+            letters: ['m', 'i', 'l', 'k'],
             sentence: 'Drinking cold milk helps our bones grow strong.'
           },
           {
-            word: 'BERRY',
+            word: 'berry',
             emoji: '🫐',
             phonics: ['/b/', '/ɛ/', '/r/', '/i/'],
-            letters: ['B', 'E', 'R', 'R', 'Y'],
+            letters: ['b', 'e', 'r', 'r', 'y'],
             sentence: 'Ripe blue berries make the tastiest morning snack.'
           }
         ]
@@ -646,10 +646,10 @@
         description: 'Words added by parents or teachers',
         words: [
           {
-            word: 'STAR',
+            word: 'star',
             emoji: '⭐',
             phonics: ['/s/', '/t/', '/ɑːr/'],
-            letters: ['S', 'T', 'A', 'R'],
+            letters: ['s', 't', 'a', 'r'],
             sentence: 'A twinkling star shines bright up above the world.'
           }
         ]
@@ -663,6 +663,42 @@
     let starsCount = 0;
     let streakCount = 0;
     let isSoundMuted = false;
+
+    // Web Audio API context for tactile audio feedback
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Play a friendly pop chime on tile press
+    function playTapChime(pitchFreq = 440) {
+      if (isSoundMuted) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(pitchFreq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (e) {
+        // audio context fallback
+      }
+    }
 
     // Spelling Quiz State
     let puzzleMissingIndices = []; // Which character positions are missing
@@ -679,7 +715,6 @@
         utterance.pitch = pitch;
         utterance.lang = 'en-US';
 
-        // Select a friendly child-like or clear English voice if available
         const voices = window.speechSynthesis.getVoices();
         const preferredVoice = voices.find(v => (v.name.includes('Samantha') || v.name.includes('Google US English') || v.name.includes('Natural') || v.lang.startsWith('en')) && !v.name.includes('Bad'));
         if (preferredVoice) {
@@ -715,42 +750,94 @@
       }
     }
 
-    // Helper: Approximate phoneme audio pronunciation guide
+    // Accurate Phonics Sound Engine:
+    // Speech synthesis inherently says letter names ("bee", "see", "dee") when given single characters.
+    // To pronounce pure phoneme sounds (/buh/, /kuh/, /ah/, etc.) we map IPA & lowercase letters
+    // to phonetic words that speech engines speak with the exact target phonics sound.
     function pronouncePhoneme(phoneme, letter) {
-      // Map IPA phonemes to clean speech-synthesizable phonetic sounds
-      const soundMap = {
+      if (isSoundMuted) return;
+      playTapChime(520);
+
+      const l = (letter || '').toLowerCase();
+
+      // Mappings based on IPA phonemes & letters to phonetic speech tokens
+      const phonicsAudioGuide = {
+        // IPA direct sound approximations:
         '/k/': 'kuh',
-        '/æ/': 'a',
+        '/æ/': 'aah',       // short 'a' sound as in cat / apple
         '/t/': 'tuh',
         '/d/': 'duh',
-        '/ɒ/': 'aw',
+        '/ɒ/': 'aww',       // short 'o' sound as in dog / pot
         '/ɡ/': 'guh',
         '/s/': 'sss',
-        '/ʌ/': 'uh',
+        '/ʌ/': 'uhh',       // short 'u' sound as in sun / cup
         '/n/': 'nnn',
         '/p/': 'puh',
-        '/ɪ/': 'ih',
+        '/ɪ/': 'ihh',       // short 'i' sound as in pig / fish
         '/b/': 'buh',
         '/f/': 'fff',
-        '/ks/': 'ks',
+        '/ks/': 'box',      // for 'x' sound
         '/r/': 'rrr',
-        '/ɜːr/': 'er',
+        '/ɜːr/': 'err',
         '/ʃ/': 'shh',
         '/ɛər/': 'air',
         '/l/': 'lll',
         '/aɪ/': 'eye',
         '/ə/': 'uh',
-        '/iː/': 'ee',
+        '/iː/': 'eee',
         '/uː/': 'ooo',
         '/m/': 'mmm',
         '/eɪ/': 'ay',
         '/əl/': 'ull',
-        '/ɛ/': 'eh',
+        '/ɛ/': 'ehh',       // short 'e' sound as in bed / bread
         '/ɑːr/': 'are'
       };
 
-      const sound = soundMap[phoneme] || letter || phoneme;
-      speakText(sound, 0.75, 1.15);
+      // Fallback single-letter pure phonetic sounds (not letter names!)
+      const letterPhonicsMap = {
+        'a': 'aah',
+        'b': 'buh',
+        'c': 'kuh',
+        'd': 'duh',
+        'e': 'ehh',
+        'f': 'fff',
+        'g': 'guh',
+        'h': 'huh',
+        'i': 'ihh',
+        'j': 'juh',
+        'k': 'kuh',
+        'l': 'lll',
+        'm': 'mmm',
+        'n': 'nnn',
+        'o': 'aww',
+        'p': 'puh',
+        'q': 'kwuh',
+        'r': 'rrr',
+        's': 'sss',
+        't': 'tuh',
+        'u': 'uhh',
+        'v': 'vvv',
+        'w': 'wuh',
+        'x': 'ks',
+        'y': 'yuh',
+        'z': 'zzz'
+      };
+
+      let soundPrompt = '';
+      if (phoneme && phonicsAudioGuide[phoneme]) {
+        soundPrompt = phonicsAudioGuide[phoneme];
+      } else if (l && letterPhonicsMap[l]) {
+        soundPrompt = letterPhonicsMap[l];
+      } else {
+        soundPrompt = l || phoneme;
+      }
+
+      speakText(soundPrompt, 0.72, 1.1);
+    }
+
+    // Pronounce letter phonics for missing letter keypad clicks
+    function pronounceLetterPhonicsOnly(letter) {
+      pronouncePhoneme(null, letter);
     }
 
     function getCurrentCategory() {
@@ -761,10 +848,10 @@
       const cat = getCurrentCategory();
       if (!cat.words || cat.words.length === 0) {
         return {
-          word: 'CAT',
+          word: 'cat',
           emoji: '🐱',
           phonics: ['/k/', '/æ/', '/t/'],
-          letters: ['C', 'A', 'T'],
+          letters: ['c', 'a', 't'],
           sentence: 'A cheerful cat smiles!'
         };
       }
@@ -830,7 +917,8 @@
 
     function renderLearnView(wordObj) {
       document.getElementById('learn-emoji').textContent = wordObj.emoji;
-      document.getElementById('learn-word').textContent = wordObj.letters.join(' · ');
+      // Lowercase word presentation
+      document.getElementById('learn-word').textContent = wordObj.letters.join(' · ').toLowerCase();
       document.getElementById('learn-phonics').textContent = wordObj.phonics.join(' · ');
       
       // Highlight target word in sentence
@@ -838,20 +926,21 @@
       const formattedSentence = wordObj.sentence.replace(regex, `<span class="text-safari-coral font-bold underline">$1</span>`);
       document.getElementById('learn-sentence').innerHTML = formattedSentence;
 
-      // Build syllable / letter buttons
+      // Build syllable / lowercase letter buttons
       const container = document.getElementById('learn-letter-buttons');
       container.innerHTML = '';
 
       wordObj.letters.forEach((char, i) => {
-        const ph = wordObj.phonics[i] || `/${char.toLowerCase()}/`;
+        const lowerChar = char.toLowerCase();
+        const ph = wordObj.phonics[i] || `/${lowerChar}/`;
         const btn = document.createElement('button');
         btn.className = "px-4 py-2 bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 rounded-2xl font-bold text-lg text-slate-800 shadow-bouncy-sm btn-3d flex flex-col items-center min-w-[50px]";
         btn.innerHTML = `
-          <span class="text-xl font-bold">${char}</span>
+          <span class="text-2xl font-bold lowercase">${lowerChar}</span>
           <span class="text-[11px] font-body text-purple-700 font-semibold">${ph}</span>
         `;
         btn.onclick = () => {
-          pronouncePhoneme(ph, char);
+          pronouncePhoneme(ph, lowerChar);
         };
         container.appendChild(btn);
       });
@@ -859,7 +948,7 @@
 
     function speakCurrentWord() {
       const wordObj = getCurrentWord();
-      speakText(wordObj.word, 0.8, 1.1);
+      speakText(wordObj.word.toLowerCase(), 0.8, 1.1);
     }
 
     function speakSentence() {
@@ -871,14 +960,10 @@
       const letters = wordObj.letters;
       userSpellingAnswers = {};
       
-      // Determine missing indices:
-      // For 3-letter words: hide 1 vowel or middle/ending letter.
-      // For 4+ letter words: hide 1 or 2 letters.
+      // Missing indices logic
       if (letters.length <= 3) {
-        // pick index 1 (middle) or random
         puzzleMissingIndices = [1];
       } else {
-        // Hide 2 letters
         const idx1 = Math.floor(Math.random() * (letters.length - 2)) + 1;
         let idx2 = (idx1 + 1) % letters.length;
         if (idx2 === 0) idx2 = letters.length - 1;
@@ -887,7 +972,6 @@
 
       activeSlotIndex = puzzleMissingIndices[0];
 
-      // Update static prompts without spoiling the word text
       document.getElementById('spell-emoji').textContent = wordObj.emoji;
       setSpellFeedback("Tap an empty box and pick the missing letter!", "normal");
 
@@ -901,28 +985,29 @@
       container.innerHTML = '';
 
       wordObj.letters.forEach((correctChar, index) => {
+        const lowerChar = correctChar.toLowerCase();
         const isMissing = puzzleMissingIndices.includes(index);
         const slot = document.createElement('div');
 
         if (!isMissing) {
-          // Pre-filled visible letter
-          slot.className = "w-14 h-16 sm:w-16 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold bg-slate-100 border-4 border-slate-300 text-slate-700 shadow-bouncy-sm";
-          slot.textContent = correctChar;
+          // Pre-filled visible lowercase letter
+          slot.className = "w-14 h-16 sm:w-16 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold bg-slate-100 border-4 border-slate-300 text-slate-700 shadow-bouncy-sm lowercase";
+          slot.textContent = lowerChar;
         } else {
           // Missing letter interactive slot
           const filledChar = userSpellingAnswers[index];
           const isActive = (activeSlotIndex === index);
 
-          slot.className = `w-14 h-16 sm:w-16 sm:h-20 rounded-2xl flex flex-col items-center justify-center text-3xl sm:text-4xl font-bold cursor-pointer transition-all shadow-bouncy-sm select-none ${
+          slot.className = `w-14 h-16 sm:w-16 sm:h-20 rounded-2xl flex flex-col items-center justify-center text-3xl sm:text-4xl font-bold cursor-pointer transition-all shadow-bouncy-sm select-none lowercase ${
             isActive ? 'active-slot slot-blank' : filledChar ? 'slot-filled' : 'slot-blank'
           }`;
 
-          slot.textContent = filledChar || '?';
+          slot.textContent = filledChar ? filledChar.toLowerCase() : '?';
           
           slot.onclick = () => {
             activeSlotIndex = index;
             renderSpellingSlots();
-            speakText("Pick a letter for this slot", 0.95, 1.2);
+            speakText("Pick a letter for this box", 0.95, 1.2);
           };
         }
 
@@ -935,9 +1020,9 @@
       const grid = document.getElementById('spelling-options-grid');
       grid.innerHTML = '';
 
-      // Generate colorful options: include correct answers + random distractors
-      const requiredLetters = puzzleMissingIndices.map(idx => wordObj.letters[idx]);
-      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+      // Generate colorful options in lowercase: include correct answers + random distractors
+      const requiredLetters = puzzleMissingIndices.map(idx => wordObj.letters[idx].toLowerCase());
+      const alphabet = "abcdefghijklmnopqrstuvwxyz".split('');
       
       const optionSet = new Set(requiredLetters);
       while (optionSet.size < Math.min(8, 26)) {
@@ -960,7 +1045,7 @@
       options.forEach((char, idx) => {
         const btn = document.createElement('button');
         const colorClass = colorPalette[idx % colorPalette.length];
-        btn.className = `w-11 h-12 sm:w-13 sm:h-14 rounded-2xl border-2 font-bold text-xl sm:text-2xl shadow-bouncy-sm btn-3d flex items-center justify-center uppercase transition-transform ${colorClass}`;
+        btn.className = `w-11 h-12 sm:w-13 sm:h-14 rounded-2xl border-2 font-bold text-2xl sm:text-3xl shadow-bouncy-sm btn-3d flex items-center justify-center lowercase transition-transform ${colorClass}`;
         btn.textContent = char;
 
         btn.onclick = () => handleLetterSelection(char);
@@ -969,6 +1054,7 @@
     }
 
     function handleLetterSelection(letter) {
+      const lower = letter.toLowerCase();
       if (activeSlotIndex === null) {
         // Default to first empty slot
         const firstEmpty = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
@@ -979,8 +1065,10 @@
         }
       }
 
-      userSpellingAnswers[activeSlotIndex] = letter.toUpperCase();
-      speakText(letter, 0.9, 1.2);
+      userSpellingAnswers[activeSlotIndex] = lower;
+      
+      // Pronounce true phonetics sound of the chosen letter instead of saying letter name
+      pronounceLetterPhonicsOnly(lower);
 
       // Auto advance to next unfilled slot if exists
       const nextUnfilled = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
@@ -1009,7 +1097,7 @@
 
       let isCorrect = true;
       for (const idx of puzzleMissingIndices) {
-        if (userSpellingAnswers[idx] !== wordObj.letters[idx]) {
+        if (userSpellingAnswers[idx].toLowerCase() !== wordObj.letters[idx].toLowerCase()) {
           isCorrect = false;
           break;
         }
@@ -1038,17 +1126,14 @@
 
       setSpellFeedback("🎉 HOORAY! You spelled it right!", "success");
       
-      // Fire celebratory confetti!
       triggerConfetti();
-
-      // Cheer speech
       playAudioCheer();
 
       // Open Success Modal
       setTimeout(() => {
         const wordObj = getCurrentWord();
         document.getElementById('success-title').textContent = "Super Speller!";
-        document.getElementById('success-subtitle').textContent = `You correctly spelled ${wordObj.word}!`;
+        document.getElementById('success-subtitle').textContent = `You correctly spelled ${wordObj.word.toLowerCase()}!`;
         document.getElementById('success-modal').classList.remove('hidden');
       }, 400);
     }
@@ -1056,11 +1141,12 @@
     function provideHint() {
       const wordObj = getCurrentWord();
       if (activeSlotIndex !== null) {
-        const correctLetter = wordObj.letters[activeSlotIndex];
+        const correctLetter = wordObj.letters[activeSlotIndex].toLowerCase();
         userSpellingAnswers[activeSlotIndex] = correctLetter;
-        speakText(`The letter is ${correctLetter}!`, 0.85, 1.2);
         
-        // Auto select next unfilled slot
+        // Pronounce phonics
+        pronounceLetterPhonicsOnly(correctLetter);
+        
         const nextUnfilled = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
         activeSlotIndex = nextUnfilled !== undefined ? nextUnfilled : null;
         
@@ -1116,11 +1202,11 @@
       }
     }
 
-    // Physical Keyboard Listener Support for Desktop / Tablet Keyboards
+    // Physical Keyboard Listener Support
     window.addEventListener('keydown', (e) => {
       if (currentMode !== 'spell') return;
-      const key = e.key.toUpperCase();
-      if (/^[A-Z]$/.test(key)) {
+      const key = e.key.toLowerCase();
+      if (/^[a-z]$/.test(key)) {
         handleLetterSelection(key);
       } else if (e.key === 'Backspace') {
         if (activeSlotIndex !== null && userSpellingAnswers[activeSlotIndex]) {
@@ -1134,36 +1220,37 @@
 
     function renderPhonicsView(wordObj) {
       document.getElementById('phonics-emoji').textContent = wordObj.emoji;
-      document.getElementById('phonics-word-display').textContent = wordObj.word;
+      // Lowercase word in phonics header
+      document.getElementById('phonics-word-display').textContent = wordObj.word.toLowerCase();
 
       const container = document.getElementById('phonics-blocks-container');
       container.innerHTML = '';
 
       wordObj.letters.forEach((letter, i) => {
-        const ph = wordObj.phonics[i] || `/${letter.toLowerCase()}/`;
+        const lower = letter.toLowerCase();
+        const ph = wordObj.phonics[i] || `/${lower}/`;
         const block = document.createElement('div');
         
         block.id = `phonics-block-${i}`;
         block.className = "flex-1 min-w-[75px] max-w-[110px] bg-purple-50 hover:bg-purple-100 border-4 border-purple-300 rounded-3xl p-3 sm:p-4 flex flex-col items-center justify-center cursor-pointer shadow-bouncy-sm transition-transform btn-3d";
         
         block.innerHTML = `
-          <span class="text-3xl sm:text-4xl font-bold text-purple-900">${letter}</span>
+          <span class="text-4xl sm:text-5xl font-bold text-purple-900 lowercase">${lower}</span>
           <span class="text-sm font-bold text-safari-coral font-body mt-1 bg-white px-2 py-0.5 rounded-full border border-purple-200">${ph}</span>
           <span class="text-xs text-slate-400 mt-1 font-body">🔊 tap</span>
         `;
 
         block.onclick = () => {
-          // Animate block
           block.classList.add('scale-110', 'border-purple-600');
           setTimeout(() => block.classList.remove('scale-110', 'border-purple-600'), 350);
-          pronouncePhoneme(ph, letter);
+          pronouncePhoneme(ph, lower);
         };
 
         container.appendChild(block);
       });
     }
 
-    // Blend sounds sequentially then speak the full word
+    // Blend sounds sequentially with true phoneme sounds, then pronounce whole word
     async function blendAndPlaySounds() {
       const wordObj = getCurrentWord();
       if (isSoundMuted) {
@@ -1172,8 +1259,8 @@
       }
 
       for (let i = 0; i < wordObj.letters.length; i++) {
-        const letter = wordObj.letters[i];
-        const ph = wordObj.phonics[i] || `/${letter.toLowerCase()}/`;
+        const letter = wordObj.letters[i].toLowerCase();
+        const ph = wordObj.phonics[i] || `/${letter}/`;
         const block = document.getElementById(`phonics-block-${i}`);
 
         if (block) {
@@ -1181,16 +1268,16 @@
         }
 
         pronouncePhoneme(ph, letter);
-        await new Promise(r => setTimeout(r, 650));
+        await new Promise(r => setTimeout(r, 700));
 
         if (block) {
           block.classList.remove('bg-amber-200', 'scale-110', 'border-amber-400');
         }
       }
 
-      // Small pause before full blend
-      await new Promise(r => setTimeout(r, 300));
-      speakText(`${wordObj.word}!`, 0.85, 1.15);
+      // Short pause before smooth blend of the whole word
+      await new Promise(r => setTimeout(r, 350));
+      speakText(`${wordObj.word.toLowerCase()}!`, 0.85, 1.15);
       triggerConfetti();
     }
 
@@ -1240,7 +1327,7 @@
       const emojiInput = document.getElementById('custom-emoji-input');
       const sentenceInput = document.getElementById('custom-sentence-input');
 
-      const word = wordInput.value.trim().toUpperCase();
+      const word = wordInput.value.trim().toLowerCase();
       let emoji = emojiInput.value.trim() || '🌟';
       let sentence = sentenceInput.value.trim() || `This is the word ${word}!`;
 
@@ -1249,9 +1336,9 @@
         return;
       }
 
-      // Generate phonics approximations for custom word
-      const letters = word.split('');
-      const phonics = letters.map(l => `/${l.toLowerCase()}/`);
+      // Generate lowercase letters and phonics approximations
+      const letters = word.split('').map(l => l.toLowerCase());
+      const phonics = letters.map(l => `/${l}/`);
 
       WORD_CATEGORIES.custom.words.push({
         word,
@@ -1277,10 +1364,8 @@
     }
 
     window.onload = () => {
-      // Warm up voices
       if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = () => {
-          // Pre-load voices list
           window.speechSynthesis.getVoices();
         };
       }
