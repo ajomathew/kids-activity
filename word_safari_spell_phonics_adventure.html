@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Safari: Spell & Phonics Adventure</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Fredoka & Quicksand -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['"Fredoka"', 'cursive', 'sans-serif'],
+            quicksand: ['"Quicksand"', 'sans-serif'],
+          },
+          colors: {
+            safari: {
+              yellow: '#FFD166',
+              coral: '#FF6B6B',
+              teal: '#4ECDC4',
+              blue: '#118AB2',
+              navy: '#073B4C',
+              purple: '#9B5DE5',
+              green: '#06D6A0',
+              pink: '#F72585'
+            }
+          },
+          boxShadow: {
+            'bouncy': '0 8px 0px 0px rgba(0, 0, 0, 0.15)',
+            'bouncy-sm': '0 4px 0px 0px rgba(0, 0, 0, 0.15)',
+            'bouncy-active': '0 2px 0px 0px rgba(0, 0, 0, 0.15)',
+          },
+          animation: {
+            'bounce-gentle': 'bounceGentle 2s infinite',
+            'wiggle': 'wiggle 0.5s ease-in-out',
+            'pulse-scale': 'pulseScale 1.5s infinite',
+          },
+          keyframes: {
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(0deg)' },
+              '25%': { transform: 'rotate(-6deg)' },
+              '75%': { transform: 'rotate(6deg)' },
+            },
+            pulseScale: {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.06)' },
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Fredoka', cursive, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    .font-body {
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    /* Tactile 3D button press effect */
+    .btn-3d {
+      transition: all 0.1s ease;
+    }
+    .btn-3d:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0px 0px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Custom scrollbar for kid friendliness */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4ECDC4;
+      border-radius: 10px;
+    }
+
+    /* Missing letter slot pulse */
+    .slot-blank {
+      border: 4px dashed #94a3b8;
+      background-color: #f8fafc;
+    }
+    .slot-blank.active-slot {
+      border-color: #FF6B6B;
+      background-color: #fff1f2;
+      animation: pulseScale 1.2s infinite;
+    }
+    .slot-filled {
+      border: 4px solid #4ECDC4;
+      background-color: #f0fdfa;
+      color: #0d9488;
+    }
+    .slot-correct {
+      border-color: #06D6A0;
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+    .slot-wrong {
+      border-color: #FF6B6B;
+      background-color: #fef2f2;
+      color: #e11d48;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-sky-100 via-amber-50 to-emerald-100 min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden">
+
+  <header class="w-full bg-white/90 backdrop-blur-md shadow-md border-b-4 border-amber-300 sticky top-0 z-40 px-4 py-2.5">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-2 cursor-pointer" onclick="switchMode('learn')">
+        <div class="w-11 h-11 bg-safari-yellow rounded-2xl flex items-center justify-center text-2xl shadow-bouncy-sm border-2 border-amber-400">
+          🦁
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-wide text-safari-navy leading-none">
+            Word<span class="text-safari-coral">Safari</span>
+          </h1>
+          <p class="text-[11px] font-body text-slate-500 font-semibold tracking-wider uppercase">Spelling & Phonics Adventure</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center space-x-1 sm:space-x-2 bg-slate-100 p-1.5 rounded-full border-2 border-slate-200">
+        <button id="nav-learn" onclick="switchMode('learn')" class="px-3.5 sm:px-5 py-2 rounded-full font-bold text-sm sm:text-base transition-all flex items-center gap-1.5 bg-safari-teal text-white shadow-bouncy-sm">
+          <span>📖</span> <span class="hidden xs:inline">1.</span> Learn Words
+        </button>
+        <button id="nav-spell" onclick="switchMode('spell')" class="px-3.5 sm:px-5 py-2 rounded-full font-bold text-sm sm:text-base transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+          <span>✏️</span> <span class="hidden xs:inline">2.</span> Fill Missing
+        </button>
+        <button id="nav-phonics" onclick="switchMode('phonics')" class="px-3.5 sm:px-5 py-2 rounded-full font-bold text-sm sm:text-base transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+          <span>🔊</span> <span class="hidden xs:inline">3.</span> Phonics Lab
+        </button>
+      </nav>
+
+      <!-- Score, Stars & Settings Bar -->
+      <div class="flex items-center space-x-2.5">
+        <div class="flex items-center bg-amber-100 text-amber-900 px-3 py-1.5 rounded-2xl border-2 border-amber-300 font-bold text-base shadow-sm">
+          <span class="text-xl mr-1.5 animate-bounce-gentle">⭐</span>
+          <span id="star-count">0</span>
+        </div>
+
+        <div class="flex items-center bg-purple-100 text-purple-900 px-2.5 py-1.5 rounded-2xl border-2 border-purple-300 font-bold text-sm">
+          <span class="mr-1">🔥</span>
+          <span id="streak-count">0</span>
+        </div>
+
+        <!-- Audio mute toggle button -->
+        <button id="toggle-sound-btn" onclick="toggleMute()" class="w-10 h-10 rounded-2xl bg-white border-2 border-slate-200 shadow-bouncy-sm flex items-center justify-center text-lg hover:bg-slate-50 btn-3d" title="Mute/Unmute Audio">
+          <span id="sound-icon">🔊</span>
+        </button>
+
+        <!-- Category Selector / Modal Open -->
+        <button onclick="openCategoryModal()" class="w-10 h-10 rounded-2xl bg-safari-yellow border-2 border-amber-400 shadow-bouncy-sm flex items-center justify-center text-lg hover:bg-amber-300 btn-3d" title="Change Word List / Categories">
+          <span>⚙️</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="max-w-4xl mx-auto w-full px-4 pt-4 pb-2">
+    <div class="flex flex-wrap items-center justify-between bg-white/70 backdrop-blur-sm border-2 border-slate-200 rounded-3xl px-4 py-2.5 shadow-sm gap-2">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-semibold text-slate-500 font-body">Current List:</span>
+        <span id="active-category-name" class="font-bold text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-xl border border-indigo-200 flex items-center gap-1">
+          🐾 3-Letter Starters
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <div class="text-xs font-bold text-slate-500 font-body">
+          Word <span id="current-word-index" class="text-safari-navy">1</span> of <span id="total-word-count">8</span>
+        </div>
+        <div class="flex-1 sm:w-36 bg-slate-200 h-3 rounded-full overflow-hidden p-0.5">
+          <div id="progress-bar-fill" class="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full transition-all duration-300" style="width: 12.5%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-4xl mx-auto w-full px-4 py-3 flex-1 flex flex-col justify-center">
+
+    <!-- MODE 1: LEARN FLASHCARDS -->
+    <section id="mode-learn" class="w-full flex flex-col items-center">
+      <div class="w-full max-w-xl bg-white rounded-3xl border-4 border-amber-300 shadow-bouncy p-6 sm:p-8 flex flex-col items-center relative overflow-hidden transition-all duration-300">
+        
+        <!-- Top decorative badge -->
+        <div class="absolute top-4 left-4 bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider font-body border border-teal-200">
+          Word Flashcard
+        </div>
+
+        <!-- Pronounce Icon in Corner -->
+        <button onclick="speakCurrentWord()" class="absolute top-4 right-4 bg-amber-100 text-amber-800 p-2.5 rounded-2xl hover:bg-amber-200 border-2 border-amber-300 shadow-bouncy-sm btn-3d" title="Listen to word">
+          <span class="text-xl">📢</span>
+        </button>
+
+        <!-- Big Emoji Illustration -->
+        <div class="mt-4 mb-2 cursor-pointer group" onclick="speakCurrentWord()">
+          <div id="learn-emoji" class="text-8xl sm:text-9xl group-hover:scale-110 transition-transform duration-200 drop-shadow-md">
+            🐱
+          </div>
+        </div>
+
+        <!-- Big Bold Word Display with Syllable Dots -->
+        <div class="text-center my-2">
+          <h2 id="learn-word" class="text-5xl sm:text-6xl font-bold tracking-widest text-slate-800 uppercase">
+            C · A · T
+          </h2>
+          <!-- Phonetic spelling -->
+          <div class="mt-2 inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 px-4 py-1.5 rounded-2xl border border-purple-200 font-body text-base font-semibold">
+            <span>Phonics:</span>
+            <span id="learn-phonics" class="font-bold tracking-wider">/k/ · /æ/ · /t/</span>
+          </div>
+        </div>
+
+        <!-- Fun Sentence -->
+        <div class="w-full bg-amber-50/80 rounded-2xl p-4 mt-4 border-2 border-dashed border-amber-200 text-center">
+          <p class="text-sm font-semibold text-slate-500 uppercase font-body tracking-wider mb-1">Example Sentence</p>
+          <p id="learn-sentence" class="text-lg sm:text-xl font-body font-semibold text-slate-700">
+            The playful <span class="text-safari-coral font-bold underline">cat</span> purrs happily!
+          </p>
+          <button onclick="speakSentence()" class="mt-2 text-xs font-bold text-amber-700 hover:text-amber-900 inline-flex items-center gap-1 bg-amber-200/70 px-3 py-1 rounded-lg">
+            🔊 Read sentence aloud
+          </button>
+        </div>
+
+        <!-- Syllables Breakdown Buttons -->
+        <div class="w-full mt-4 flex flex-col items-center">
+          <p class="text-xs font-bold text-slate-400 uppercase font-body tracking-wider mb-2">Tap each letter to hear its sound:</p>
+          <div id="learn-letter-buttons" class="flex flex-wrap justify-center gap-2">
+            <!-- Dynamically populated letter buttons -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Navigation for Learn Cards -->
+      <div class="w-full max-w-xl flex items-center justify-between mt-6 px-2">
+        <button onclick="navigateWord(-1)" class="px-5 py-3 rounded-2xl bg-white border-2 border-slate-300 font-bold text-slate-700 shadow-bouncy-sm hover:bg-slate-50 flex items-center gap-2 btn-3d">
+          <span>⬅️</span> Previous
+        </button>
+
+        <button onclick="speakCurrentWord()" class="px-6 py-3 rounded-2xl bg-safari-yellow border-2 border-amber-400 font-bold text-slate-800 shadow-bouncy-sm hover:bg-amber-300 flex items-center gap-2 btn-3d">
+          <span>🔊</span> Say Word
+        </button>
+
+        <button onclick="navigateWord(1)" class="px-5 py-3 rounded-2xl bg-safari-teal text-white border-2 border-teal-500 font-bold shadow-bouncy-sm hover:bg-teal-500 flex items-center gap-2 btn-3d">
+          Next <span>➡️</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="mode-spell" class="w-full flex-col items-center hidden">
+      <div class="w-full max-w-xl bg-white rounded-3xl border-4 border-safari-coral shadow-bouncy p-6 sm:p-8 flex flex-col items-center relative overflow-hidden">
+        
+        <!-- Mode Badge -->
+        <div class="absolute top-4 left-4 bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider font-body border border-rose-200">
+          Missing Letters Game
+        </div>
+
+        <!-- Hint Button -->
+        <button onclick="provideHint()" id="hint-btn" class="absolute top-4 right-4 bg-amber-100 text-amber-900 px-3 py-1.5 rounded-2xl hover:bg-amber-200 border-2 border-amber-300 shadow-bouncy-sm btn-3d font-bold text-xs flex items-center gap-1.5" title="Get a spelling hint">
+          <span>💡</span> Hint
+        </button>
+
+        <!-- Illustration -->
+        <div class="mt-4 mb-2 cursor-pointer" onclick="speakCurrentWord()">
+          <div id="spell-emoji" class="text-7xl sm:text-8xl hover:scale-105 transition-transform drop-shadow">
+            🐱
+          </div>
+        </div>
+
+        <!-- Audio prompt banner -->
+        <button onclick="speakCurrentWord()" class="mt-1 mb-4 inline-flex items-center gap-2 text-sm font-bold text-safari-blue bg-blue-50 px-4 py-1.5 rounded-full border border-blue-200 hover:bg-blue-100 btn-3d">
+          <span>🔊</span> Tap to hear word: <span id="spell-audio-prompt" class="font-bold underline uppercase">CAT</span>
+        </button>
+
+        <!-- Dynamic Letter Slots Area -->
+        <div id="letter-slots-container" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 my-3 min-h-[80px]">
+          <!-- Slots rendered dynamically via JS -->
+        </div>
+
+        <!-- Feedback & Status Notification Banner -->
+        <div id="spell-feedback" class="h-8 flex items-center justify-center text-center font-bold text-base mt-2 transition-all">
+          <span class="text-slate-400 font-body">Choose the missing letter below!</span>
+        </div>
+
+        <hr class="w-full border-slate-200 my-4">
+
+        <!-- Keyboard / Choice Letter Tiles -->
+        <div class="w-full flex flex-col items-center">
+          <p class="text-xs font-bold text-slate-500 uppercase font-body tracking-wider mb-2.5">
+            Click a letter tile or type on keyboard:
+          </p>
+          <div id="spelling-options-grid" class="flex flex-wrap justify-center gap-2 max-w-md">
+            <!-- Letter choices inserted dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer action controls -->
+      <div class="w-full max-w-xl flex items-center justify-between mt-6 px-2">
+        <button onclick="resetCurrentPuzzle()" class="px-4 py-3 rounded-2xl bg-white border-2 border-slate-300 font-bold text-slate-700 shadow-bouncy-sm hover:bg-slate-50 flex items-center gap-1.5 btn-3d text-sm">
+          <span>🔄</span> Reset
+        </button>
+
+        <button onclick="skipSpellingWord()" class="px-4 py-3 rounded-2xl bg-slate-100 border-2 border-slate-200 font-bold text-slate-600 shadow-bouncy-sm hover:bg-slate-200 flex items-center gap-1.5 btn-3d text-sm">
+          <span>⏭️</span> Skip Word
+        </button>
+
+        <button onclick="checkAnswer(true)" id="spell-check-btn" class="px-6 py-3 rounded-2xl bg-safari-green text-white border-2 border-emerald-500 font-bold text-base shadow-bouncy-sm hover:bg-emerald-500 flex items-center gap-1.5 btn-3d">
+          <span>✨</span> Check Word
+        </button>
+      </div>
+    </section>
+
+    <section id="mode-phonics" class="w-full flex-col items-center hidden">
+      <div class="w-full max-w-xl bg-white rounded-3xl border-4 border-safari-purple shadow-bouncy p-6 sm:p-8 flex flex-col items-center relative overflow-hidden">
+        
+        <!-- Mode Badge -->
+        <div class="absolute top-4 left-4 bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider font-body border border-purple-200">
+          Phonics Lab & Sound Blender
+        </div>
+
+        <div class="mt-4 mb-2 cursor-pointer" onclick="speakCurrentWord()">
+          <div id="phonics-emoji" class="text-7xl sm:text-8xl hover:scale-105 transition-transform">
+            🐱
+          </div>
+        </div>
+
+        <div class="text-center mt-1 mb-2">
+          <h2 id="phonics-word-display" class="text-4xl sm:text-5xl font-bold tracking-widest text-slate-800 uppercase">
+            CAT
+          </h2>
+          <p class="text-sm font-body font-semibold text-purple-600 mt-1">
+            Tap each phoneme block, then press <span class="font-bold">Blend Sounds</span>!
+          </p>
+        </div>
+
+        <!-- Phonics Segment Blocks -->
+        <div id="phonics-blocks-container" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 my-5 w-full">
+          <!-- Phonics letter & phonetic sound blocks populated dynamically -->
+        </div>
+
+        <!-- Blend sound controller button -->
+        <button onclick="blendAndPlaySounds()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-safari-purple to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold text-lg shadow-bouncy border-2 border-purple-400 flex items-center justify-center gap-2 btn-3d">
+          <span class="text-2xl">🪄</span> Blend Sounds Together!
+        </button>
+
+        <!-- Phonics Fun Tip box -->
+        <div class="w-full bg-purple-50 rounded-2xl p-4 mt-5 border border-purple-200 flex items-start gap-3">
+          <span class="text-2xl">💡</span>
+          <div class="text-xs font-body text-purple-900 leading-relaxed">
+            <span class="font-bold">Phonics Tip:</span> Notice how the letters work together like a team! Letters have names (like 'C'), but phonics is the special sound they make when reading (like "/k/").
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Phonics lab navigation footer -->
+      <div class="w-full max-w-xl flex items-center justify-between mt-6 px-2">
+        <button onclick="navigateWord(-1)" class="px-5 py-3 rounded-2xl bg-white border-2 border-slate-300 font-bold text-slate-700 shadow-bouncy-sm hover:bg-slate-50 flex items-center gap-2 btn-3d">
+          <span>⬅️</span> Prev Word
+        </button>
+
+        <button onclick="navigateWord(1)" class="px-5 py-3 rounded-2xl bg-safari-purple text-white border-2 border-purple-500 font-bold shadow-bouncy-sm hover:bg-purple-600 flex items-center gap-2 btn-3d">
+          Next Word <span>➡️</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="category-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 border-4 border-amber-300 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <button onclick="closeCategoryModal()" class="absolute top-4 right-4 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full font-bold text-slate-600 flex items-center justify-center">
+        ✕
+      </button>
+
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl">🎒</span>
+        <h3 class="text-2xl font-bold text-slate-800">Word Safari Lists</h3>
+      </div>
+
+      <p class="text-sm font-body text-slate-600 mb-4">
+        Choose a theme or add your own words to practice spelling and phonics!
+      </p>
+
+      <!-- Category selection cards -->
+      <div class="space-y-2.5" id="category-list-container">
+        <!-- Injected via JS -->
+      </div>
+
+      <hr class="my-5 border-slate-200">
+
+      <!-- Add Custom Word Section -->
+      <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
+        <h4 class="font-bold text-amber-900 text-sm flex items-center gap-1.5 mb-2">
+          <span>✏️</span> Add Custom Word for Kids
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+          <input type="text" id="custom-word-input" placeholder="Word (e.g. STAR)" maxlength="12" class="px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold uppercase focus:ring-2 focus:ring-amber-400 outline-none">
+          <input type="text" id="custom-emoji-input" placeholder="Emoji (e.g. ⭐)" maxlength="4" class="px-3 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+        </div>
+        <input type="text" id="custom-sentence-input" placeholder="Example Sentence (e.g. The star shines bright in the sky.)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-body mb-3 focus:ring-2 focus:ring-amber-400 outline-none">
+        <button onclick="addCustomWord()" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-sm shadow-sm btn-3d">
+          ➕ Add to Custom Category
+        </button>
+      </div>
+
+      <div class="mt-5 text-center">
+        <button onclick="closeCategoryModal()" class="px-6 py-2.5 bg-slate-800 text-white rounded-2xl font-bold text-sm btn-3d">
+          Done & Play!
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 border-4 border-safari-green shadow-2xl text-center relative animate-pulse-scale">
+      <div class="text-6xl mb-3">🎉</div>
+      <h3 class="text-3xl font-bold text-safari-navy mb-1" id="success-title">Awesome!</h3>
+      <p class="font-body text-slate-600 font-semibold mb-4" id="success-subtitle">You spelled it perfectly!</p>
+      
+      <div class="bg-amber-100 rounded-2xl py-3 px-4 mb-5 inline-flex items-center gap-2 border border-amber-300">
+        <span class="text-2xl">⭐</span>
+        <span class="text-amber-900 font-bold text-lg">+1 Star Earned!</span>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="replayCurrentSuccessWord()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl btn-3d text-sm">
+          🔊 Hear Again
+        </button>
+        <button onclick="closeSuccessAndNext()" class="flex-1 py-3 bg-safari-green hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-bouncy-sm btn-3d text-sm">
+          Next Word ➡️
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="w-full text-center py-3 text-xs text-slate-500 font-body px-4">
+    <p>Friendly tip: Click on the speakers or letter tiles anytime to hear the sounds! 🐯✨</p>
+  </footer>
+
+  <script>
+    // Master Word Categories Database with Phonics breakdown, Emojis, and Sentences
+    const WORD_CATEGORIES = {
+      starter3: {
+        id: 'starter3',
+        name: '🐾 3-Letter Starters',
+        description: 'Easy foundational words for beginning spellers',
+        words: [
+          {
+            word: 'CAT',
+            emoji: '🐱',
+            phonics: ['/k/', '/æ/', '/t/'],
+            letters: ['C', 'A', 'T'],
+            sentence: 'The playful cat purrs happily in the warm sunshine.'
+          },
+          {
+            word: 'DOG',
+            emoji: '🐶',
+            phonics: ['/d/', '/ɒ/', '/ɡ/'],
+            letters: ['D', 'O', 'G'],
+            sentence: 'The loyal dog wags its tail when greeting a friend.'
+          },
+          {
+            word: 'SUN',
+            emoji: '☀️',
+            phonics: ['/s/', '/ʌ/', '/n/'],
+            letters: ['S', 'U', 'N'],
+            sentence: 'The golden sun warms the earth every morning.'
+          },
+          {
+            word: 'PIG',
+            emoji: '🐷',
+            phonics: ['/p/', '/ɪ/', '/ɡ/'],
+            letters: ['P', 'I', 'G'],
+            sentence: 'The cheerful pig loves to splash in cool mud.'
+          },
+          {
+            word: 'BAT',
+            emoji: '🦇',
+            phonics: ['/b/', '/æ/', '/t/'],
+            letters: ['B', 'A', 'T'],
+            sentence: 'The little brown bat flies under the moonlight.'
+          },
+          {
+            word: 'BUG',
+            emoji: '🐞',
+            phonics: ['/b/', '/ʌ/', '/ɡ/'],
+            letters: ['B', 'U', 'G'],
+            sentence: 'A tiny ladybug crawls on a green garden leaf.'
+          },
+          {
+            word: 'CUP',
+            emoji: '🥛',
+            phonics: ['/k/', '/ʌ/', '/p/'],
+            letters: ['C', 'U', 'P'],
+            sentence: 'I drink a fresh cup of cold milk with breakfast.'
+          },
+          {
+            word: 'FOX',
+            emoji: '🦊',
+            phonics: ['/f/', '/ɒ/', '/ks/'],
+            letters: ['F', 'O', 'X'],
+            sentence: 'The clever orange fox trots through the forest.'
+          }
+        ]
+      },
+      nature4: {
+        id: 'nature4',
+        name: '🌿 4-Letter Nature Friends',
+        description: 'Wonderful 4-letter words from the animal and nature world',
+        words: [
+          {
+            word: 'FROG',
+            emoji: '🐸',
+            phonics: ['/f/', '/r/', '/ɒ/', '/ɡ/'],
+            letters: ['F', 'R', 'O', 'G'],
+            sentence: 'The green frog leaps from lily pad to lily pad!'
+          },
+          {
+            word: 'BIRD',
+            emoji: '🐦',
+            phonics: ['/b/', '/ɜːr/', '/d/'],
+            letters: ['B', 'I', 'R', 'D'],
+            sentence: 'The blue bird sings a sweet song up in the oak tree.'
+          },
+          {
+            word: 'FISH',
+            emoji: '🐠',
+            phonics: ['/f/', '/ɪ/', '/ʃ/'],
+            letters: ['F', 'I', 'S', 'H'],
+            sentence: 'The tropical fish swims smoothly through the coral.'
+          },
+          {
+            word: 'DUCK',
+            emoji: '🦆',
+            phonics: ['/d/', '/ʌ/', '/k/'],
+            letters: ['D', 'U', 'C', 'K'],
+            sentence: 'The mama duck leads her ducklings across the pond.'
+          },
+          {
+            word: 'BEAR',
+            emoji: '🐻',
+            phonics: ['/b/', '/ɛər/'],
+            letters: ['B', 'E', 'A', 'R'],
+            sentence: 'The big fuzzy bear enjoys honey and fresh berries.'
+          },
+          {
+            word: 'LION',
+            emoji: '🦁',
+            phonics: ['/l/', '/aɪ/', '/ə/', '/n/'],
+            letters: ['L', 'I', 'O', 'N'],
+            sentence: 'The brave lion roars across the African plains.'
+          },
+          {
+            word: 'TREE',
+            emoji: '🌳',
+            phonics: ['/t/', '/r/', '/iː/'],
+            letters: ['T', 'R', 'E', 'E'],
+            sentence: 'The tall green tree gives shade on hot summer days.'
+          },
+          {
+            word: 'MOON',
+            emoji: '🌙',
+            phonics: ['/m/', '/uː/', '/n/'],
+            letters: ['M', 'O', 'O', 'N'],
+            sentence: 'The silver moon glows peacefully in the night sky.'
+          }
+        ]
+      },
+      yumYum: {
+        id: 'yumYum',
+        name: '🍎 Yummy Snacks & Food',
+        description: 'Delicious food words with tasty sounds',
+        words: [
+          {
+            word: 'CAKE',
+            emoji: '🎂',
+            phonics: ['/k/', '/eɪ/', '/k/'],
+            letters: ['C', 'A', 'K', 'E'],
+            sentence: 'We celebrate birthdays with yummy frosted cake!'
+          },
+          {
+            word: 'APPLE',
+            emoji: '🍎',
+            phonics: ['/æ/', '/p/', '/əl/'],
+            letters: ['A', 'P', 'P', 'L', 'E'],
+            sentence: 'Crunching into a sweet red apple is delicious.'
+          },
+          {
+            word: 'BREAD',
+            emoji: '🍞',
+            phonics: ['/b/', '/r/', '/ɛ/', '/d/'],
+            letters: ['B', 'R', 'E', 'A', 'D'],
+            sentence: 'Warm baked bread smells wonderful right out of the oven.'
+          },
+          {
+            word: 'MILK',
+            emoji: '🥛',
+            phonics: ['/m/', '/ɪ/', '/l/', '/k/'],
+            letters: ['M', 'I', 'L', 'K'],
+            sentence: 'Drinking cold milk helps our bones grow strong.'
+          },
+          {
+            word: 'BERRY',
+            emoji: '🫐',
+            phonics: ['/b/', '/ɛ/', '/r/', '/i/'],
+            letters: ['B', 'E', 'R', 'R', 'Y'],
+            sentence: 'Ripe blue berries make the tastiest morning snack.'
+          }
+        ]
+      },
+      custom: {
+        id: 'custom',
+        name: '⭐ My Custom Words',
+        description: 'Words added by parents or teachers',
+        words: [
+          {
+            word: 'STAR',
+            emoji: '⭐',
+            phonics: ['/s/', '/t/', '/ɑːr/'],
+            letters: ['S', 'T', 'A', 'R'],
+            sentence: 'A twinkling star shines bright up above the world.'
+          }
+        ]
+      }
+    };
+
+    // State Variables
+    let currentCategoryKey = 'starter3';
+    let currentWordIndex = 0;
+    let currentMode = 'learn'; // 'learn' | 'spell' | 'phonics'
+    let starsCount = 0;
+    let streakCount = 0;
+    let isSoundMuted = false;
+
+    // Spelling Quiz State
+    let puzzleMissingIndices = []; // Which character positions are missing
+    let userSpellingAnswers = {};   // index -> letter chosen
+    let activeSlotIndex = null;     // currently highlighted slot
+
+    function speakText(text, rate = 0.85, pitch = 1.1) {
+      if (isSoundMuted || !('speechSynthesis' in window)) return;
+      
+      try {
+        window.speechSynthesis.cancel(); // Stop any pending speech
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = rate;
+        utterance.pitch = pitch;
+        utterance.lang = 'en-US';
+
+        // Select a friendly child-like or clear English voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => (v.name.includes('Samantha') || v.name.includes('Google US English') || v.name.includes('Natural') || v.lang.startsWith('en')) && !v.name.includes('Bad'));
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.error('Speech synthesis error:', err);
+      }
+    }
+
+    function playAudioCheer() {
+      const compliments = [
+        "Super job!",
+        "Fantastic spelling!",
+        "You're a spelling superstar!",
+        "Brilliant!",
+        "Spot on! Way to go!",
+        "Woohoo! Wonderful!"
+      ];
+      const pick = compliments[Math.floor(Math.random() * compliments.length)];
+      speakText(pick, 0.95, 1.25);
+    }
+
+    function toggleMute() {
+      isSoundMuted = !isSoundMuted;
+      document.getElementById('sound-icon').textContent = isSoundMuted ? '🔇' : '🔊';
+      if (isSoundMuted && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      } else if (!isSoundMuted) {
+        speakText("Sound on! Ready to play!", 1.0, 1.1);
+      }
+    }
+
+    // Helper: Approximate phoneme audio pronunciation guide
+    function pronouncePhoneme(phoneme, letter) {
+      // Map IPA phonemes to clean speech-synthesizable phonetic sounds
+      const soundMap = {
+        '/k/': 'kuh',
+        '/æ/': 'a',
+        '/t/': 'tuh',
+        '/d/': 'duh',
+        '/ɒ/': 'aw',
+        '/ɡ/': 'guh',
+        '/s/': 'sss',
+        '/ʌ/': 'uh',
+        '/n/': 'nnn',
+        '/p/': 'puh',
+        '/ɪ/': 'ih',
+        '/b/': 'buh',
+        '/f/': 'fff',
+        '/ks/': 'ks',
+        '/r/': 'rrr',
+        '/ɜːr/': 'er',
+        '/ʃ/': 'shh',
+        '/ɛər/': 'air',
+        '/l/': 'lll',
+        '/aɪ/': 'eye',
+        '/ə/': 'uh',
+        '/iː/': 'ee',
+        '/uː/': 'ooo',
+        '/m/': 'mmm',
+        '/eɪ/': 'ay',
+        '/əl/': 'ull',
+        '/ɛ/': 'eh',
+        '/ɑːr/': 'are'
+      };
+
+      const sound = soundMap[phoneme] || letter || phoneme;
+      speakText(sound, 0.75, 1.15);
+    }
+
+    function getCurrentCategory() {
+      return WORD_CATEGORIES[currentCategoryKey] || WORD_CATEGORIES.starter3;
+    }
+
+    function getCurrentWord() {
+      const cat = getCurrentCategory();
+      if (!cat.words || cat.words.length === 0) {
+        return {
+          word: 'CAT',
+          emoji: '🐱',
+          phonics: ['/k/', '/æ/', '/t/'],
+          letters: ['C', 'A', 'T'],
+          sentence: 'A cheerful cat smiles!'
+        };
+      }
+      return cat.words[currentWordIndex % cat.words.length];
+    }
+
+    function updateProgressIndicators() {
+      const cat = getCurrentCategory();
+      const total = cat.words.length;
+      const index = (currentWordIndex % total) + 1;
+      
+      document.getElementById('current-word-index').textContent = index;
+      document.getElementById('total-word-count').textContent = total;
+      
+      const pct = (index / total) * 100;
+      document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+      document.getElementById('active-category-name').textContent = cat.name;
+    }
+
+    function switchMode(newMode) {
+      currentMode = newMode;
+
+      // Update Nav styling
+      ['learn', 'spell', 'phonics'].forEach(m => {
+        const btn = document.getElementById(`nav-${m}`);
+        const view = document.getElementById(`mode-${m}`);
+        if (m === newMode) {
+          btn.className = "px-3.5 sm:px-5 py-2 rounded-full font-bold text-sm sm:text-base transition-all flex items-center gap-1.5 bg-safari-teal text-white shadow-bouncy-sm";
+          view.classList.remove('hidden');
+          view.classList.add('flex');
+        } else {
+          btn.className = "px-3.5 sm:px-5 py-2 rounded-full font-bold text-sm sm:text-base transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900";
+          view.classList.add('hidden');
+          view.classList.remove('flex');
+        }
+      });
+
+      renderCurrentModeView();
+    }
+
+    function navigateWord(delta) {
+      const cat = getCurrentCategory();
+      currentWordIndex = (currentWordIndex + delta + cat.words.length) % cat.words.length;
+      renderCurrentModeView();
+      
+      if (currentMode === 'learn') {
+        speakCurrentWord();
+      }
+    }
+
+    function renderCurrentModeView() {
+      updateProgressIndicators();
+      const wordObj = getCurrentWord();
+
+      if (currentMode === 'learn') {
+        renderLearnView(wordObj);
+      } else if (currentMode === 'spell') {
+        setupSpellingPuzzle(wordObj);
+      } else if (currentMode === 'phonics') {
+        renderPhonicsView(wordObj);
+      }
+    }
+
+    function renderLearnView(wordObj) {
+      document.getElementById('learn-emoji').textContent = wordObj.emoji;
+      document.getElementById('learn-word').textContent = wordObj.letters.join(' · ');
+      document.getElementById('learn-phonics').textContent = wordObj.phonics.join(' · ');
+      
+      // Highlight target word in sentence
+      const regex = new RegExp(`(${wordObj.word})`, 'gi');
+      const formattedSentence = wordObj.sentence.replace(regex, `<span class="text-safari-coral font-bold underline">$1</span>`);
+      document.getElementById('learn-sentence').innerHTML = formattedSentence;
+
+      // Build syllable / letter buttons
+      const container = document.getElementById('learn-letter-buttons');
+      container.innerHTML = '';
+
+      wordObj.letters.forEach((char, i) => {
+        const ph = wordObj.phonics[i] || `/${char.toLowerCase()}/`;
+        const btn = document.createElement('button');
+        btn.className = "px-4 py-2 bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 rounded-2xl font-bold text-lg text-slate-800 shadow-bouncy-sm btn-3d flex flex-col items-center min-w-[50px]";
+        btn.innerHTML = `
+          <span class="text-xl font-bold">${char}</span>
+          <span class="text-[11px] font-body text-purple-700 font-semibold">${ph}</span>
+        `;
+        btn.onclick = () => {
+          pronouncePhoneme(ph, char);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function speakCurrentWord() {
+      const wordObj = getCurrentWord();
+      speakText(wordObj.word, 0.8, 1.1);
+    }
+
+    function speakSentence() {
+      const wordObj = getCurrentWord();
+      speakText(wordObj.sentence, 0.88, 1.05);
+    }
+
+    function setupSpellingPuzzle(wordObj) {
+      const letters = wordObj.letters;
+      userSpellingAnswers = {};
+      
+      // Determine missing indices:
+      // For 3-letter words: hide 1 vowel or middle/ending letter.
+      // For 4+ letter words: hide 1 or 2 letters.
+      if (letters.length <= 3) {
+        // pick index 1 (middle) or random
+        puzzleMissingIndices = [1];
+      } else {
+        // Hide 2 letters
+        const idx1 = Math.floor(Math.random() * (letters.length - 2)) + 1;
+        let idx2 = (idx1 + 1) % letters.length;
+        if (idx2 === 0) idx2 = letters.length - 1;
+        puzzleMissingIndices = [idx1, idx2].sort((a, b) => a - b);
+      }
+
+      activeSlotIndex = puzzleMissingIndices[0];
+
+      // Update static prompts
+      document.getElementById('spell-emoji').textContent = wordObj.emoji;
+      document.getElementById('spell-audio-prompt').textContent = wordObj.word;
+      setSpellFeedback("Tap an empty box and pick the missing letter!", "normal");
+
+      renderSpellingSlots();
+      renderSpellingKeypad();
+    }
+
+    function renderSpellingSlots() {
+      const wordObj = getCurrentWord();
+      const container = document.getElementById('letter-slots-container');
+      container.innerHTML = '';
+
+      wordObj.letters.forEach((correctChar, index) => {
+        const isMissing = puzzleMissingIndices.includes(index);
+        const slot = document.createElement('div');
+
+        if (!isMissing) {
+          // Pre-filled visible letter
+          slot.className = "w-14 h-16 sm:w-16 sm:h-20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-bold bg-slate-100 border-4 border-slate-300 text-slate-700 shadow-bouncy-sm";
+          slot.textContent = correctChar;
+        } else {
+          // Missing letter interactive slot
+          const filledChar = userSpellingAnswers[index];
+          const isActive = (activeSlotIndex === index);
+
+          slot.className = `w-14 h-16 sm:w-16 sm:h-20 rounded-2xl flex flex-col items-center justify-center text-3xl sm:text-4xl font-bold cursor-pointer transition-all shadow-bouncy-sm select-none ${
+            isActive ? 'active-slot slot-blank' : filledChar ? 'slot-filled' : 'slot-blank'
+          }`;
+
+          slot.textContent = filledChar || '?';
+          
+          slot.onclick = () => {
+            activeSlotIndex = index;
+            renderSpellingSlots();
+            speakText("Pick a letter for this slot", 0.95, 1.2);
+          };
+        }
+
+        container.appendChild(slot);
+      });
+    }
+
+    function renderSpellingKeypad() {
+      const wordObj = getCurrentWord();
+      const grid = document.getElementById('spelling-options-grid');
+      grid.innerHTML = '';
+
+      // Generate colorful options: include correct answers + random distractors
+      const requiredLetters = puzzleMissingIndices.map(idx => wordObj.letters[idx]);
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+      
+      const optionSet = new Set(requiredLetters);
+      while (optionSet.size < Math.min(8, 26)) {
+        const randomChar = alphabet[Math.floor(Math.random() * alphabet.length)];
+        optionSet.add(randomChar);
+      }
+
+      // Shuffle options
+      const options = Array.from(optionSet).sort(() => Math.random() - 0.5);
+
+      const colorPalette = [
+        'bg-amber-100 border-amber-300 text-amber-900',
+        'bg-teal-100 border-teal-300 text-teal-900',
+        'bg-rose-100 border-rose-300 text-rose-900',
+        'bg-purple-100 border-purple-300 text-purple-900',
+        'bg-sky-100 border-sky-300 text-sky-900',
+        'bg-emerald-100 border-emerald-300 text-emerald-900',
+      ];
+
+      options.forEach((char, idx) => {
+        const btn = document.createElement('button');
+        const colorClass = colorPalette[idx % colorPalette.length];
+        btn.className = `w-11 h-12 sm:w-13 sm:h-14 rounded-2xl border-2 font-bold text-xl sm:text-2xl shadow-bouncy-sm btn-3d flex items-center justify-center uppercase transition-transform ${colorClass}`;
+        btn.textContent = char;
+
+        btn.onclick = () => handleLetterSelection(char);
+        grid.appendChild(btn);
+      });
+    }
+
+    function handleLetterSelection(letter) {
+      if (activeSlotIndex === null) {
+        // Default to first empty slot
+        const firstEmpty = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
+        if (firstEmpty !== undefined) {
+          activeSlotIndex = firstEmpty;
+        } else {
+          activeSlotIndex = puzzleMissingIndices[0];
+        }
+      }
+
+      userSpellingAnswers[activeSlotIndex] = letter.toUpperCase();
+      speakText(letter, 0.9, 1.2);
+
+      // Auto advance to next unfilled slot if exists
+      const nextUnfilled = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
+      if (nextUnfilled !== undefined) {
+        activeSlotIndex = nextUnfilled;
+      }
+
+      renderSpellingSlots();
+
+      // Check if all slots are filled
+      const allFilled = puzzleMissingIndices.every(idx => !!userSpellingAnswers[idx]);
+      if (allFilled) {
+        checkAnswer(false);
+      }
+    }
+
+    function checkAnswer(manualClick = false) {
+      const wordObj = getCurrentWord();
+      const allFilled = puzzleMissingIndices.every(idx => !!userSpellingAnswers[idx]);
+
+      if (!allFilled) {
+        setSpellFeedback("Fill in all the missing boxes first!", "warning");
+        speakText("Keep going! Fill in all the boxes.", 0.9, 1.1);
+        return;
+      }
+
+      let isCorrect = true;
+      for (const idx of puzzleMissingIndices) {
+        if (userSpellingAnswers[idx] !== wordObj.letters[idx]) {
+          isCorrect = false;
+          break;
+        }
+      }
+
+      if (isCorrect) {
+        handleSuccess();
+      } else {
+        streakCount = 0;
+        document.getElementById('streak-count').textContent = streakCount;
+        setSpellFeedback("Oops! Try again or tap Hint! 🌟", "error");
+        speakText("Almost! Try again or tap the lightbulb hint!", 0.9, 1.05);
+
+        // Shake visual effect
+        const container = document.getElementById('letter-slots-container');
+        container.classList.add('animate-wiggle');
+        setTimeout(() => container.classList.remove('animate-wiggle'), 500);
+      }
+    }
+
+    function handleSuccess() {
+      starsCount += 1;
+      streakCount += 1;
+      document.getElementById('star-count').textContent = starsCount;
+      document.getElementById('streak-count').textContent = streakCount;
+
+      setSpellFeedback("🎉 HOORAY! You spelled it right!", "success");
+      
+      // Fire celebratory confetti!
+      triggerConfetti();
+
+      // Cheer speech
+      playAudioCheer();
+
+      // Open Success Modal
+      setTimeout(() => {
+        const wordObj = getCurrentWord();
+        document.getElementById('success-title').textContent = "Super Speller!";
+        document.getElementById('success-subtitle').textContent = `You correctly spelled ${wordObj.word}!`;
+        document.getElementById('success-modal').classList.remove('hidden');
+      }, 400);
+    }
+
+    function provideHint() {
+      const wordObj = getCurrentWord();
+      if (activeSlotIndex !== null) {
+        const correctLetter = wordObj.letters[activeSlotIndex];
+        userSpellingAnswers[activeSlotIndex] = correctLetter;
+        speakText(`The letter is ${correctLetter}!`, 0.85, 1.2);
+        
+        // Auto select next unfilled slot
+        const nextUnfilled = puzzleMissingIndices.find(idx => !userSpellingAnswers[idx]);
+        activeSlotIndex = nextUnfilled !== undefined ? nextUnfilled : null;
+        
+        renderSpellingSlots();
+        setSpellFeedback(`Hint placed: '${correctLetter}'!`, "hint");
+
+        const allFilled = puzzleMissingIndices.every(idx => !!userSpellingAnswers[idx]);
+        if (allFilled) {
+          checkAnswer(false);
+        }
+      }
+    }
+
+    function resetCurrentPuzzle() {
+      userSpellingAnswers = {};
+      activeSlotIndex = puzzleMissingIndices[0];
+      setSpellFeedback("Slots reset! Try spelling it now.", "normal");
+      renderSpellingSlots();
+    }
+
+    function skipSpellingWord() {
+      streakCount = 0;
+      document.getElementById('streak-count').textContent = streakCount;
+      navigateWord(1);
+    }
+
+    function setSpellFeedback(msg, type = "normal") {
+      const fb = document.getElementById('spell-feedback');
+      fb.textContent = msg;
+      if (type === "success") fb.className = "h-8 flex items-center justify-center text-center font-bold text-base mt-2 text-emerald-600 animate-bounce-gentle";
+      else if (type === "error") fb.className = "h-8 flex items-center justify-center text-center font-bold text-base mt-2 text-rose-600";
+      else if (type === "hint") fb.className = "h-8 flex items-center justify-center text-center font-bold text-base mt-2 text-amber-600";
+      else fb.className = "h-8 flex items-center justify-center text-center font-bold text-base mt-2 text-slate-500 font-body";
+    }
+
+    function closeSuccessAndNext() {
+      document.getElementById('success-modal').classList.add('hidden');
+      navigateWord(1);
+    }
+
+    function replayCurrentSuccessWord() {
+      speakCurrentWord();
+    }
+
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 65,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#9B5DE5']
+        });
+      }
+    }
+
+    // Physical Keyboard Listener Support for Desktop / Tablet Keyboards
+    window.addEventListener('keydown', (e) => {
+      if (currentMode !== 'spell') return;
+      const key = e.key.toUpperCase();
+      if (/^[A-Z]$/.test(key)) {
+        handleLetterSelection(key);
+      } else if (e.key === 'Backspace') {
+        if (activeSlotIndex !== null && userSpellingAnswers[activeSlotIndex]) {
+          delete userSpellingAnswers[activeSlotIndex];
+          renderSpellingSlots();
+        }
+      } else if (e.key === 'Enter') {
+        checkAnswer(true);
+      }
+    });
+
+    function renderPhonicsView(wordObj) {
+      document.getElementById('phonics-emoji').textContent = wordObj.emoji;
+      document.getElementById('phonics-word-display').textContent = wordObj.word;
+
+      const container = document.getElementById('phonics-blocks-container');
+      container.innerHTML = '';
+
+      wordObj.letters.forEach((letter, i) => {
+        const ph = wordObj.phonics[i] || `/${letter.toLowerCase()}/`;
+        const block = document.createElement('div');
+        
+        block.id = `phonics-block-${i}`;
+        block.className = "flex-1 min-w-[75px] max-w-[110px] bg-purple-50 hover:bg-purple-100 border-4 border-purple-300 rounded-3xl p-3 sm:p-4 flex flex-col items-center justify-center cursor-pointer shadow-bouncy-sm transition-transform btn-3d";
+        
+        block.innerHTML = `
+          <span class="text-3xl sm:text-4xl font-bold text-purple-900">${letter}</span>
+          <span class="text-sm font-bold text-safari-coral font-body mt-1 bg-white px-2 py-0.5 rounded-full border border-purple-200">${ph}</span>
+          <span class="text-xs text-slate-400 mt-1 font-body">🔊 tap</span>
+        `;
+
+        block.onclick = () => {
+          // Animate block
+          block.classList.add('scale-110', 'border-purple-600');
+          setTimeout(() => block.classList.remove('scale-110', 'border-purple-600'), 350);
+          pronouncePhoneme(ph, letter);
+        };
+
+        container.appendChild(block);
+      });
+    }
+
+    // Blend sounds sequentially then speak the full word
+    async function blendAndPlaySounds() {
+      const wordObj = getCurrentWord();
+      if (isSoundMuted) {
+        speakText("Sound is currently muted! Unmute at the top.", 1.0, 1.0);
+        return;
+      }
+
+      for (let i = 0; i < wordObj.letters.length; i++) {
+        const letter = wordObj.letters[i];
+        const ph = wordObj.phonics[i] || `/${letter.toLowerCase()}/`;
+        const block = document.getElementById(`phonics-block-${i}`);
+
+        if (block) {
+          block.classList.add('bg-amber-200', 'scale-110', 'border-amber-400');
+        }
+
+        pronouncePhoneme(ph, letter);
+        await new Promise(r => setTimeout(r, 650));
+
+        if (block) {
+          block.classList.remove('bg-amber-200', 'scale-110', 'border-amber-400');
+        }
+      }
+
+      // Small pause before full blend
+      await new Promise(r => setTimeout(r, 300));
+      speakText(`${wordObj.word}!`, 0.85, 1.15);
+      triggerConfetti();
+    }
+
+    function openCategoryModal() {
+      renderCategoryList();
+      document.getElementById('category-modal').classList.remove('hidden');
+    }
+
+    function closeCategoryModal() {
+      document.getElementById('category-modal').classList.add('hidden');
+    }
+
+    function renderCategoryList() {
+      const container = document.getElementById('category-list-container');
+      container.innerHTML = '';
+
+      Object.keys(WORD_CATEGORIES).forEach(key => {
+        const cat = WORD_CATEGORIES[key];
+        const isSelected = (currentCategoryKey === key);
+
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
+          isSelected ? 'bg-amber-100 border-amber-400 shadow-sm' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+        }`;
+
+        card.innerHTML = `
+          <div>
+            <h5 class="font-bold text-slate-800 text-base">${cat.name}</h5>
+            <p class="text-xs text-slate-500 font-body">${cat.description} (${cat.words.length} words)</p>
+          </div>
+          <span class="text-xl">${isSelected ? '✅' : '👉'}</span>
+        `;
+
+        card.onclick = () => {
+          currentCategoryKey = key;
+          currentWordIndex = 0;
+          renderCategoryList();
+          renderCurrentModeView();
+        };
+
+        container.appendChild(card);
+      });
+    }
+
+    function addCustomWord() {
+      const wordInput = document.getElementById('custom-word-input');
+      const emojiInput = document.getElementById('custom-emoji-input');
+      const sentenceInput = document.getElementById('custom-sentence-input');
+
+      const word = wordInput.value.trim().toUpperCase();
+      let emoji = emojiInput.value.trim() || '🌟';
+      let sentence = sentenceInput.value.trim() || `This is the word ${word}!`;
+
+      if (!word || word.length < 2) {
+        speakText("Please enter a word with at least 2 letters.", 0.9, 1.1);
+        return;
+      }
+
+      // Generate phonics approximations for custom word
+      const letters = word.split('');
+      const phonics = letters.map(l => `/${l.toLowerCase()}/`);
+
+      WORD_CATEGORIES.custom.words.push({
+        word,
+        emoji,
+        phonics,
+        letters,
+        sentence
+      });
+
+      // Switch to custom category
+      currentCategoryKey = 'custom';
+      currentWordIndex = WORD_CATEGORIES.custom.words.length - 1;
+
+      // Clear inputs
+      wordInput.value = '';
+      emojiInput.value = '';
+      sentenceInput.value = '';
+
+      renderCategoryList();
+      renderCurrentModeView();
+      speakText(`Added ${word} to your custom list!`, 0.9, 1.15);
+      closeCategoryModal();
+    }
+
+    window.onload = () => {
+      // Warm up voices
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          // Pre-load voices list
+          window.speechSynthesis.getVoices();
+        };
+      }
+      
+      renderCurrentModeView();
+    };
+  </script>
+</body>
+</html>
