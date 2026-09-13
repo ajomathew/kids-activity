@@ -13,7 +13,8 @@ default:
 pages:
   stage: deploy
   script:
-    - cp * ./public
+    - dir 
+    - cp * public
   artifacts:
     paths:
       - public
