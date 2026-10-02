@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Number Wonderland: Learn 1 to 100</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Fredoka & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Fredoka', 'Nunito', cursive, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* Vibrant candy bounce transitions */
+    .bounce-tap:active {
+      transform: scale(0.92);
+    }
+    .bouncy-hover:hover {
+      transform: translateY(-4px) scale(1.03);
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .animate-float {
+      animation: floaty 3s ease-in-out infinite;
+    }
+
+    @keyframes gentle-wobble {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px) rotate(-3deg); }
+      40% { transform: translateX(8px) rotate(3deg); }
+      60% { transform: translateX(-4px) rotate(-1deg); }
+      80% { transform: translateX(4px) rotate(1deg); }
+    }
+    .animate-wobble {
+      animation: gentle-wobble 0.6s ease-in-out;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 16px rgba(251, 191, 36, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+    }
+    .pulse-glow {
+      animation: pulse-ring 2s infinite;
+    }
+
+    /* Custom scrollbar for ranges */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Balloon shapes */
+    .balloon {
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      position: relative;
+    }
+    .balloon::after {
+      content: "▲";
+      font-size: 14px;
+      color: inherit;
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(180deg);
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-b from-sky-200 via-amber-50 to-pink-100 min-h-screen flex flex-col text-slate-800 antialiased overflow-x-hidden selection:bg-pink-300">
+
+  <header class="w-full bg-white/90 backdrop-blur-md sticky top-0 z-40 shadow-md border-b-4 border-amber-300 px-3 py-2 sm:px-6 sm:py-3 transition-all">
+    <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+      <!-- Title & Mascot -->
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchMode('explore')">
+        <span class="text-3xl sm:text-4xl animate-bounce">🎈</span>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-black tracking-wide text-pink-600 leading-tight">Number Wonderland</h1>
+          <p class="text-xs sm:text-sm text-sky-600 font-bold hidden sm:block">Learn 1 to 100 with Fun!</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons: Audio Mute & Stars Collected -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Sound Toggle -->
+        <button id="soundToggleBtn" onclick="toggleAudio()" class="flex items-center gap-1.5 bg-yellow-100 border-2 border-yellow-400 text-yellow-800 font-bold px-3 py-1.5 rounded-full shadow-sm bounce-tap hover:bg-yellow-200 transition" aria-label="Toggle Sound">
+          <span id="soundIcon" class="text-lg">🔊</span>
+          <span id="soundText" class="text-xs sm:text-sm hidden xs:inline">Sound ON</span>
+        </button>
+
+        <!-- Star Counter -->
+        <div class="flex items-center gap-1.5 bg-amber-400 text-amber-950 font-black px-3.5 py-1.5 rounded-full shadow-md border-2 border-amber-500">
+          <span class="text-lg sm:text-xl text-yellow-100 animate-spin" style="animation-duration: 6s;">⭐</span>
+          <span id="starCounter" class="text-base sm:text-lg">0</span>
+          <span class="text-xs uppercase font-extrabold tracking-wider hidden sm:inline">Stars</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Switcher Tabs -->
+    <nav class="max-w-4xl mx-auto mt-2 sm:mt-3 grid grid-cols-4 gap-1.5 sm:gap-3">
+      <button id="nav-explore" onclick="switchMode('explore')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-pink-500 text-white border-pink-700 shadow-md">
+        <span class="text-lg sm:text-xl">🌸</span>
+        <span>Explore</span>
+      </button>
+
+      <button id="nav-game" onclick="switchMode('game')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-sky-50 shadow-sm">
+        <span class="text-lg sm:text-xl">🎈</span>
+        <span>Pop Game</span>
+      </button>
+
+      <button id="nav-build" onclick="switchMode('build')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-purple-50 shadow-sm">
+        <span class="text-lg sm:text-xl">🧱</span>
+        <span>Build It!</span>
+      </button>
+
+      <button id="nav-sing" onclick="switchMode('sing')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 shadow-sm">
+        <span class="text-lg sm:text-xl">🎶</span>
+        <span>Sing 1-100</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-5 flex flex-col items-center justify-start">
+
+    <!-- ==================== MODE 1: EXPLORE 1-100 ==================== -->
+    <section id="exploreMode" class="w-full flex flex-col gap-4">
+      <!-- Decades Filter Pills -->
+      <div class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto hide-scrollbar py-1 px-1">
+        <button onclick="setGridChunk('1-10')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-pink-500 text-white shadow-md border-2 border-pink-600 whitespace-nowrap">1 - 10</button>
+        <button onclick="setGridChunk('11-20')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">11 - 20</button>
+        <button onclick="setGridChunk('21-30')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">21 - 30</button>
+        <button onclick="setGridChunk('31-40')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">31 - 40</button>
+        <button onclick="setGridChunk('41-50')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">41 - 50</button>
+        <button onclick="setGridChunk('51-60')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">51 - 60</button>
+        <button onclick="setGridChunk('61-70')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">61 - 70</button>
+        <button onclick="setGridChunk('71-80')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">71 - 80</button>
+        <button onclick="setGridChunk('81-90')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">81 - 90</button>
+        <button onclick="setGridChunk('91-100')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap">91 - 100</button>
+        <button onclick="setGridChunk('all')" class="chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-amber-400 text-amber-950 shadow-sm border-2 border-amber-500 whitespace-nowrap">🌟 All 100</button>
+      </div>
+
+      <!-- Quick prompt instructions for kids -->
+      <div class="bg-white/80 rounded-2xl p-2.5 sm:p-3 text-center shadow-sm flex items-center justify-center gap-2 border-2 border-sky-200">
+        <span class="text-2xl animate-spin" style="animation-duration: 4s;">👆</span>
+        <span class="text-sm sm:text-base font-bold text-sky-800">Tap any number bubble to hear its name and see its blocks!</span>
+      </div>
+
+      <!-- Numbers Grid Container -->
+      <div id="numbersGrid" class="grid grid-cols-5 sm:grid-cols-10 gap-2 sm:gap-3 p-2 bg-white/70 rounded-3xl shadow-inner border-4 border-sky-100 min-h-[300px]">
+        <!-- Dynamic number cards injected here via JS -->
+      </div>
+    </section>
+
+    <!-- ==================== MODE 2: LISTEN & FIND (BALLOON POP) ==================== -->
+    <section id="gameMode" class="w-full hidden flex-col items-center gap-4">
+      <!-- Game Banner -->
+      <div class="w-full bg-gradient-to-r from-sky-400 via-indigo-400 to-pink-400 rounded-3xl p-4 sm:p-6 text-white text-center shadow-lg relative border-4 border-white flex flex-col items-center">
+        <p class="text-xs sm:text-sm uppercase tracking-wider font-extrabold text-yellow-200">Listen & Pop Game</p>
+        <h2 id="gamePromptText" class="text-2xl sm:text-4xl font-black mt-1 mb-2 tracking-wide drop-shadow">
+          Find the number: <span id="gameTargetWord" class="underline decoration-yellow-300 text-yellow-200">seven</span>
+        </h2>
+        <button onclick="repeatGameAudio()" class="flex items-center gap-2 bg-yellow-400 text-amber-950 font-black px-4 py-2 rounded-full shadow-md bounce-tap hover:bg-yellow-300 transition text-sm sm:text-base border-2 border-yellow-500">
+          <span>🔊</span> Listen Again
+        </button>
+
+        <!-- Streak Indicator -->
+        <div class="mt-3 flex items-center gap-1.5">
+          <span class="text-sm font-bold text-sky-100">Streak:</span>
+          <div id="streakPills" class="flex gap-1">
+            <!-- Streak stars injected here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Balloons Area -->
+      <div id="balloonArea" class="w-full min-h-[340px] sm:min-h-[400px] flex items-center justify-around flex-wrap gap-4 py-6 px-2">
+        <!-- Floating clickable balloons generated by JS -->
+      </div>
+
+      <!-- Game Hint / Encouragement -->
+      <div id="gameHintMsg" class="min-h-[32px] text-center text-base sm:text-lg font-bold text-pink-600">
+        Tap the floating balloon that matches!
+      </div>
+    </section>
+
+    <!-- ==================== MODE 3: BUILD IT (TENS & ONES) ==================== -->
+    <section id="buildMode" class="w-full hidden flex-col items-center gap-4">
+      <div class="w-full bg-white/90 rounded-3xl p-4 sm:p-6 shadow-lg border-4 border-purple-200 flex flex-col items-center text-center">
+        <p class="text-xs sm:text-sm font-black text-purple-600 uppercase tracking-widest">Base-10 Builder</p>
+        <div class="flex items-center gap-3 mt-1">
+          <span class="text-gray-500 font-bold text-base sm:text-lg">Make this number:</span>
+          <span id="targetBuildNum" class="text-4xl sm:text-5xl font-black text-purple-700 bg-purple-100 px-4 py-1 rounded-2xl border-2 border-purple-300">24</span>
+        </div>
+        <p id="targetBuildWord" class="text-base sm:text-xl font-extrabold text-pink-600 mt-1 capitalize">twenty-four</p>
+        
+        <div class="mt-2 flex gap-2">
+          <button onclick="speakCurrentBuildTarget()" class="text-sm bg-purple-100 text-purple-800 font-bold px-3 py-1 rounded-full border border-purple-300 hover:bg-purple-200 transition">
+            🔊 Hear Target
+          </button>
+          <button onclick="newBuildPuzzle()" class="text-sm bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-300 hover:bg-emerald-200 transition">
+            🎲 New Number
+          </button>
+        </div>
+      </div>
+
+      <!-- The Workbench Display: Current Stacks & Ones -->
+      <div class="w-full bg-amber-50/80 rounded-3xl p-4 sm:p-5 border-4 border-dashed border-amber-300 min-h-[220px] flex flex-col items-center justify-between shadow-inner">
+        <div class="w-full flex items-start justify-center gap-4 sm:gap-8 flex-wrap">
+          <!-- Tens Stacks Group -->
+          <div class="flex flex-col items-center">
+            <span class="text-xs sm:text-sm font-black text-blue-700 uppercase mb-1">Tens Stacks (10 each)</span>
+            <div id="buildTensContainer" class="flex items-end gap-2 min-h-[120px] p-2 bg-blue-100/60 rounded-2xl border-2 border-blue-200">
+              <!-- Rendered 10-bars -->
+            </div>
+            <span id="tensCountLabel" class="text-sm font-black text-blue-600 mt-1">0 Tens (= 0)</span>
+          </div>
+
+          <!-- Ones Dots Group -->
+          <div class="flex flex-col items-center">
+            <span class="text-xs sm:text-sm font-black text-amber-700 uppercase mb-1">Ones Stars (1 each)</span>
+            <div id="buildOnesContainer" class="grid grid-cols-5 gap-1.5 min-h-[120px] min-w-[120px] p-2 bg-amber-100/60 rounded-2xl border-2 border-amber-200 items-center justify-center">
+              <!-- Rendered single units -->
+            </div>
+            <span id="onesCountLabel" class="text-sm font-black text-amber-600 mt-1">0 Ones (= 0)</span>
+          </div>
+        </div>
+
+        <!-- Current Total Score Box -->
+        <div class="mt-4 flex items-center justify-center gap-3">
+          <span class="text-base font-extrabold text-slate-600">Your Total:</span>
+          <span id="currentBuildTotal" class="text-3xl sm:text-4xl font-black text-slate-800 bg-white px-4 py-1 rounded-2xl shadow-sm border-2 border-slate-300">0</span>
+          <span id="buildMatchFeedback" class="text-2xl">🤔</span>
+        </div>
+      </div>
+
+      <!-- Controls to Add/Remove 10s and 1s -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 w-full max-w-2xl">
+        <button onclick="addBuildItem('ten')" class="bg-blue-500 hover:bg-blue-600 text-white font-black py-3 px-3 rounded-2xl shadow-md border-b-4 border-blue-700 bounce-tap flex flex-col items-center justify-center">
+          <span class="text-2xl">➕ 📏</span>
+          <span class="text-sm sm:text-base mt-1">+10 (Stack)</span>
+        </button>
+
+        <button onclick="removeBuildItem('ten')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-3 px-3 rounded-2xl shadow border-2 border-blue-300 bounce-tap flex flex-col items-center justify-center">
+          <span class="text-2xl">➖ 📏</span>
+          <span class="text-sm sm:text-base mt-1">-10 (Stack)</span>
+        </button>
+
+        <button onclick="addBuildItem('one')" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-black py-3 px-3 rounded-2xl shadow-md border-b-4 border-amber-600 bounce-tap flex flex-col items-center justify-center">
+          <span class="text-2xl">➕ ⭐</span>
+          <span class="text-sm sm:text-base mt-1">+1 (Star)</span>
+        </button>
+
+        <button onclick="removeBuildItem('one')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-3 px-3 rounded-2xl shadow border-2 border-amber-300 bounce-tap flex flex-col items-center justify-center">
+          <span class="text-2xl">➖ ⭐</span>
+          <span class="text-sm sm:text-base mt-1">-1 (Star)</span>
+        </button>
+      </div>
+
+      <button onclick="resetCurrentBuild()" class="text-xs sm:text-sm font-bold text-slate-500 underline hover:text-slate-700 transition">
+        Clear All Blocks
+      </button>
+    </section>
+
+    <!-- ==================== MODE 4: SING & COUNT (AUTO-PLAY) ==================== -->
+    <section id="singMode" class="w-full hidden flex-col items-center gap-5">
+      <div class="w-full bg-white/90 rounded-3xl p-5 sm:p-8 shadow-lg border-4 border-emerald-200 flex flex-col items-center text-center">
+        <p class="text-xs sm:text-sm font-black text-emerald-600 uppercase tracking-widest">Rhythmic Number Chant</p>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-800 mt-1">Let's Count Along Together!</h2>
+        <p class="text-sm sm:text-base text-slate-600 max-w-md mt-1">Press Play to watch the numbers dance and listen to each one spoken clearly.</p>
+
+        <!-- Range Selection for Sing Mode -->
+        <div class="flex items-center gap-2 mt-4 flex-wrap justify-center">
+          <span class="text-sm font-bold text-slate-700">Range:</span>
+          <button onclick="setSingRange(1, 10)" id="singRange-1-10" class="sing-range-btn px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-emerald-500 text-white border-2 border-emerald-600">1 to 10</button>
+          <button onclick="setSingRange(1, 20)" id="singRange-1-20" class="sing-range-btn px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-white text-slate-700 border-2 border-slate-200">1 to 20</button>
+          <button onclick="setSingRange(10, 100, 10)" id="singRange-10-100" class="sing-range-btn px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-white text-slate-700 border-2 border-slate-200">By 10s (10-100)</button>
+          <button onclick="setSingRange(1, 100)" id="singRange-1-100" class="sing-range-btn px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-white text-slate-700 border-2 border-slate-200">1 to 100</button>
+        </div>
+
+        <!-- Huge Display Card for Sing Mode -->
+        <div class="my-6 w-full max-w-md bg-gradient-to-tr from-emerald-100 via-teal-50 to-amber-100 rounded-3xl p-6 sm:p-8 border-4 border-emerald-300 shadow-md flex flex-col items-center relative overflow-hidden">
+          <div id="singNumberBig" class="text-7xl sm:text-9xl font-black text-emerald-600 drop-shadow transform transition-all duration-300 scale-100">
+            1
+          </div>
+          <div id="singWordBig" class="text-2xl sm:text-4xl font-extrabold text-teal-800 capitalize mt-2">
+            one
+          </div>
+          
+          <!-- Animated rhythm indicator stars -->
+          <div id="singVisualDots" class="mt-4 flex flex-wrap justify-center gap-1.5 max-w-xs min-h-[30px]">
+            <!-- Dots dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Controls: Play / Pause / Reset -->
+        <div class="flex items-center gap-3">
+          <button id="singPlayBtn" onclick="toggleSingPlay()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-3 rounded-full text-lg shadow-lg border-b-4 border-emerald-700 bounce-tap flex items-center gap-2">
+            <span id="singPlayIcon">▶️</span>
+            <span id="singPlayText">Start Counting</span>
+          </button>
+          <button onclick="resetSingMode()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-3 rounded-full text-sm bounce-tap">
+            🔄 Reset
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: Detailed Number Inspector -->
+  <div id="numberModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 transition-opacity">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-7 shadow-2xl border-4 border-pink-300 flex flex-col items-center relative transform transition-all animate-float">
+      <!-- Close Button -->
+      <button onclick="closeNumberModal()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full w-9 h-9 flex items-center justify-center font-black text-lg bounce-tap">
+        ✕
+      </button>
+
+      <!-- Category Tag (e.g., Even/Odd, Tens) -->
+      <span id="modalNumberTag" class="text-xs font-black tracking-wider uppercase bg-pink-100 text-pink-700 px-3 py-1 rounded-full border border-pink-200">
+        Counting Star
+      </span>
+
+      <!-- Huge Numeral -->
+      <div id="modalNumeral" class="text-7xl sm:text-8xl font-black text-pink-600 my-2 drop-shadow-sm">
+        24
+      </div>
+
+      <!-- Spelled-out Name in Bold Clear Letters -->
+      <h3 id="modalNumberWord" class="text-2xl sm:text-3xl font-extrabold text-slate-800 capitalize tracking-wide text-center">
+        twenty-four
+      </h3>
+
+      <!-- Audio Button -->
+      <button onclick="speakModalNumber()" class="mt-3 flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-black px-5 py-2 rounded-full shadow-md bounce-tap text-base border-b-4 border-pink-700">
+        <span>🔊</span> Tap to Hear
+      </button>
+
+      <!-- Base-10 Visual Representation (Tens & Ones) -->
+      <div class="w-full bg-amber-50 rounded-2xl p-3 sm:p-4 mt-5 border-2 border-amber-200 flex flex-col items-center">
+        <span class="text-xs font-extrabold text-amber-800 uppercase tracking-wider mb-2">How many tens & ones?</span>
+        <div class="w-full flex items-center justify-around gap-2">
+          <!-- Tens display -->
+          <div class="flex flex-col items-center">
+            <div id="modalTensBarContainer" class="flex gap-1 items-end min-h-[50px]">
+              <!-- Ten-bars SVG/blocks inserted here -->
+            </div>
+            <span id="modalTensText" class="text-xs font-bold text-blue-700 mt-1">2 Tens (20)</span>
+          </div>
+
+          <div class="text-xl font-bold text-amber-500">+</div>
+
+          <!-- Ones display -->
+          <div class="flex flex-col items-center">
+            <div id="modalOnesGridContainer" class="grid grid-cols-5 gap-1 min-h-[50px] items-center">
+              <!-- Single stars inserted here -->
+            </div>
+            <span id="modalOnesText" class="text-xs font-bold text-amber-700 mt-1">4 Ones (4)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prev / Next Navigation Arrows -->
+      <div class="w-full flex items-center justify-between mt-5 gap-3">
+        <button onclick="navigateModal(-1)" class="flex-1 bg-sky-100 hover:bg-sky-200 text-sky-800 font-black py-2.5 px-3 rounded-2xl border-2 border-sky-300 bounce-tap flex items-center justify-center gap-1 text-sm sm:text-base">
+          <span>⬅️</span> Prev
+        </button>
+        <button onclick="navigateModal(1)" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-black py-2.5 px-3 rounded-2xl border-b-4 border-sky-700 bounce-tap flex items-center justify-center gap-1 text-sm sm:text-base">
+          Next <span>➡️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       STATE & GLOBAL VARIABLES
+       ========================================================================== */
+    let currentMode = 'explore';
+    let isSoundMuted = false;
+    let starsEarned = 0;
+
+    // Explore Mode state
+    let activeChunk = '1-10';
+    let currentModalNumber = 1;
+
+    // Balloon Pop Game state
+    let gameTarget = 7;
+    let gameOptions = [];
+    let gameStreak = 0;
+
+    // Build It Mode state
+    let buildTarget = 24;
+    let currentBuildTens = 0;
+    let currentBuildOnes = 0;
+
+    // Sing Mode state
+    let singMin = 1;
+    let singMax = 10;
+    let singStep = 1;
+    let singCurrent = 1;
+    let singInterval = null;
+    let isSinging = false;
+
+    /* ==========================================================================
+       ENGLISH NUMBER NAMES CONVERTER (1 to 100)
+       ========================================================================== */
+    const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+    const TEENS = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+    const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+    function numberToWords(num) {
+      if (num === 0) return 'zero';
+      if (num === 100) return 'one hundred';
+      if (num < 10) return ONES[num];
+      if (num >= 10 && num < 20) return TEENS[num - 10];
+      
+      const tenDigit = Math.floor(num / 10);
+      const oneDigit = num % 10;
+      if (oneDigit === 0) {
+        return TENS[tenDigit];
+      }
+      return `${TENS[tenDigit]}-${ONES[oneDigit]}`;
+    }
+
+    /* ==========================================================================
+       WEB AUDIO SYNTHESIZER (Chimes, Boings, Taps - No External Files)
+       ========================================================================== */
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Play a gentle musical chime
+    function playChime(freq = 523.25, type = 'sine', duration = 0.25) {
+      if (isSoundMuted) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {
+        console.error("Audio error", e);
+      }
+    }
+
+    // Play a happy celebration arpeggio
+    function playWinJingle() {
+      if (isSoundMuted) return;
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      notes.forEach((freq, index) => {
+        setTimeout(() => {
+          playChime(freq, 'triangle', 0.35);
+        }, index * 90);
+      });
+    }
+
+    // Gentle bounce sound for wrong click (no harsh buzzing)
+    function playBoingSound() {
+      if (isSoundMuted) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(160, ctx.currentTime + 0.3);
+
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    /* ==========================================================================
+       WEB SPEECH API: Child-Friendly Voice Synthesis
+       ========================================================================== */
+    function speakText(text) {
+      if (isSoundMuted) return;
+      if (!('speechSynthesis' in window)) return;
+
+      window.speechSynthesis.cancel(); // cancel any active speech
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.88; // Slower, clear pace for children
+      utterance.pitch = 1.25; // Warm, friendly higher pitch
+
+      // Pick an English voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Google') || v.name.includes('Female')));
+      if (preferred) {
+        utterance.voice = preferred;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function toggleAudio() {
+      isSoundMuted = !isSoundMuted;
+      const soundIcon = document.getElementById('soundIcon');
+      const soundText = document.getElementById('soundText');
+      if (isSoundMuted) {
+        soundIcon.textContent = '🔇';
+        soundText.textContent = 'Muted';
+        window.speechSynthesis.cancel();
+      } else {
+        soundIcon.textContent = '🔊';
+        soundText.textContent = 'Sound ON';
+        playChime(600);
+        speakText("Sound is back on!");
+      }
+    }
+
+    function addStars(amount = 1) {
+      starsEarned += amount;
+      document.getElementById('starCounter').textContent = starsEarned;
+      // Trigger tiny confetti
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 40,
+          spread: 60,
+          origin: { y: 0.2, x: 0.85 }
+        });
+      }
+    }
+
+    /* ==========================================================================
+       MODE SWITCHING LOGIC
+       ========================================================================== */
+    function switchMode(mode) {
+      currentMode = mode;
+
+      // Stop sing loop if switching away
+      if (mode !== 'sing' && isSinging) {
+        toggleSingPlay();
+      }
+
+      // Update Tab Styles
+      const modes = ['explore', 'game', 'build', 'sing'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`nav-${m}`);
+        const view = document.getElementById(`${m}Mode`);
+        if (m === mode) {
+          btn.className = 'mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-pink-500 text-white border-pink-700 shadow-md';
+          view.classList.remove('hidden');
+          view.classList.add('flex');
+        } else {
+          btn.className = 'mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-pink-50 shadow-sm';
+          view.classList.add('hidden');
+          view.classList.remove('flex');
+        }
+      });
+
+      playChime(440);
+
+      // Initialize specific views
+      if (mode === 'explore') {
+        renderGrid();
+      } else if (mode === 'game') {
+        initGameRound();
+      } else if (mode === 'build') {
+        newBuildPuzzle();
+      } else if (mode === 'sing') {
+        initSingDisplay();
+      }
+    }
+
+    /* ==========================================================================
+       MODE 1: EXPLORE 100-GRID
+       ========================================================================== */
+    const PASTEL_PALETTE = [
+      'bg-red-100 border-red-300 text-red-700 hover:bg-red-200',
+      'bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200',
+      'bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200',
+      'bg-yellow-100 border-yellow-300 text-yellow-800 hover:bg-yellow-200',
+      'bg-lime-100 border-lime-300 text-lime-800 hover:bg-lime-200',
+      'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200',
+      'bg-teal-100 border-teal-300 text-teal-800 hover:bg-teal-200',
+      'bg-sky-100 border-sky-300 text-sky-800 hover:bg-sky-200',
+      'bg-indigo-100 border-indigo-300 text-indigo-800 hover:bg-indigo-200',
+      'bg-purple-100 border-purple-300 text-purple-800 hover:bg-purple-200'
+    ];
+
+    function setGridChunk(chunk) {
+      activeChunk = chunk;
+      // Highlight selected button
+      document.querySelectorAll('.chunk-btn').forEach(btn => {
+        btn.className = 'chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap';
+      });
+      event.target.className = 'chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-pink-500 text-white shadow-md border-2 border-pink-600 whitespace-nowrap';
+
+      playChime(500);
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const container = document.getElementById('numbersGrid');
+      container.innerHTML = '';
+
+      let start = 1;
+      let end = 100;
+
+      if (activeChunk !== 'all') {
+        const parts = activeChunk.split('-');
+        start = parseInt(parts[0]);
+        end = parseInt(parts[1]);
+      }
+
+      for (let i = start; i <= end; i++) {
+        const card = document.createElement('button');
+        const colorClass = PASTEL_PALETTE[Math.floor((i - 1) / 10) % PASTEL_PALETTE.length];
+        
+        card.className = `${colorClass} h-16 sm:h-20 rounded-2xl flex flex-col items-center justify-center border-2 sm:border-3 shadow-sm hover:shadow-md transition transform active:scale-90 font-black relative overflow-hidden group`;
+        card.onclick = () => openNumberModal(i);
+
+        card.innerHTML = `
+          <span class="text-xl sm:text-2xl font-black">${i}</span>
+          <span class="text-[10px] sm:text-xs font-semibold tracking-tighter opacity-80 max-w-[90%] truncate">${numberToWords(i)}</span>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function openNumberModal(num) {
+      currentModalNumber = num;
+      const modal = document.getElementById('numberModal');
+      const numeralElem = document.getElementById('modalNumeral');
+      const wordElem = document.getElementById('modalNumberWord');
+      const tagElem = document.getElementById('modalNumberTag');
+
+      numeralElem.textContent = num;
+      const word = numberToWords(num);
+      wordElem.textContent = word;
+
+      // Fun friendly badge
+      if (num === 100) tagElem.textContent = '💯 Century Star!';
+      else if (num % 10 === 0) tagElem.textContent = `🔟 Group of ${num / 10} Tens!`;
+      else if (num % 2 === 0) tagElem.textContent = '⭐ Even Partner';
+      else tagElem.textContent = '✨ Super Number';
+
+      // Build Base-10 visualization
+      renderModalBase10(num);
+
+      // Show modal
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      // Play sound & speak
+      playChime(587.33);
+      speakModalNumber();
+    }
+
+    function renderModalBase10(num) {
+      const tensCount = Math.floor(num / 10);
+      const onesCount = num % 10;
+
+      const tensContainer = document.getElementById('modalTensBarContainer');
+      const onesContainer = document.getElementById('modalOnesGridContainer');
+      const tensText = document.getElementById('modalTensText');
+      const onesText = document.getElementById('modalOnesText');
+
+      tensContainer.innerHTML = '';
+      onesContainer.innerHTML = '';
+
+      // Create ten-stacks (towers)
+      if (tensCount === 0) {
+        tensContainer.innerHTML = '<span class="text-xs text-slate-400 italic">No tens</span>';
+      } else {
+        for (let t = 0; t < tensCount; t++) {
+          const bar = document.createElement('div');
+          bar.className = 'w-4 h-14 bg-gradient-to-t from-blue-600 to-sky-400 rounded-md shadow-xs border border-blue-700 flex flex-col justify-between py-0.5 items-center';
+          bar.title = '10 Units';
+          // 10 segment dividers
+          for (let s = 0; s < 9; s++) {
+            const line = document.createElement('div');
+            line.className = 'w-full h-px bg-white/60';
+            bar.appendChild(line);
+          }
+          tensContainer.appendChild(bar);
+        }
+      }
+      tensText.textContent = `${tensCount} Ten${tensCount === 1 ? '' : 's'} (${tensCount * 10})`;
+
+      // Create one-stars
+      if (onesCount === 0) {
+        onesContainer.innerHTML = '<span class="text-xs text-slate-400 italic">No ones</span>';
+      } else {
+        for (let o = 0; o < onesCount; o++) {
+          const star = document.createElement('div');
+          star.className = 'text-xl leading-none text-amber-500 animate-pulse';
+          star.textContent = '⭐';
+          onesContainer.appendChild(star);
+        }
+      }
+      onesText.textContent = `${onesCount} One${onesCount === 1 ? '' : 's'} (${onesCount})`;
+    }
+
+    function speakModalNumber() {
+      const word = numberToWords(currentModalNumber);
+      speakText(`${currentModalNumber}. ${word}!`);
+    }
+
+    function navigateModal(direction) {
+      let nextNum = currentModalNumber + direction;
+      if (nextNum < 1) nextNum = 100;
+      if (nextNum > 100) nextNum = 1;
+      openNumberModal(nextNum);
+    }
+
+    function closeNumberModal() {
+      const modal = document.getElementById('numberModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Close modal when tapping outside content
+    window.onclick = function(event) {
+      const modal = document.getElementById('numberModal');
+      if (event.target === modal) {
+        closeNumberModal();
+      }
+    };
+
+    /* ==========================================================================
+       MODE 2: LISTEN & FIND (BALLOON POP)
+       ========================================================================== */
+    const BALLOON_COLORS = [
+      'bg-red-400 border-red-500 text-white',
+      'bg-yellow-400 border-yellow-500 text-yellow-950',
+      'bg-emerald-400 border-emerald-500 text-white',
+      'bg-sky-400 border-sky-500 text-white',
+      'bg-purple-400 border-purple-500 text-white',
+      'bg-pink-400 border-pink-500 text-white'
+    ];
+
+    function initGameRound() {
+      // Pick random number between 1 and 100
+      gameTarget = Math.floor(Math.random() * 100) + 1;
+
+      // Pick 3 plausible distractors (nearby or random)
+      const optionsSet = new Set([gameTarget]);
+      while (optionsSet.size < 4) {
+        let distractor;
+        if (Math.random() > 0.5 && gameTarget > 10) {
+          // near number
+          const offset = Math.floor(Math.random() * 11) - 5;
+          distractor = Math.max(1, Math.min(100, gameTarget + offset));
+        } else {
+          distractor = Math.floor(Math.random() * 100) + 1;
+        }
+        optionsSet.add(distractor);
+      }
+
+      gameOptions = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+
+      // Update text and prompt
+      const targetWord = numberToWords(gameTarget);
+      document.getElementById('gameTargetWord').textContent = `"${targetWord}"`;
+      document.getElementById('gameHintMsg').textContent = `Can you find ${targetWord}? Tap the balloon!`;
+      document.getElementById('gameHintMsg').className = 'min-h-[32px] text-center text-base sm:text-lg font-bold text-pink-600';
+
+      renderBalloons();
+      renderStreak();
+
+      // Read audio aloud with delay
+      setTimeout(() => {
+        speakGamePrompt();
+      }, 300);
+    }
+
+    function speakGamePrompt() {
+      const word = numberToWords(gameTarget);
+      speakText(`Can you find... ${word}?`);
+    }
+
+    function repeatGameAudio() {
+      playChime(600);
+      speakGamePrompt();
+    }
+
+    function renderStreak() {
+      const container = document.getElementById('streakPills');
+      container.innerHTML = '';
+      for (let s = 0; s < 5; s++) {
+        const star = document.createElement('span');
+        star.className = `text-sm ${s < gameStreak ? 'text-yellow-300' : 'text-slate-300/60'}`;
+        star.textContent = '⭐';
+        container.appendChild(star);
+      }
+    }
+
+    function renderBalloons() {
+      const container = document.getElementById('balloonArea');
+      container.innerHTML = '';
+
+      gameOptions.forEach((num, index) => {
+        const color = BALLOON_COLORS[index % BALLOON_COLORS.length];
+        const balloon = document.createElement('button');
+        balloon.id = `balloon-${num}`;
+        balloon.className = `balloon ${color} w-28 h-36 sm:w-36 sm:h-44 shadow-lg border-4 flex flex-col items-center justify-center font-black animate-float cursor-pointer transform hover:scale-105 transition active:scale-95`;
+        balloon.style.animationDelay = `${index * 0.4}s`;
+        balloon.onclick = () => handleBalloonTap(num, balloon);
+
+        balloon.innerHTML = `
+          <span class="text-5xl sm:text-6xl font-black drop-shadow-md tracking-tight">${num}</span>
+        `;
+        container.appendChild(balloon);
+      });
+    }
+
+    function handleBalloonTap(selectedNumber, balloonElement) {
+      if (selectedNumber === gameTarget) {
+        // Correct guess!
+        playWinJingle();
+        addStars(1);
+        gameStreak = Math.min(5, gameStreak + 1);
+
+        const word = numberToWords(selectedNumber);
+        speakText(`Hooray! That is ${word}!`);
+
+        // Pop Animation
+        balloonElement.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        balloonElement.style.transform = 'scale(1.4)';
+        balloonElement.style.opacity = '0';
+
+        document.getElementById('gameHintMsg').textContent = `🎉 Super job! You found ${word}!`;
+        document.getElementById('gameHintMsg').className = 'min-h-[32px] text-center text-lg sm:text-xl font-black text-emerald-600 animate-bounce';
+
+        // Confetti explosion
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+
+        // Next round after brief celebration
+        setTimeout(() => {
+          initGameRound();
+        }, 1800);
+      } else {
+        // Gentle wrong feedback: no buzzer!
+        playBoingSound();
+        balloonElement.classList.add('animate-wobble');
+        setTimeout(() => balloonElement.classList.remove('animate-wobble'), 600);
+
+        const wrongWord = numberToWords(selectedNumber);
+        const targetWord = numberToWords(gameTarget);
+        document.getElementById('gameHintMsg').textContent = `That was ${selectedNumber} (${wrongWord}). Try to find ${gameTarget} (${targetWord})!`;
+        speakText(`That is ${wrongWord}. Look for ${targetWord}!`);
+      }
+    }
+
+    /* ==========================================================================
+       MODE 3: BUILD IT (PLACE VALUE TENS & ONES)
+       ========================================================================== */
+    function newBuildPuzzle() {
+      // Choose a fun number between 11 and 99
+      buildTarget = Math.floor(Math.random() * 89) + 11;
+      currentBuildTens = 0;
+      currentBuildOnes = 0;
+
+      document.getElementById('targetBuildNum').textContent = buildTarget;
+      document.getElementById('targetBuildWord').textContent = numberToWords(buildTarget);
+
+      renderBuildWorkbench();
+      playChime(523.25);
+      speakCurrentBuildTarget();
+    }
+
+    function speakCurrentBuildTarget() {
+      const word = numberToWords(buildTarget);
+      speakText(`Can you build ${buildTarget}? That's ${word}!`);
+    }
+
+    function addBuildItem(type) {
+      if (type === 'ten') {
+        if (currentBuildTens < 9) {
+          currentBuildTens++;
+          playChime(400 + currentBuildTens * 30);
+          speakText("Ten!");
+        }
+      } else if (type === 'one') {
+        if (currentBuildOnes < 9) {
+          currentBuildOnes++;
+          playChime(600 + currentBuildOnes * 40);
+          speakText(numberToWords(currentBuildOnes));
+        }
+      }
+      renderBuildWorkbench();
+      checkBuildMatch();
+    }
+
+    function removeBuildItem(type) {
+      if (type === 'ten' && currentBuildTens > 0) {
+        currentBuildTens--;
+        playBoingSound();
+      } else if (type === 'one' && currentBuildOnes > 0) {
+        currentBuildOnes--;
+        playBoingSound();
+      }
+      renderBuildWorkbench();
+      checkBuildMatch();
+    }
+
+    function resetCurrentBuild() {
+      currentBuildTens = 0;
+      currentBuildOnes = 0;
+      playBoingSound();
+      renderBuildWorkbench();
+      checkBuildMatch();
+    }
+
+    function renderBuildWorkbench() {
+      const tensContainer = document.getElementById('buildTensContainer');
+      const onesContainer = document.getElementById('buildOnesContainer');
+      const tensLabel = document.getElementById('tensCountLabel');
+      const onesLabel = document.getElementById('onesCountLabel');
+      const totalLabel = document.getElementById('currentBuildTotal');
+
+      tensContainer.innerHTML = '';
+      onesContainer.innerHTML = '';
+
+      // Render tens
+      for (let t = 0; t < currentBuildTens; t++) {
+        const stack = document.createElement('div');
+        stack.className = 'w-6 h-28 bg-gradient-to-t from-blue-700 via-blue-500 to-sky-300 rounded-lg shadow-md border-2 border-blue-900 flex flex-col justify-between py-1 items-center animate-bounce';
+        stack.style.animationDuration = '0.5s';
+        stack.title = '10 Units';
+        for (let i = 0; i < 9; i++) {
+          const div = document.createElement('div');
+          div.className = 'w-4 h-0.5 bg-white/70 rounded';
+          stack.appendChild(div);
+        }
+        tensContainer.appendChild(stack);
+      }
+      tensLabel.textContent = `${currentBuildTens} Ten${currentBuildTens === 1 ? '' : 's'} (= ${currentBuildTens * 10})`;
+
+      // Render ones
+      for (let o = 0; o < currentBuildOnes; o++) {
+        const star = document.createElement('div');
+        star.className = 'text-3xl leading-none text-amber-500 animate-pulse';
+        star.textContent = '⭐';
+        onesContainer.appendChild(star);
+      }
+      onesLabel.textContent = `${currentBuildOnes} One${currentBuildOnes === 1 ? '' : 's'} (= ${currentBuildOnes})`;
+
+      const total = (currentBuildTens * 10) + currentBuildOnes;
+      totalLabel.textContent = total;
+    }
+
+    function checkBuildMatch() {
+      const total = (currentBuildTens * 10) + currentBuildOnes;
+      const feedback = document.getElementById('buildMatchFeedback');
+
+      if (total === buildTarget) {
+        feedback.textContent = '🌟 MATCH!';
+        playWinJingle();
+        addStars(2);
+
+        const word = numberToWords(buildTarget);
+        speakText(`You did it! ${currentBuildTens} tens and ${currentBuildOnes} ones make ${word}!`);
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 90,
+            spread: 80,
+            origin: { y: 0.5 }
+          });
+        }
+
+        setTimeout(() => {
+          newBuildPuzzle();
+        }, 3000);
+      } else if (total < buildTarget) {
+        feedback.textContent = '⬆️ Add more!';
+      } else {
+        feedback.textContent = '⬇️ Too many!';
+      }
+    }
+
+    /* ==========================================================================
+       MODE 4: SING & COUNT (AUTO-PLAY RHYTHM)
+       ========================================================================== */
+    function setSingRange(min, max, step = 1) {
+      if (isSinging) toggleSingPlay();
+      singMin = min;
+      singMax = max;
+      singStep = step;
+      singCurrent = min;
+
+      // Update button highlights
+      document.querySelectorAll('.sing-range-btn').forEach(b => {
+        b.className = 'sing-range-btn px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-white text-slate-700 border-2 border-slate-200';
+      });
+      event.target.className = 'sing-range-btn px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-emerald-500 text-white border-2 border-emerald-600';
+
+      initSingDisplay();
+      playChime(500);
+    }
+
+    function initSingDisplay() {
+      singCurrent = singMin;
+      updateSingDisplay();
+    }
+
+    function updateSingDisplay() {
+      const bigNum = document.getElementById('singNumberBig');
+      const bigWord = document.getElementById('singWordBig');
+      const dotsArea = document.getElementById('singVisualDots');
+
+      bigNum.textContent = singCurrent;
+      const word = numberToWords(singCurrent);
+      bigWord.textContent = word;
+
+      // Pulse animation
+      bigNum.classList.add('scale-110');
+      setTimeout(() => bigNum.classList.remove('scale-110'), 250);
+
+      // Render dots
+      dotsArea.innerHTML = '';
+      const dotCount = Math.min(singCurrent, 20); // Cap visual dots at 20 so it fits nicely
+      for (let i = 0; i < dotCount; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'text-lg text-emerald-500 animate-bounce';
+        dot.style.animationDelay = `${(i % 5) * 0.1}s`;
+        dot.textContent = '🟢';
+        dotsArea.appendChild(dot);
+      }
+      if (singCurrent > 20) {
+        const plus = document.createElement('span');
+        plus.className = 'text-xs font-extrabold text-teal-700 self-center ml-1';
+        plus.textContent = `...and more!`;
+        dotsArea.appendChild(plus);
+      }
+
+      // Audio rhythm chime & speech
+      playChime(350 + (singCurrent % 10) * 40, 'triangle', 0.2);
+      speakText(word);
+    }
+
+    function toggleSingPlay() {
+      isSinging = !isSinging;
+      const icon = document.getElementById('singPlayIcon');
+      const text = document.getElementById('singPlayText');
+
+      if (isSinging) {
+        icon.textContent = '⏸️';
+        text.textContent = 'Pause';
+        updateSingDisplay();
+
+        singInterval = setInterval(() => {
+          singCurrent += singStep;
+          if (singCurrent > singMax) {
+            // Finished song cycle
+            playWinJingle();
+            addStars(3);
+            if (typeof confetti === 'function') {
+              confetti({ particleCount: 100, spread: 80 });
+            }
+            toggleSingPlay();
+            singCurrent = singMin;
+            return;
+          }
+          updateSingDisplay();
+        }, 1600); // 1.6s rhythm step
+      } else {
+        icon.textContent = '▶️';
+        text.textContent = 'Start Counting';
+        clearInterval(singInterval);
+        singInterval = null;
+      }
+    }
+
+    function resetSingMode() {
+      if (isSinging) toggleSingPlay();
+      singCurrent = singMin;
+      updateSingDisplay();
+      playChime(300);
+    }
+
+    window.onload = function() {
+      renderGrid();
+      // Pre-warm Speech Synthesis voices
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+          window.speechSynthesis.getVoices();
+        };
+      }
+    };
+  </script>
+</body>
+</html>
