@@ -12,8 +12,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
   <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
     body {
@@ -51,13 +49,13 @@
       animation: gentle-wobble 0.6s ease-in-out;
     }
 
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 16px rgba(251, 191, 36, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+    @keyframes pop-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
     }
-    .pulse-glow {
-      animation: pulse-ring 2s infinite;
+    .animate-pop-pulse {
+      animation: pop-pulse 1.8s infinite ease-in-out;
     }
 
     /* Custom scrollbar for ranges */
@@ -82,6 +80,14 @@
       bottom: -10px;
       left: 50%;
       transform: translateX(-50%) rotate(180deg);
+    }
+
+    /* Train car link animation */
+    .train-link {
+      height: 8px;
+      width: 24px;
+      background: #94a3b8;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -116,26 +122,31 @@
       </div>
     </div>
 
-    <!-- Mode Switcher Tabs -->
-    <nav class="max-w-4xl mx-auto mt-2 sm:mt-3 grid grid-cols-4 gap-1.5 sm:gap-3">
-      <button id="nav-explore" onclick="switchMode('explore')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-pink-500 text-white border-pink-700 shadow-md">
+    <!-- Mode Switcher Tabs (Now with 5 modes including Number Neighbors) -->
+    <nav class="max-w-4xl mx-auto mt-2 sm:mt-3 grid grid-cols-5 gap-1 sm:gap-2.5">
+      <button id="nav-explore" onclick="switchMode('explore')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-2xl font-black text-xs sm:text-sm border-b-4 transition bg-pink-500 text-white border-pink-700 shadow-md">
         <span class="text-lg sm:text-xl">🌸</span>
-        <span>Explore</span>
+        <span class="truncate">Explore</span>
       </button>
 
-      <button id="nav-game" onclick="switchMode('game')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-sky-50 shadow-sm">
+      <button id="nav-game" onclick="switchMode('game')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-2xl font-black text-xs sm:text-sm border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-sky-50 shadow-sm">
         <span class="text-lg sm:text-xl">🎈</span>
-        <span>Pop Game</span>
+        <span class="truncate">Pop Game</span>
       </button>
 
-      <button id="nav-build" onclick="switchMode('build')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-purple-50 shadow-sm">
+      <button id="nav-neighbors" onclick="switchMode('neighbors')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-2xl font-black text-xs sm:text-sm border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-amber-50 shadow-sm">
+        <span class="text-lg sm:text-xl">🚂</span>
+        <span class="truncate">Neighbors</span>
+      </button>
+
+      <button id="nav-build" onclick="switchMode('build')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-2xl font-black text-xs sm:text-sm border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-purple-50 shadow-sm">
         <span class="text-lg sm:text-xl">🧱</span>
-        <span>Build It!</span>
+        <span class="truncate">Build It!</span>
       </button>
 
-      <button id="nav-sing" onclick="switchMode('sing')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 shadow-sm">
+      <button id="nav-sing" onclick="switchMode('sing')" class="mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-2xl font-black text-xs sm:text-sm border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-emerald-50 shadow-sm">
         <span class="text-lg sm:text-xl">🎶</span>
-        <span>Sing 1-100</span>
+        <span class="truncate">Sing 1-100</span>
       </button>
     </nav>
   </header>
@@ -173,7 +184,6 @@
 
     <!-- ==================== MODE 2: LISTEN & FIND (BALLOON POP) ==================== -->
     <section id="gameMode" class="w-full hidden flex-col items-center gap-4">
-      <!-- Game Banner -->
       <div class="w-full bg-gradient-to-r from-sky-400 via-indigo-400 to-pink-400 rounded-3xl p-4 sm:p-6 text-white text-center shadow-lg relative border-4 border-white flex flex-col items-center">
         <p class="text-xs sm:text-sm uppercase tracking-wider font-extrabold text-yellow-200">Listen & Pop Game</p>
         <h2 id="gamePromptText" class="text-2xl sm:text-4xl font-black mt-1 mb-2 tracking-wide drop-shadow">
@@ -192,7 +202,7 @@
         </div>
       </div>
 
-      <!-- Balloons Area -->
+      <!-- Balloons Area (Clean numerals only on balloons) -->
       <div id="balloonArea" class="w-full min-h-[340px] sm:min-h-[400px] flex items-center justify-around flex-wrap gap-4 py-6 px-2">
         <!-- Floating clickable balloons generated by JS -->
       </div>
@@ -203,7 +213,136 @@
       </div>
     </section>
 
-    <!-- ==================== MODE 3: BUILD IT (TENS & ONES) ==================== -->
+    <!-- ==================== MODE 3: NUMBER NEIGHBORS (BEFORE, BETWEEN, AFTER) ==================== -->
+    <section id="neighborsMode" class="w-full hidden flex-col items-center gap-4">
+      <!-- Game Configuration Header -->
+      <div class="w-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 rounded-3xl p-4 sm:p-6 text-white text-center shadow-lg border-4 border-white flex flex-col items-center relative">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🚂</span>
+          <p class="text-xs sm:text-sm uppercase tracking-wider font-extrabold text-amber-100">Number Neighbors Adventure</p>
+        </div>
+
+        <h2 id="neighborQuestionText" class="text-2xl sm:text-4xl font-black mt-1 mb-2 tracking-wide drop-shadow text-white">
+          What comes after <span class="text-yellow-200">23</span>?
+        </h2>
+
+        <button onclick="speakNeighborPrompt()" class="flex items-center gap-2 bg-white text-orange-900 font-black px-4 py-1.5 rounded-full shadow-md bounce-tap hover:bg-orange-50 transition text-sm sm:text-base border-2 border-orange-200 mt-1">
+          <span>🔊</span> Repeat Question
+        </button>
+
+        <!-- Question Subtype Selection & Answer Mode Selector -->
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-3 w-full max-w-xl">
+          <!-- Question Type Tabs -->
+          <div class="bg-black/20 p-1 rounded-2xl flex items-center gap-1">
+            <button onclick="setNeighborType('mix')" id="ntype-mix" class="ntype-btn px-3 py-1 rounded-xl text-xs font-black bg-white text-orange-600 shadow">🎲 Mix All</button>
+            <button onclick="setNeighborType('after')" id="ntype-after" class="ntype-btn px-3 py-1 rounded-xl text-xs font-black text-white hover:bg-white/20">➡️ After</button>
+            <button onclick="setNeighborType('before')" id="ntype-before" class="ntype-btn px-3 py-1 rounded-xl text-xs font-black text-white hover:bg-white/20">⬅️ Before</button>
+            <button onclick="setNeighborType('between')" id="ntype-between" class="ntype-btn px-3 py-1 rounded-xl text-xs font-black text-white hover:bg-white/20">↔️ Between</button>
+          </div>
+
+          <!-- Answer Mode Style Selector: MCQ vs Tens/Ones Dial -->
+          <div class="bg-black/20 p-1 rounded-2xl flex items-center gap-1">
+            <button onclick="setNeighborInputMode('mcq')" id="ninput-mcq" class="ninput-btn px-3 py-1 rounded-xl text-xs font-black bg-yellow-300 text-amber-950 shadow">🔘 Bubble MCQ</button>
+            <button onclick="setNeighborInputMode('dial')" id="ninput-dial" class="ninput-btn px-3 py-1 rounded-xl text-xs font-black text-white hover:bg-white/20">🔢 Tens & Ones Dial</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Train Track / Number Cards Visualization -->
+      <div id="neighborCardsWrapper" class="w-full bg-white/80 rounded-3xl p-5 sm:p-8 border-4 border-amber-200 shadow-md flex items-center justify-center gap-2 sm:gap-4 overflow-x-auto min-h-[160px]">
+        <!-- Train cars dynamically injected here -->
+      </div>
+
+      <!-- Hint and Encouragement text -->
+      <div id="neighborFeedback" class="min-h-[30px] text-center text-base sm:text-xl font-black text-orange-600">
+        Pick the missing neighbor number!
+      </div>
+
+      <!-- ==================== ANSWER CONTAINER: MCQ STYLE ==================== -->
+      <div id="neighborMcqArea" class="w-full max-w-xl grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 py-2">
+        <!-- 4 Large Colorful Bouncy Buttons injected here -->
+      </div>
+
+      <!-- ==================== ANSWER CONTAINER: TENS & ONES POSITION DIAL ==================== -->
+      <div id="neighborDialArea" class="w-full max-w-2xl bg-white/90 rounded-3xl p-4 sm:p-6 shadow-md border-4 border-indigo-200 hidden flex-col items-center gap-4">
+        <div class="text-center">
+          <span class="text-xs font-extrabold text-indigo-500 uppercase tracking-widest">Make Your Number</span>
+          <h3 class="text-lg font-black text-slate-800">Pick Tens & Ones Position:</h3>
+        </div>
+
+        <!-- Current Assembled Number Badge -->
+        <div class="flex items-center gap-3">
+          <div class="flex flex-col items-center">
+            <span class="text-[11px] font-bold text-blue-600 uppercase">Tens (10s)</span>
+            <div id="dialTensDisplay" class="w-14 h-16 sm:w-16 sm:h-20 bg-blue-100 border-4 border-blue-400 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-black text-blue-700 shadow-inner">
+              0
+            </div>
+          </div>
+          <span class="text-3xl font-black text-slate-400 mt-4">+</span>
+          <div class="flex flex-col items-center">
+            <span class="text-[11px] font-bold text-amber-600 uppercase">Ones (1s)</span>
+            <div id="dialOnesDisplay" class="w-14 h-16 sm:w-16 sm:h-20 bg-amber-100 border-4 border-amber-400 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-black text-amber-700 shadow-inner">
+              0
+            </div>
+          </div>
+          <span class="text-3xl font-black text-slate-400 mt-4">=</span>
+          <div class="flex flex-col items-center">
+            <span class="text-[11px] font-bold text-emerald-600 uppercase">Your Answer</span>
+            <div id="dialTotalDisplay" class="w-20 h-16 sm:w-24 sm:h-20 bg-emerald-100 border-4 border-emerald-400 rounded-2xl flex items-center justify-center text-4xl sm:text-5xl font-black text-emerald-700 shadow-inner">
+              0
+            </div>
+          </div>
+        </div>
+
+        <!-- Tens Pad (0-9) -->
+        <div class="w-full flex flex-col items-center">
+          <span class="text-xs font-black text-blue-700 uppercase mb-1">1. Choose Tens Digit (0 to 9)</span>
+          <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-lg">
+            <!-- 0 through 9 Tens buttons -->
+            <button onclick="setDialTens(0)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-blue-500 text-white shadow border-2 border-blue-600 bounce-tap">0</button>
+            <button onclick="setDialTens(1)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">1</button>
+            <button onclick="setDialTens(2)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">2</button>
+            <button onclick="setDialTens(3)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">3</button>
+            <button onclick="setDialTens(4)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">4</button>
+            <button onclick="setDialTens(5)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">5</button>
+            <button onclick="setDialTens(6)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">6</button>
+            <button onclick="setDialTens(7)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">7</button>
+            <button onclick="setDialTens(8)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">8</button>
+            <button onclick="setDialTens(9)" class="dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap">9</button>
+          </div>
+        </div>
+
+        <!-- Ones Pad (0-9) -->
+        <div class="w-full flex flex-col items-center">
+          <span class="text-xs font-black text-amber-700 uppercase mb-1">2. Choose Ones Digit (0 to 9)</span>
+          <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-lg">
+            <!-- 0 through 9 Ones buttons -->
+            <button onclick="setDialOnes(0)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-amber-500 text-white shadow border-2 border-amber-600 bounce-tap">0</button>
+            <button onclick="setDialOnes(1)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">1</button>
+            <button onclick="setDialOnes(2)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">2</button>
+            <button onclick="setDialOnes(3)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">3</button>
+            <button onclick="setDialOnes(4)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">4</button>
+            <button onclick="setDialOnes(5)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">5</button>
+            <button onclick="setDialOnes(6)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">6</button>
+            <button onclick="setDialOnes(7)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">7</button>
+            <button onclick="setDialOnes(8)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">8</button>
+            <button onclick="setDialOnes(9)" class="dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap">9</button>
+          </div>
+        </div>
+
+        <!-- Big Submit Button for Dial Mode -->
+        <button onclick="submitDialAnswer()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-lg sm:text-xl py-3 px-8 rounded-2xl shadow-lg border-b-4 border-emerald-700 bounce-tap flex items-center gap-2">
+          <span>✨</span> Check My Answer!
+        </button>
+      </div>
+
+      <!-- Next question skip button -->
+      <button onclick="generateNeighborRound()" class="text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 underline transition mt-1">
+        Try another puzzle ➡️
+      </button>
+    </section>
+
+    <!-- ==================== MODE 4: BUILD IT (TENS & ONES) ==================== -->
     <section id="buildMode" class="w-full hidden flex-col items-center gap-4">
       <div class="w-full bg-white/90 rounded-3xl p-4 sm:p-6 shadow-lg border-4 border-purple-200 flex flex-col items-center text-center">
         <p class="text-xs sm:text-sm font-black text-purple-600 uppercase tracking-widest">Base-10 Builder</p>
@@ -281,7 +420,7 @@
       </button>
     </section>
 
-    <!-- ==================== MODE 4: SING & COUNT (AUTO-PLAY) ==================== -->
+    <!-- ==================== MODE 5: SING & COUNT (AUTO-PLAY) ==================== -->
     <section id="singMode" class="w-full hidden flex-col items-center gap-5">
       <div class="w-full bg-white/90 rounded-3xl p-5 sm:p-8 shadow-lg border-4 border-emerald-200 flex flex-col items-center text-center">
         <p class="text-xs sm:text-sm font-black text-emerald-600 uppercase tracking-widest">Rhythmic Number Chant</p>
@@ -408,6 +547,13 @@
     let gameOptions = [];
     let gameStreak = 0;
 
+    // Number Neighbors Game state
+    let neighborSubtype = 'mix'; // 'mix' | 'after' | 'before' | 'between'
+    let neighborInputMode = 'mcq'; // 'mcq' | 'dial'
+    let currentNeighborQuestion = null; // { type, start, answer, end, cards }
+    let dialTens = 0;
+    let dialOnes = 0;
+
     // Build It Mode state
     let buildTarget = 24;
     let currentBuildTens = 0;
@@ -460,7 +606,7 @@
       return audioCtx;
     }
 
-    // Play a gentle musical chime
+    // Play gentle chime
     function playChime(freq = 523.25, type = 'sine', duration = 0.25) {
       if (isSoundMuted) return;
       try {
@@ -485,7 +631,7 @@
       }
     }
 
-    // Play a happy celebration arpeggio
+    // Play happy celebration arpeggio
     function playWinJingle() {
       if (isSoundMuted) return;
       const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
@@ -533,7 +679,6 @@
       utterance.rate = 0.88; // Slower, clear pace for children
       utterance.pitch = 1.25; // Warm, friendly higher pitch
 
-      // Pick an English voice if available
       const voices = window.speechSynthesis.getVoices();
       const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Google') || v.name.includes('Female')));
       if (preferred) {
@@ -562,7 +707,6 @@
     function addStars(amount = 1) {
       starsEarned += amount;
       document.getElementById('starCounter').textContent = starsEarned;
-      // Trigger tiny confetti
       if (typeof confetti === 'function') {
         confetti({
           particleCount: 40,
@@ -578,22 +722,20 @@
     function switchMode(mode) {
       currentMode = mode;
 
-      // Stop sing loop if switching away
       if (mode !== 'sing' && isSinging) {
         toggleSingPlay();
       }
 
-      // Update Tab Styles
-      const modes = ['explore', 'game', 'build', 'sing'];
+      const modes = ['explore', 'game', 'neighbors', 'build', 'sing'];
       modes.forEach(m => {
         const btn = document.getElementById(`nav-${m}`);
         const view = document.getElementById(`${m}Mode`);
         if (m === mode) {
-          btn.className = 'mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-pink-500 text-white border-pink-700 shadow-md';
+          btn.className = 'mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-2xl font-black text-xs sm:text-sm border-b-4 transition bg-pink-500 text-white border-pink-700 shadow-md';
           view.classList.remove('hidden');
           view.classList.add('flex');
         } else {
-          btn.className = 'mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-1 rounded-2xl font-black text-xs sm:text-base border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-pink-50 shadow-sm';
+          btn.className = 'mode-tab flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-2xl font-black text-xs sm:text-sm border-b-4 transition bg-white text-slate-700 border-slate-200 hover:bg-pink-50 shadow-sm';
           view.classList.add('hidden');
           view.classList.remove('flex');
         }
@@ -601,11 +743,12 @@
 
       playChime(440);
 
-      // Initialize specific views
       if (mode === 'explore') {
         renderGrid();
       } else if (mode === 'game') {
         initGameRound();
+      } else if (mode === 'neighbors') {
+        generateNeighborRound();
       } else if (mode === 'build') {
         newBuildPuzzle();
       } else if (mode === 'sing') {
@@ -631,7 +774,6 @@
 
     function setGridChunk(chunk) {
       activeChunk = chunk;
-      // Highlight selected button
       document.querySelectorAll('.chunk-btn').forEach(btn => {
         btn.className = 'chunk-btn px-3.5 py-1.5 rounded-full font-bold text-sm bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:border-pink-300 whitespace-nowrap';
       });
@@ -680,20 +822,16 @@
       const word = numberToWords(num);
       wordElem.textContent = word;
 
-      // Fun friendly badge
       if (num === 100) tagElem.textContent = '💯 Century Star!';
       else if (num % 10 === 0) tagElem.textContent = `🔟 Group of ${num / 10} Tens!`;
       else if (num % 2 === 0) tagElem.textContent = '⭐ Even Partner';
       else tagElem.textContent = '✨ Super Number';
 
-      // Build Base-10 visualization
       renderModalBase10(num);
 
-      // Show modal
       modal.classList.remove('hidden');
       modal.classList.add('flex');
 
-      // Play sound & speak
       playChime(587.33);
       speakModalNumber();
     }
@@ -710,7 +848,6 @@
       tensContainer.innerHTML = '';
       onesContainer.innerHTML = '';
 
-      // Create ten-stacks (towers)
       if (tensCount === 0) {
         tensContainer.innerHTML = '<span class="text-xs text-slate-400 italic">No tens</span>';
       } else {
@@ -718,7 +855,6 @@
           const bar = document.createElement('div');
           bar.className = 'w-4 h-14 bg-gradient-to-t from-blue-600 to-sky-400 rounded-md shadow-xs border border-blue-700 flex flex-col justify-between py-0.5 items-center';
           bar.title = '10 Units';
-          // 10 segment dividers
           for (let s = 0; s < 9; s++) {
             const line = document.createElement('div');
             line.className = 'w-full h-px bg-white/60';
@@ -729,7 +865,6 @@
       }
       tensText.textContent = `${tensCount} Ten${tensCount === 1 ? '' : 's'} (${tensCount * 10})`;
 
-      // Create one-stars
       if (onesCount === 0) {
         onesContainer.innerHTML = '<span class="text-xs text-slate-400 italic">No ones</span>';
       } else {
@@ -761,7 +896,6 @@
       modal.classList.remove('flex');
     }
 
-    // Close modal when tapping outside content
     window.onclick = function(event) {
       const modal = document.getElementById('numberModal');
       if (event.target === modal) {
@@ -782,15 +916,12 @@
     ];
 
     function initGameRound() {
-      // Pick random number between 1 and 100
       gameTarget = Math.floor(Math.random() * 100) + 1;
 
-      // Pick 3 plausible distractors (nearby or random)
       const optionsSet = new Set([gameTarget]);
       while (optionsSet.size < 4) {
         let distractor;
         if (Math.random() > 0.5 && gameTarget > 10) {
-          // near number
           const offset = Math.floor(Math.random() * 11) - 5;
           distractor = Math.max(1, Math.min(100, gameTarget + offset));
         } else {
@@ -801,7 +932,6 @@
 
       gameOptions = Array.from(optionsSet).sort(() => Math.random() - 0.5);
 
-      // Update text and prompt
       const targetWord = numberToWords(gameTarget);
       document.getElementById('gameTargetWord').textContent = `"${targetWord}"`;
       document.getElementById('gameHintMsg').textContent = `Can you find ${targetWord}? Tap the balloon!`;
@@ -810,7 +940,6 @@
       renderBalloons();
       renderStreak();
 
-      // Read audio aloud with delay
       setTimeout(() => {
         speakGamePrompt();
       }, 300);
@@ -849,6 +978,7 @@
         balloon.style.animationDelay = `${index * 0.4}s`;
         balloon.onclick = () => handleBalloonTap(num, balloon);
 
+        // Numerals only (no number names on balloon)
         balloon.innerHTML = `
           <span class="text-5xl sm:text-6xl font-black drop-shadow-md tracking-tight">${num}</span>
         `;
@@ -858,7 +988,6 @@
 
     function handleBalloonTap(selectedNumber, balloonElement) {
       if (selectedNumber === gameTarget) {
-        // Correct guess!
         playWinJingle();
         addStars(1);
         gameStreak = Math.min(5, gameStreak + 1);
@@ -866,7 +995,6 @@
         const word = numberToWords(selectedNumber);
         speakText(`Hooray! That is ${word}!`);
 
-        // Pop Animation
         balloonElement.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         balloonElement.style.transform = 'scale(1.4)';
         balloonElement.style.opacity = '0';
@@ -874,7 +1002,6 @@
         document.getElementById('gameHintMsg').textContent = `🎉 Super job! You found ${word}!`;
         document.getElementById('gameHintMsg').className = 'min-h-[32px] text-center text-lg sm:text-xl font-black text-emerald-600 animate-bounce';
 
-        // Confetti explosion
         if (typeof confetti === 'function') {
           confetti({
             particleCount: 80,
@@ -883,12 +1010,10 @@
           });
         }
 
-        // Next round after brief celebration
         setTimeout(() => {
           initGameRound();
         }, 1800);
       } else {
-        // Gentle wrong feedback: no buzzer!
         playBoingSound();
         balloonElement.classList.add('animate-wobble');
         setTimeout(() => balloonElement.classList.remove('animate-wobble'), 600);
@@ -901,10 +1026,321 @@
     }
 
     /* ==========================================================================
-       MODE 3: BUILD IT (PLACE VALUE TENS & ONES)
+       MODE 3: NUMBER NEIGHBORS (BEFORE, BETWEEN, AFTER)
+       ========================================================================== */
+    function setNeighborType(type) {
+      neighborSubtype = type;
+      ['mix', 'after', 'before', 'between'].forEach(t => {
+        const btn = document.getElementById(`ntype-${t}`);
+        if (t === type) {
+          btn.className = 'ntype-btn px-3 py-1 rounded-xl text-xs font-black bg-white text-orange-600 shadow';
+        } else {
+          btn.className = 'ntype-btn px-3 py-1 rounded-xl text-xs font-black text-white hover:bg-white/20';
+        }
+      });
+      playChime(480);
+      generateNeighborRound();
+    }
+
+    function setNeighborInputMode(mode) {
+      neighborInputMode = mode;
+      const mcqBtn = document.getElementById('ninput-mcq');
+      const dialBtn = document.getElementById('ninput-dial');
+      const mcqArea = document.getElementById('neighborMcqArea');
+      const dialArea = document.getElementById('neighborDialArea');
+
+      if (mode === 'mcq') {
+        mcqBtn.className = 'ninput-btn px-3 py-1 rounded-xl text-xs font-black bg-yellow-300 text-amber-950 shadow';
+        dialBtn.className = 'ninput-btn px-3 py-1 rounded-xl text-xs font-black text-white hover:bg-white/20';
+        mcqArea.classList.remove('hidden');
+        mcqArea.classList.add('grid');
+        dialArea.classList.add('hidden');
+        dialArea.classList.remove('flex');
+      } else {
+        dialBtn.className = 'ninput-btn px-3 py-1 rounded-xl text-xs font-black bg-yellow-300 text-amber-950 shadow';
+        mcqBtn.className = 'ninput-btn px-3 py-1 rounded-xl text-xs font-black text-white hover:bg-white/20';
+        mcqArea.classList.add('hidden');
+        mcqArea.classList.remove('grid');
+        dialArea.classList.remove('hidden');
+        dialArea.classList.add('flex');
+        resetDial();
+      }
+      playChime(520);
+    }
+
+    function generateNeighborRound() {
+      // Determine question type: 'after', 'before', or 'between'
+      let type = neighborSubtype;
+      if (type === 'mix') {
+        const types = ['after', 'before', 'between'];
+        type = types[Math.floor(Math.random() * types.length)];
+      }
+
+      let qData = {};
+
+      if (type === 'after') {
+        // e.g., what comes after 23? (range 1-99)
+        const base = Math.floor(Math.random() * 99) + 1; // 1 to 99
+        const answer = base + 1;
+        qData = {
+          type: 'after',
+          base: base,
+          answer: answer,
+          questionText: `What comes AFTER ${base}?`,
+          spokenText: `What number comes after ${numberToWords(base)}?`,
+          sequencePhrase: `${base}, then ${answer}!`,
+          cards: [
+            { num: base, isMissing: false },
+            { num: '?', isMissing: true }
+          ]
+        };
+      } else if (type === 'before') {
+        // e.g., what comes before 25? (range 2-100)
+        const base = Math.floor(Math.random() * 99) + 2; // 2 to 100
+        const answer = base - 1;
+        qData = {
+          type: 'before',
+          base: base,
+          answer: answer,
+          questionText: `What comes BEFORE ${base}?`,
+          spokenText: `What number comes before ${numberToWords(base)}?`,
+          sequencePhrase: `${answer}, then ${base}!`,
+          cards: [
+            { num: '?', isMissing: true },
+            { num: base, isMissing: false }
+          ]
+        };
+      } else { // 'between'
+        // e.g., what comes between 41 and 43? (range 1-98)
+        const first = Math.floor(Math.random() * 98) + 1;
+        const answer = first + 1;
+        const last = first + 2;
+        qData = {
+          type: 'between',
+          first: first,
+          last: last,
+          answer: answer,
+          questionText: `What comes BETWEEN ${first} and ${last}?`,
+          spokenText: `What number comes between ${numberToWords(first)} and ${numberToWords(last)}?`,
+          sequencePhrase: `${first}, ${answer}, ${last}!`,
+          cards: [
+            { num: first, isMissing: false },
+            { num: '?', isMissing: true },
+            { num: last, isMissing: false }
+          ]
+        };
+      }
+
+      currentNeighborQuestion = qData;
+
+      // Update question text
+      const heading = document.getElementById('neighborQuestionText');
+      if (type === 'after') {
+        heading.innerHTML = `What comes <span class="underline decoration-yellow-300">AFTER</span> <span class="text-yellow-200">${qData.base}</span>?`;
+      } else if (type === 'before') {
+        heading.innerHTML = `What comes <span class="underline decoration-yellow-300">BEFORE</span> <span class="text-yellow-200">${qData.base}</span>?`;
+      } else {
+        heading.innerHTML = `What comes <span class="underline decoration-yellow-300">BETWEEN</span> <span class="text-yellow-200">${qData.first}</span> and <span class="text-yellow-200">${qData.last}</span>?`;
+      }
+
+      document.getElementById('neighborFeedback').textContent = 'Find the missing number!';
+      document.getElementById('neighborFeedback').className = 'min-h-[30px] text-center text-base sm:text-xl font-black text-orange-600';
+
+      renderNeighborCards();
+      renderNeighborMcqOptions();
+      resetDial();
+
+      setTimeout(() => {
+        speakNeighborPrompt();
+      }, 300);
+    }
+
+    function speakNeighborPrompt() {
+      if (!currentNeighborQuestion) return;
+      playChime(500);
+      speakText(currentNeighborQuestion.spokenText);
+    }
+
+    function renderNeighborCards() {
+      const container = document.getElementById('neighborCardsWrapper');
+      container.innerHTML = '';
+
+      currentNeighborQuestion.cards.forEach((card, index) => {
+        if (index > 0) {
+          // Train coupler link
+          const link = document.createElement('div');
+          link.className = 'train-link mx-0.5 sm:mx-1';
+          container.appendChild(link);
+        }
+
+        const car = document.createElement('div');
+        if (card.isMissing) {
+          car.id = 'missingCardSlot';
+          car.className = 'w-24 h-28 sm:w-32 sm:h-36 bg-amber-100 border-4 border-dashed border-amber-400 rounded-3xl flex flex-col items-center justify-center shadow-inner relative animate-pop-pulse';
+          car.innerHTML = `
+            <span class="text-4xl sm:text-6xl font-black text-amber-500">❓</span>
+            <span class="text-[11px] sm:text-xs font-extrabold text-amber-700 uppercase mt-1">Tap Answer</span>
+          `;
+        } else {
+          car.className = 'w-24 h-28 sm:w-32 sm:h-36 bg-gradient-to-b from-sky-400 to-blue-500 text-white border-4 border-white rounded-3xl flex flex-col items-center justify-center shadow-lg relative';
+          car.innerHTML = `
+            <span class="text-3xl sm:text-5xl font-black drop-shadow">${card.num}</span>
+            <span class="text-[10px] sm:text-xs font-semibold opacity-90 truncate max-w-[90%]">${numberToWords(card.num)}</span>
+          `;
+        }
+        container.appendChild(car);
+      });
+    }
+
+    function renderNeighborMcqOptions() {
+      const container = document.getElementById('neighborMcqArea');
+      container.innerHTML = '';
+
+      const answer = currentNeighborQuestion.answer;
+      const options = new Set([answer]);
+
+      // Distractor choices around the answer or common place-value mixups
+      while (options.size < 4) {
+        let candidate;
+        const r = Math.random();
+        if (r < 0.35 && answer > 2) {
+          candidate = answer - 1;
+        } else if (r < 0.70 && answer < 99) {
+          candidate = answer + 1;
+        } else if (r < 0.85 && answer > 10) {
+          candidate = answer + (Math.random() > 0.5 ? 10 : -10);
+        } else {
+          candidate = Math.floor(Math.random() * 100) + 1;
+        }
+        if (candidate >= 1 && candidate <= 100) {
+          options.add(candidate);
+        }
+      }
+
+      const shuffled = Array.from(options).sort(() => Math.random() - 0.5);
+
+      const BTN_PALETTE = [
+        'bg-rose-400 hover:bg-rose-500 text-white border-rose-600',
+        'bg-amber-400 hover:bg-amber-500 text-amber-950 border-amber-600',
+        'bg-emerald-400 hover:bg-emerald-500 text-white border-emerald-600',
+        'bg-sky-400 hover:bg-sky-500 text-white border-sky-600'
+      ];
+
+      shuffled.forEach((optNum, idx) => {
+        const btn = document.createElement('button');
+        const color = BTN_PALETTE[idx % BTN_PALETTE.length];
+        btn.className = `${color} py-4 px-2 rounded-3xl shadow-md border-b-4 flex flex-col items-center justify-center font-black text-3xl sm:text-4xl bounce-tap transition transform hover:scale-105 active:scale-95`;
+        btn.onclick = () => checkNeighborAnswer(optNum, btn);
+
+        btn.innerHTML = `
+          <span>${optNum}</span>
+          <span class="text-xs font-semibold opacity-90">${numberToWords(optNum)}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    // Dial Mode handlers
+    function setDialTens(val) {
+      dialTens = val;
+      updateDialDisplay();
+      playChime(350 + val * 20);
+    }
+
+    function setDialOnes(val) {
+      dialOnes = val;
+      updateDialDisplay();
+      playChime(500 + val * 25);
+    }
+
+    function updateDialDisplay() {
+      document.getElementById('dialTensDisplay').textContent = dialTens;
+      document.getElementById('dialOnesDisplay').textContent = dialOnes;
+      const total = (dialTens * 10) + dialOnes;
+      document.getElementById('dialTotalDisplay').textContent = total;
+
+      // Update button active states
+      document.querySelectorAll('.dial-ten-btn').forEach((b, idx) => {
+        if (idx === dialTens) {
+          b.className = 'dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-blue-500 text-white shadow border-2 border-blue-600 bounce-tap';
+        } else {
+          b.className = 'dial-ten-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-blue-50 bounce-tap';
+        }
+      });
+
+      document.querySelectorAll('.dial-one-btn').forEach((b, idx) => {
+        if (idx === dialOnes) {
+          b.className = 'dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-amber-500 text-white shadow border-2 border-amber-600 bounce-tap';
+        } else {
+          b.className = 'dial-one-btn w-9 h-11 sm:w-11 sm:h-12 rounded-xl font-black text-lg bg-white text-slate-700 shadow-sm border-2 border-slate-200 hover:bg-amber-50 bounce-tap';
+        }
+      });
+    }
+
+    function resetDial() {
+      dialTens = 0;
+      dialOnes = 0;
+      updateDialDisplay();
+    }
+
+    function submitDialAnswer() {
+      const selected = (dialTens * 10) + dialOnes;
+      checkNeighborAnswer(selected, document.getElementById('neighborDialArea'));
+    }
+
+    function checkNeighborAnswer(chosenNumber, elementToAnimate) {
+      const correct = currentNeighborQuestion.answer;
+      const feedback = document.getElementById('neighborFeedback');
+
+      if (chosenNumber === correct) {
+        playWinJingle();
+        addStars(2);
+
+        // Fill in the missing card
+        const missingCard = document.getElementById('missingCardSlot');
+        if (missingCard) {
+          missingCard.className = 'w-24 h-28 sm:w-32 sm:h-36 bg-emerald-500 text-white border-4 border-emerald-300 rounded-3xl flex flex-col items-center justify-center shadow-xl transform scale-110 transition duration-300';
+          missingCard.innerHTML = `
+            <span class="text-3xl sm:text-5xl font-black">${correct}</span>
+            <span class="text-[10px] sm:text-xs font-bold capitalize">${numberToWords(correct)}</span>
+          `;
+        }
+
+        const celebration = `🎉 Yes! ${currentNeighborQuestion.sequencePhrase}`;
+        feedback.textContent = celebration;
+        feedback.className = 'min-h-[30px] text-center text-lg sm:text-2xl font-black text-emerald-600 animate-bounce';
+
+        speakText(`Super! ${currentNeighborQuestion.sequencePhrase}`);
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 90,
+            spread: 75,
+            origin: { y: 0.6 }
+          });
+        }
+
+        setTimeout(() => {
+          generateNeighborRound();
+        }, 2400);
+      } else {
+        playBoingSound();
+        if (elementToAnimate) {
+          elementToAnimate.classList.add('animate-wobble');
+          setTimeout(() => elementToAnimate.classList.remove('animate-wobble'), 600);
+        }
+
+        const chosenWord = numberToWords(chosenNumber);
+        feedback.textContent = `You picked ${chosenNumber} (${chosenWord}). Try counting again!`;
+        feedback.className = 'min-h-[30px] text-center text-base sm:text-lg font-bold text-rose-500';
+        speakText(`That was ${chosenWord}. Let's try again!`);
+      }
+    }
+
+    /* ==========================================================================
+       MODE 4: BUILD IT (PLACE VALUE TENS & ONES)
        ========================================================================== */
     function newBuildPuzzle() {
-      // Choose a fun number between 11 and 99
       buildTarget = Math.floor(Math.random() * 89) + 11;
       currentBuildTens = 0;
       currentBuildOnes = 0;
@@ -970,7 +1406,6 @@
       tensContainer.innerHTML = '';
       onesContainer.innerHTML = '';
 
-      // Render tens
       for (let t = 0; t < currentBuildTens; t++) {
         const stack = document.createElement('div');
         stack.className = 'w-6 h-28 bg-gradient-to-t from-blue-700 via-blue-500 to-sky-300 rounded-lg shadow-md border-2 border-blue-900 flex flex-col justify-between py-1 items-center animate-bounce';
@@ -985,7 +1420,6 @@
       }
       tensLabel.textContent = `${currentBuildTens} Ten${currentBuildTens === 1 ? '' : 's'} (= ${currentBuildTens * 10})`;
 
-      // Render ones
       for (let o = 0; o < currentBuildOnes; o++) {
         const star = document.createElement('div');
         star.className = 'text-3xl leading-none text-amber-500 animate-pulse';
@@ -1029,7 +1463,7 @@
     }
 
     /* ==========================================================================
-       MODE 4: SING & COUNT (AUTO-PLAY RHYTHM)
+       MODE 5: SING & COUNT (AUTO-PLAY RHYTHM)
        ========================================================================== */
     function setSingRange(min, max, step = 1) {
       if (isSinging) toggleSingPlay();
@@ -1038,7 +1472,6 @@
       singStep = step;
       singCurrent = min;
 
-      // Update button highlights
       document.querySelectorAll('.sing-range-btn').forEach(b => {
         b.className = 'sing-range-btn px-3 py-1 rounded-full text-xs sm:text-sm font-black bg-white text-slate-700 border-2 border-slate-200';
       });
@@ -1062,13 +1495,11 @@
       const word = numberToWords(singCurrent);
       bigWord.textContent = word;
 
-      // Pulse animation
       bigNum.classList.add('scale-110');
       setTimeout(() => bigNum.classList.remove('scale-110'), 250);
 
-      // Render dots
       dotsArea.innerHTML = '';
-      const dotCount = Math.min(singCurrent, 20); // Cap visual dots at 20 so it fits nicely
+      const dotCount = Math.min(singCurrent, 20);
       for (let i = 0; i < dotCount; i++) {
         const dot = document.createElement('span');
         dot.className = 'text-lg text-emerald-500 animate-bounce';
@@ -1083,7 +1514,6 @@
         dotsArea.appendChild(plus);
       }
 
-      // Audio rhythm chime & speech
       playChime(350 + (singCurrent % 10) * 40, 'triangle', 0.2);
       speakText(word);
     }
@@ -1101,7 +1531,6 @@
         singInterval = setInterval(() => {
           singCurrent += singStep;
           if (singCurrent > singMax) {
-            // Finished song cycle
             playWinJingle();
             addStars(3);
             if (typeof confetti === 'function') {
@@ -1112,7 +1541,7 @@
             return;
           }
           updateSingDisplay();
-        }, 1600); // 1.6s rhythm step
+        }, 1600);
       } else {
         icon.textContent = '▶️';
         text.textContent = 'Start Counting';
@@ -1130,7 +1559,6 @@
 
     window.onload = function() {
       renderGrid();
-      // Pre-warm Speech Synthesis voices
       if ('speechSynthesis' in window) {
         window.speechSynthesis.getVoices();
         window.speechSynthesis.onvoiceschanged = () => {
