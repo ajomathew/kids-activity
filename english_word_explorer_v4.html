@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>English Word Explorer</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#202938;background:#f4f6fb}*{box-sizing:border-box}body{margin:0;padding:22px 14px;display:flex;justify-content:center}main{width:min(100%,600px);display:grid;gap:16px}.panel{background:white;border:1px solid #e1e6ef;border-radius:18px;padding:20px;box-shadow:0 8px 24px #2538580c}h1{font-size:25px;margin:4px 0}.eyebrow,.muted{color:#69758a}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em}p{line-height:1.45}textarea,select{width:100%;padding:12px;border:1px solid #d9dfeb;border-radius:10px;font:inherit;background:white;color:#202938;margin:8px 0}button{font:inherit;cursor:pointer}.action{border:0;border-radius:11px;padding:12px;font-weight:750}.primary{background:#397bba;color:white;width:100%}.secondary{background:#edf2fa;color:#263750;width:100%;border:1px solid #d9dfeb}.row{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;align-items:end}.muted{font-size:13px}.progress{display:flex;justify-content:space-between;font-size:14px;margin:14px 0 8px}.track{height:9px;border-radius:20px;background:#e9edf4;overflow:hidden}#bar{height:100%;background:#4eaa79;width:0}.mission{background:#f1f4fa;border-radius:13px;padding:14px;text-align:center;margin:16px 0}.mission small{font-weight:800;color:#69758a}#instruction{font-weight:750;margin-top:5px}#feedback{font-size:13px;color:#69758a;margin-top:5px}#grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.tile{aspect-ratio:1;border:0;border-radius:12px;background:linear-gradient(145deg,#6688d9,#4565b5);color:white;font-size:27px;font-weight:800;box-shadow:0 3px 0 #344e91}.tile.active{background:#e9b957;color:#48330d}.actions{display:flex;gap:10px;margin-top:16px}.actions button{flex:1}#repeat{background:#f1f4fa;border:1px solid #e1e6ef}#next{background:#397bba;color:white}[hidden]{display:none!important}@media(max-width:390px){.panel{padding:15px}.row{grid-template-columns:1fr}#grid{gap:8px}}
+</style></head><body><main>
+<section class="panel"><div class="eyebrow">WORD EXPLORER</div><h1>Listen &amp; Spell! 🔤</h1>
+<p><b>Choose a letter to load familiar words, or enter your own sentence.</b></p>
+<div class="row"><label style="font-size:13px;font-weight:700">Choose a letter<select id="letter"></select></label><button id="fill" class="action secondary">✨ Fill common words</button></div>
+<p class="muted">Loads everyday practice words beginning with that letter. You can edit the list.</p>
+<label for="sourceText"><b>Your sentence or word list</b></label><textarea id="sourceText" rows="4" placeholder="The little bird sings in the garden."></textarea>
+<p class="muted">Words are extracted automatically. Duplicate words are removed. Up to 40 unique words.</p>
+<button id="create" class="action primary">Create my word squares</button><div id="setupError" class="muted" role="status"></div>
+</section>
+<section class="panel" id="gamePanel" hidden><div class="progress"><span>Words discovered</span><b id="progress">0 / 0</b></div><div class="track"><div id="bar"></div></div>
+<div class="mission"><small>YOUR MISSION</small><div id="instruction">Choose a mystery square!</div><div id="feedback">Tap once to hear, tap again to reveal.</div></div>
+<div id="grid"></div><div class="actions"><button id="repeat" class="action" disabled>🔊 Repeat word</button><button id="next" class="action">↻ Restart game</button></div></section>
+<p class="muted" style="text-align:center">When you reveal a word, its square disappears and the remaining squares shuffle.</p>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const banks={
+A:"about after again all also always am an and animal apple are around ask away",
+B:"baby back ball be beautiful because bed before big bird black blue book boy bring brother",
+C:"call can car cat chair child children city clean close come could country cow",
+D:"day dear did different do dog door down draw dream drink drive during",
+E:"each ear earth easy eat egg eight elephant end enough every eye example",
+F:"face family far farm fast father feel few find first fish five food friend from funny",
+G:"game garden get girl give go good great green group grow guess",
+H:"had hair half hand happy hard has have he head hear help her here high home house how",
+I:"I idea if important in inside into is it its",
+J:"January job join joy jump just",K:"keep key kid kind king kitchen know",
+L:"land language large last late laugh learn leave left leg less let letter life light like little live long look love",
+M:"made make man many map market may me meal meet men milk mind minute money month moon more morning mother mountain move much music must my",
+N:"name near need never new next night no not now number",
+O:"of off often old on once one only open or other our out over own",
+P:"page paper parent park part party people person picture place play please point pretty put",
+Q:"queen question quick quiet quite",R:"rabbit rain read ready red remember right river road room run",
+S:"said same saw say school sea second see seem sentence she ship short show sister sit small smile so some song soon sound speak spell stand start stop story street sun sure sweet",
+T:"table take talk tall teacher tell ten than thank that the their them then there these they thing think this three time to today together too tree try turn two",
+U:"under understand until up us use usually",V:"very village visit voice",W:"walk want warm was watch water way we well went were what when where which white who why will window with woman word work world write",
+X:"x-ray xylophone",Y:"yard year yellow yes yesterday you young your",Z:"zero zebra zoo"};
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(c=>{let o=document.createElement('option');o.value=c;o.textContent=c;$('letter').append(o)});
+let remaining=[],total=0,active=-1,discovered=0;
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function speak(w){if(!window.speechSynthesis){$('feedback').textContent='Speech is unavailable in this browser.';return}speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(w);u.lang='en-IN';u.rate=.82;speechSynthesis.speak(u)}
+function update(){$('progress').textContent=discovered+' / '+total;$('bar').style.width=(total?100*discovered/total:0)+'%';$('repeat').disabled=active<0}
+function draw(){let g=$('grid');g.replaceChildren();remaining.forEach((w,i)=>{let b=document.createElement('button');b.className='tile'+(active===i?' active':'');b.textContent=active===i?'🔊':'?';b.setAttribute('aria-label','Mystery square '+(i+1));b.addEventListener('click',()=>choose(i));g.append(b)});update()}
+function choose(i){if(active===i){let w=remaining[i];discovered++;remaining.splice(i,1);active=-1;$('instruction').textContent='✨ '+w;$('feedback').textContent=remaining.length?'Word revealed! Its square is removed. The remaining squares have shuffled. Choose another!':'🎉 Fantastic! You discovered every word!';remaining=shuffle(remaining);draw();return}if(active!==-1)return;active=i;$('instruction').textContent='Listen to the word!';$('feedback').textContent='Tap this same square again to reveal its spelling.';draw();speak(remaining[i])}
+function start(){let raw=$('sourceText').value.trim();if(!raw){$('setupError').textContent='Please enter a sentence or words.';return}let parsed=raw.match(/[A-Za-z]+(?:['’\\-][A-Za-z]+)*/g)||[];let unique=[...new Set(parsed.map(w=>w.replace(/[’]/g,"'")))];if(!unique.length){$('setupError').textContent='No words found. Please try again.';return}if(unique.length>40){$('setupError').textContent='Please use 40 or fewer unique words.';return}if(window.speechSynthesis)speechSynthesis.cancel();total=unique.length;remaining=shuffle(unique);active=-1;discovered=0;$('setupError').textContent='';$('gamePanel').hidden=false;$('instruction').textContent='Choose any mystery square!';$('feedback').textContent='Tap a square to hear its word, then tap it again to reveal.';draw();$('gamePanel').scrollIntoView({behavior:'smooth',block:'start'})}
+$('fill').addEventListener('click',()=>{let c=$('letter').value;let list=banks[c].split(/\s+/);$('sourceText').value=list.join(', ');$('setupError').textContent=list.length+' practice words beginning with '+c+' loaded. Edit the list or create squares.'});
+$('create').addEventListener('click',start);$('repeat').addEventListener('click',()=>{if(active>=0)speak(remaining[active])});$('next').addEventListener('click',()=>{if(total)start()});
+})();
+</script></body></html>
